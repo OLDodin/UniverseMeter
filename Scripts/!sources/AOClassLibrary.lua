@@ -175,11 +175,12 @@ function TWidget:Destroy()
 	end
 end
 --------------------------------------------------------------------------------
-function TWidget:DragNDrop( bDraggable, ID, wtMovable, bUseCfg, bLockedToScreenArea, Padding )
+function TWidget:DragNDrop( bDraggable, bUseCfg, bLockedToScreenArea, Padding )
 	if self.Widget then
 		self.bDraggable = bDraggable
-		if ID then
-			DnD:Init( ID, self.Widget, wtMovable, bUseCfg, bLockedToScreenArea, Padding )
+		if bUseCfg ~= nil then
+			--DnD:Init( ID, self.Widget, wtMovable, bUseCfg, bLockedToScreenArea, Padding )
+			DnD:Init( self.Widget, self.Widget, bUseCfg, bLockedToScreenArea, Padding  )
 		else
 			DnD:Enable( self.Widget, bDraggable )
 		end

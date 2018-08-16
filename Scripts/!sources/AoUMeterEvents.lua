@@ -423,6 +423,13 @@ function GlobalReset()
 	StrPower = GetTextLocalized("Power")
 	StrInsidiousness = GetTextLocalized("Insidiousness")
 	StrValor = GetTextLocalized("Valor")
+	
+	Weakness = userMods.FromWString(StrWeakness)
+	Vulnerability = userMods.FromWString(StrVulnerability)
+	Power = userMods.FromWString(StrPower)
+	Insidiousness = userMods.FromWString(StrInsidiousness)
+	Valor = userMods.FromWString(StrValor)
+	
 
 
 	TitleMode[enumMode.Dps] = GetTextLocalized("DPS")

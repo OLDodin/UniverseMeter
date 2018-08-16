@@ -70,6 +70,14 @@ Global( "StrValor", "" )
 Global( "StrSettingsDesc", "" )
 Global( "StrUnknown", userMods.ToWString("?") )
 
+Global( "Weakness", "" )
+Global( "Vulnerability", "33" )
+Global( "Power", "" )
+Global( "Insidiousness", "" )
+Global( "Valor", "" )
+
+
+
 Global( "TitleMode", {
 		[enumMode.Dps] = "",
 		[enumMode.Hps] = "",

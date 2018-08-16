@@ -624,11 +624,11 @@ function TUMeterGUI:Init()
 
 	-- The "D" button to show or hide the main panels
 	self.ShowHideBtn = TWidget:CreateNewObject("ShowHideBtn")
-	self.ShowHideBtn:DragNDrop(true, 687, nil, true)
+	self.ShowHideBtn:DragNDrop(true, true)
 
 	-- Main panel with player list
 	self.MainPanel = TMainPanelGUI:CreateNewObject("MainPanel")
-	self.MainPanel:DragNDrop(true, 686, nil, true, false)
+	self.MainPanel:DragNDrop(true, true, false)
 
 	-- Retrieve initial sizes of the main panel and its children in order to tweak the width
 	local posX, posY
@@ -639,7 +639,7 @@ function TUMeterGUI:Init()
 	self.InitialSize["FightBtnPosX"] = posX
 	
 	self.SettingsPanel = TSettingsPanelGUI:CreateNewObject("SettingsPanel")
-	self.SettingsPanel:DragNDrop(true, 698, nil, true)
+	self.SettingsPanel:DragNDrop(true, true)
 	self.SettingsPanel.DefCheckBoxText:SetVal("Name", StrSettingsDef)
 	self.SettingsPanel.DpsCheckBoxText:SetVal("Name", StrSettingsDps)
 	self.SettingsPanel.HpsCheckBoxText:SetVal("Name", StrSettingsHps)
@@ -657,7 +657,7 @@ function TUMeterGUI:Init()
 
 	-- Secondary panel with spell list / details
 	self.DetailsPanel = TDetailsPanelGUI:CreateNewObject("SpellInfoPanel")
-	self.DetailsPanel:DragNDrop(true, 688, nil, true)
+	self.DetailsPanel:DragNDrop(true, true)
 
 	-------------------------------------------------------------------------------
 	-- Widget description

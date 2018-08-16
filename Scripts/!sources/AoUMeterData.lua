@@ -1030,7 +1030,7 @@ local function GetSpellInfoFromParams(params)
 		if params.targetTags then 
 			for i, combatTag in pairs( params.targetTags ) do
 				local info = combatTag:GetInfo()
-				if not info.isHelpful and common.CompareWString(info.name, StrVulnerability) == 0 then
+				if not info.isHelpful and userMods.FromWString(info.name) == Vulnerability then
 					params.Vulnerability = true
 				end
 			end
@@ -1038,15 +1038,16 @@ local function GetSpellInfoFromParams(params)
 		if params.sourceTags then 
 			for i, combatTag in pairs( params.sourceTags ) do
 				local info = combatTag:GetInfo()
-				if not info.isHelpful and common.CompareWString(info.name, StrWeakness) == 0 then
+				local infoName = userMods.FromWString(info.name)
+				if not info.isHelpful and infoName == Weakness then
 					params.Weakness = true
 				end
 				if info.isHelpful then
-					if common.CompareWString(info.name, StrPower) == 0 then
+					if infoName == Power then
 						params.Power = true
-					elseif common.CompareWString(info.name, StrValor) == 0 then
+					elseif infoName == Valor then
 						params.Valor = true
-					elseif common.CompareWString(info.name, StrInsidiousness) == 0 then
+					elseif infoName == Insidiousness then
 						params.Insidiousness = true
 					end
 				end
