@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetPanel>
+	<Name>SpellHeaderPanel</Name>
+	<Children>
+		<Item href="TextViews/Name.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="TextViews/DamageStats.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="TextViews/DamagePercentage.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+	</Children>
+	<BackLayer href="" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Size>356</Size>
+			<Pos>22</Pos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Size>18</Size>
+			<Pos>36</Pos>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+</WidgetPanel>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetButton>
+	<Priority>100</Priority>
+	<Name>PlayerInfoButton</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>0</Pos>
+			<HighPos>0</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>0</Pos>
+			<HighPos>0</HighPos>
+		</Y>
+	</Placement>
+	<IgnoreDblClick>true</IgnoreDblClick>
+	<Variants>
+		<Item>
+			<LayerHighlight href="TransparentBarBorderHi.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
+			<PushedOffset x="-2" y="2" />
+			<StateNormal>
+				<LayerMain href="TransparentBarBorder.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
+			</StateNormal>
+			<StatePushed>
+				<LayerMain href="TransparentBarBorder.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
+			</StatePushed>
+			<Reaction>PlayerInfoButtonDown</Reaction>
+		</Item>
+	</Variants>
+</WidgetButton>

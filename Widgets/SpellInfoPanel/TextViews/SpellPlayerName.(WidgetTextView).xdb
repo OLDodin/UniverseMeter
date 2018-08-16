@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetTextView>
+	<Priority>150</Priority>
+	<Name>SpellPlayerNameTextViewName</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>40</Pos>
+			<HighPos>40</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>2</Pos>
+			<Size>20</Size>
+		</Y>
+	</Placement>
+	<TransparentInput>true</TransparentInput>
+	<Visible>true</Visible>
+	<Enabled>true</Enabled>
+	<FormatFileRef href="Name.txt" />
+	<TextValues />
+</WidgetTextView>

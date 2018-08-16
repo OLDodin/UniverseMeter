@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<UIAddon>
+  <AutoStart>true</AutoStart>
+  <Forms>
+    <Item>
+      <Form href="Widgets/MainForm.(WidgetForm).xdb#xpointer(/WidgetForm)"/>
+      <Id>Main</Id>
+    </Item>
+  </Forms>
+  <MainFormId>Main</MainFormId>
+  <Name>UniverseMeter</Name>
+  <ScriptFileRefs>
+    <Item href="Scripts/LibDnD.lua"/>
+    <Item href="Scripts/AOClassLibrary.lua"/>
+    <Item href="Scripts/AoUMeterDecl.lua"/>
+	<Item href="Scripts/AoUMeterUtil.lua"/>
+    <Item href="Scripts/AoUMeterData.lua"/>
+    <Item href="Scripts/AoUMeterGUI.lua"/>
+    <Item href="Scripts/AoUMeterEvents.lua"/>
+    <Item href="Scripts/AoUMeterInit.lua"/>
+  </ScriptFileRefs>
+  <author>OLDodin</author>
+  <textsGroups>
+    <Item>
+      <groupName>rus</groupName>
+      <texts href="Locales/rus/Locale.(UIRelatedTexts).xdb#xpointer(/UIRelatedTexts)"/>
+    </Item>
+    <Item>
+      <groupName>eng</groupName>
+      <texts href="Locales/eng/Locale.(UIRelatedTexts).xdb#xpointer(/UIRelatedTexts)"/>
+    </Item>
+  </textsGroups>
+  <www/>
+<addon_name>UniverseMeter</addon_name>
+<localizedNameFileRef href="name.txt"/>
+<localizedDescFileRef href="desc.txt"/>
+</UIAddon>

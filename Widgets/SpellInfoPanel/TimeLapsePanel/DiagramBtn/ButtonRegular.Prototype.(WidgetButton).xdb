@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetButton>
+	<Header>
+		<isPrototype>true</isPrototype>
+	</Header>
+	<Priority>2</Priority>
+	<Placement>
+		<X>
+			<Size>30</Size>
+		</X>
+		<Y>
+			<Size>105</Size>
+		</Y>
+	</Placement>
+	<IgnoreDblClick>true</IgnoreDblClick>
+	<TextTag>button_label</TextTag>
+	<Variants>
+		<Item>
+			
+			<LayerHighlight href="ButtonRegularHighlighted.(WidgetLayerTiledTexture).xdb" />
+			<PushedOffset x="-2" y="2" />
+			<StateNormal>
+				<LayerMain href="ButtonRegularNormal.(WidgetLayerTiledTexture).xdb" />
+				
+			</StateNormal>
+			<StatePushed>
+				<LayerMain href="ButtonRegularPressed.(WidgetLayerTiledTexture).xdb" />
+			</StatePushed>
+			<StateDisabled>
+				<LayerMain href="ButtonRegularDisabled.(WidgetLayerTiledTexture).xdb" />
+				
+			</StateDisabled>
+			<ReactionOnUp>true</ReactionOnUp>
+		</Item>
+	</Variants>
+	
+</WidgetButton>

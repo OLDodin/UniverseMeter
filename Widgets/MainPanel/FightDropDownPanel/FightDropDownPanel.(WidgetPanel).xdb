@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetPanel>
+	<Name>FightPanel</Name>
+	<Children>
+		<Item href="FightDropDownBtn/FightDropDownBtn.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="TextViews/Name.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+	</Children>
+	<BackLayer href="FightDropDownPanel.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Size>80</Size>
+			<Pos>85</Pos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Size>22</Size>
+			<Pos>15</Pos>
+		</Y>
+	</Placement>
+</WidgetPanel>

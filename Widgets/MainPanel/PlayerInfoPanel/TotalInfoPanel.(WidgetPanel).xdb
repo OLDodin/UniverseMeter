@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetPanel>
+	<Name>TotalInfoPanel</Name>
+	<Children>
+		<Item href="Bar/PlayerInfoBar.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
+		<Item href="Button/TotalInfoButton.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="TextViews/TotalName.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="TextViews/DamageStats.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+	</Children>
+	<BackLayer href="" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Size>256</Size>
+			<Pos>20</Pos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Size>24</Size>
+			<Pos>47</Pos>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+</WidgetPanel>

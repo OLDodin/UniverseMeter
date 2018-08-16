@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<UITexture>
+	<mipSW>-1</mipSW>
+	<mipsNumber>1</mipsNumber>
+	<generateMipChain>false</generateMipChain>
+	<type>DXT1</type>
+	<width>32</width>
+	<height>32</height>
+	<realWidth>30</realWidth>
+	<realHeight>30</realHeight>
+	<disableLODControl>false</disableLODControl>
+	<alphaTex>true</alphaTex>
+	<binaryFileSize>398</binaryFileSize>
+	<binaryFile href="ShowHideBtnHighlighted.(UITexture).bin" />
+	<sourceFile href="ShowHideBtnHighlighted.tga" />
+	<sourceFileCRC>166146325</sourceFileCRC>
+	<wrap>false</wrap>
+	<LocalizationInfo />
+	<inheritedSourceFile href="" />
+</UITexture>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetButton>
+	<Name />
+	<!--<Header>
+		<isPrototype>true</isPrototype>
+	</Header>-->
+	<Priority>8</Priority>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<Size>22</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_CENTER</Align>
+			<!--<HighPos>0</HighPos>-->
+			<Size>23</Size>
+		</Y>
+	</Placement>
+	<IgnoreDblClick>true</IgnoreDblClick>
+	<Variants>
+		<Item>
+			<StateNormal>
+				<LayerMain href="ScrollThumb.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
+			</StateNormal>
+			<StateDisabled>
+				<LayerMain href="ScrollThumbDisabled.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
+			</StateDisabled>
+			<ReactionOnUp>true</ReactionOnUp>
+		</Item>
+	</Variants>
+</WidgetButton>

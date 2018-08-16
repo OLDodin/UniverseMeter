@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<UIRelatedTexts>
+  <items>
+    <Item>
+      <name>Ability</name>
+      <resource href="Ability.txt" />
+    </Item>
+    <Item>
+      <name>Abs</name>
+      <resource href="Abs.txt" />
+    </Item>
+    <Item>
+      <name>Avg</name>
+      <resource href="Avg.txt" />
+    </Item>
+    <Item>
+      <name>Dmg</name>
+      <resource href="Dmg.txt" />
+    </Item>
+    <Item>
+      <name>DEF</name>
+      <resource href="DEF.txt" />
+    </Item>
+    <Item>
+      <name>DPS</name>
+      <resource href="DPS.txt" />
+    </Item>
+    <Item>
+      <name>HPS</name>
+      <resource href="HPS.txt" />
+    </Item>
+    <Item>
+      <name>Max</name>
+      <resource href="Max.txt" />
+    </Item>
+    <Item>
+      <name>Min</name>
+      <resource href="Min.txt" />
+    </Item>
+    <Item>
+      <name>Type</name>
+      <resource href="Type.txt" />
+    </Item>
+    <Item>
+      <name>Description</name>
+      <resource href="Description.txt" />
+    </Item>
+    <Item>
+      <name>Overload</name>
+      <resource href="Overload.txt" />
+    </Item>
+    <Item>
+      <name>Absorbed</name>
+      <resource href="Absorbed.txt" />
+    </Item>
+    <Item>
+      <name>Barrier</name>
+      <resource href="Barrier.txt" />
+    </Item>
+    <Item>
+      <name>Blocked</name>
+      <resource href="Blocked.txt" />
+    </Item>
+    <Item>
+      <name>Critical</name>
+      <resource href="Critical.txt" />
+    </Item>
+    <Item>
+      <name>Dodge</name>
+      <resource href="Dodge.txt" />
+    </Item>
+    <Item>
+      <name>Glancing</name>
+      <resource href="Glancing.txt" />
+    </Item>
+    <Item>
+      <name>Miss</name>
+      <resource href="Miss.txt" />
+    </Item>
+    <Item>
+      <name>Normal</name>
+      <resource href="Normal.txt" />
+    </Item>
+    <Item>
+      <name>Parry</name>
+      <resource href="Parry.txt" />
+    </Item>
+    <Item>
+      <name>Resisted</name>
+      <resource href="Resisted.txt" />
+    </Item>
+    <Item>
+      <name>Lethality</name>
+      <resource href="Lethality.txt" />
+    </Item>
+    <Item>
+      <name>Mount</name>
+      <resource href="Mount.txt" />
+    </Item>
+    <Item>
+      <name>Multiplier</name>
+      <resource href="Multiplier.txt" />
+    </Item>
+    <Item>
+      <name>Pet</name>
+      <resource href="Pet.txt" />
+    </Item>
+    <Item>
+      <name>Current</name>
+      <resource href="Current.txt" />
+    </Item>
+    <Item>
+      <name>Overall</name>
+      <resource href="Overall.txt" />
+    </Item>
+    <Item>
+      <name>Previous</name>
+      <resource href="Previous.txt" />
+    </Item>
+    <Item>
+      <name>Rune</name>
+      <resource href="Rune.txt" />
+    </Item>
+    <Item>
+      <name>GlobalInfo</name>
+      <resource href="GlobalInfo.txt" />
+    </Item>
+    <Item>
+      <name>Determination</name>
+      <resource href="Determination.txt" />
+    </Item>
+	<Item>
+      <name>DamagePool</name>
+      <resource href="DamagePool.txt" />
+    </Item>
+	<Item>
+      <name>FromBarrier</name>
+      <resource href="FromBarrier.txt" />
+    </Item>
+	<Item>
+      <name>SettingsDef</name>
+      <resource href="SettingsDef.txt" />
+    </Item>
+	<Item>
+      <name>SettingsDps</name>
+      <resource href="SettingsDps.txt" />
+    </Item>
+	<Item>
+      <name>SettingsHps</name>
+      <resource href="SettingsHps.txt" />
+    </Item>
+	<Item>
+      <name>SettingsIhps</name>
+      <resource href="SettingsIhps.txt" />
+    </Item>
+	<Item>
+      <name>SettingsSave</name>
+      <resource href="SettingsSave.txt" />
+    </Item>
+	<Item>
+      <name>StrSettings</name>
+      <resource href="StrSettings.txt" />
+    </Item>
+	<Item>
+      <name>PrevPrevious</name>
+      <resource href="PrevPrevious.txt" />
+    </Item>
+	<Item>
+      <name>StrUpdateTimeLapse</name>
+      <resource href="StrUpdateTimeLapse.txt" />
+    </Item>
+	<Item>
+      <name>StrUpdateTimeLapse</name>
+      <resource href="StrUpdateTimeLapse.txt" />
+    </Item>
+	<Item>
+      <name>StrAllTime</name>
+      <resource href="StrAllTime.txt" />
+    </Item>
+	<Item>
+      <name>Showed</name>
+      <resource href="Showed.txt" />
+    </Item>
+	<Item>
+      <name>Weakness</name>
+      <resource href="Weakness.txt" />
+    </Item>
+	<Item>
+      <name>Vulnerability</name>
+      <resource href="Vulnerability.txt" />
+    </Item>
+	<Item>
+      <name>Insidiousness</name>
+      <resource href="Insidiousness.txt" />
+    </Item>
+	<Item>
+      <name>Power</name>
+      <resource href="Power.txt" />
+    </Item>
+	<Item>
+      <name>Valor</name>
+      <resource href="Valor.txt" />
+    </Item>
+	<Item>
+      <name>SettingsDesc</name>
+      <resource href="SettingsDesc.txt" />
+    </Item>
+  </items>
+</UIRelatedTexts>
+

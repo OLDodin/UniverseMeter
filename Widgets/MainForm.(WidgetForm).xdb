@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetForm>
+	<Name>UniverseMeter</Name>
+	<Priority>5501</Priority>
+	<Children>
+		<Item href="ShowHideBtn/ShowHideBtn.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="MainPanel/MainPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
+		<Item href="SpellInfoPanel/SpellInfoPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
+		<Item href="SettingsPanel/SettingsPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
+		<Item href="TimeLapsePanel/TimeLapsePanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
+	</Children>
+	<BackLayer href="" />
+	<FrontLayer href="" />
+	<Placement>
+		<QuantumScale>false</QuantumScale>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Sizing>WIDGET_SIZING_DEFAULT</Sizing>
+			<Pos>0</Pos>
+			<HighPos>0</HighPos>
+			<Size>0</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Sizing>WIDGET_SIZING_DEFAULT</Sizing>
+			<Pos>0</Pos>
+			<HighPos>0</HighPos>
+			<Size>0</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<Enabled>true</Enabled>
+	<TransparentInput>false</TransparentInput>
+	<PickChildrenOnly>true</PickChildrenOnly>
+</WidgetForm>

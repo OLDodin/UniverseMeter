@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetLayerTiledTexture>
+	<Color>0xffffffff</Color>
+	<Grayed>false</Grayed>
+	<BlendEffect>BLEND_EFFECT_ALPHABLND</BlendEffect>
+	<flatPlacement>false</flatPlacement>
+	<textureItem href="ButtonRegularNormal.(UISingleTexture).xdb" />
+	<Layout>
+		<LeftX>32</LeftX>
+		<MiddleX>64</MiddleX>
+		<RightX>32</RightX>
+		<TopY>8</TopY>
+		<MiddleY>2</MiddleY>
+		<BottomY>8</BottomY>
+	</Layout>
+</WidgetLayerTiledTexture>

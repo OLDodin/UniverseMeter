@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetButton>
+	<Name>ResetButton</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>59</HighPos>
+			<Size>22</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>13</Pos>
+			<Size>22</Size>
+		</Y>
+	</Placement>
+	<IgnoreDblClick>true</IgnoreDblClick>
+	<Variants>
+		<Item>
+			<LayerHighlight href="ResetBtnHighlight.(WidgetLayerSimpleTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
+			<PushedOffset x="-2" y="2" />
+			<StateNormal>
+				<LayerMain href="ResetBtnNormal.(WidgetLayerSimpleTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
+			</StateNormal>
+			<StatePushed>
+				<LayerMain href="ResetBtnPressed.(WidgetLayerSimpleTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
+			</StatePushed>
+			<ReactionOnUp>true</ReactionOnUp>
+			<Reaction>ResetBtnReaction</Reaction>
+		</Item>
+	</Variants>
+</WidgetButton>

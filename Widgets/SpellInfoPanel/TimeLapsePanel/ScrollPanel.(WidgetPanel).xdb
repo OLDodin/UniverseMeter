@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetPanel>
+	<Name>ScrollDPSPanel</Name>
+	<Priority>6</Priority>
+	<Children>
+		<Item href="ScrollHorizontal\ScrollableContainer.(WidgetPanel).xdb"/>
+		<Item href="ElementPanel.(WidgetPanel).xdb" />
+	</Children>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Size>300</Size>
+			<Pos>15</Pos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Size>100</Size>
+			<Pos>35</Pos>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+</WidgetPanel>

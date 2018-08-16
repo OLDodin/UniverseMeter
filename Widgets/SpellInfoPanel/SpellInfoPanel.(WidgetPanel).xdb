@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetPanel>
+	<Name>SpellInfoPanel</Name>
+	<Priority>3</Priority>
+	<Children>
+		<Item href="Buttons/CloseBtn/CloseBtn.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/AllTimeBtn/Button.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/UpdateTimeLapseBtn/Button.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="GlobalInfoPanel/GlobalInfoPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
+		<Item href="GlobalInfoHeaderPanel/GlobalInfoHeaderPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
+		<Item href="SpellPanel/SpellPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
+		<Item href="SpellHeaderPanel/SpellHeaderPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
+		<Item href="SpellDetailPanel/SpellDetailPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
+		<Item href="SpellDetailHeaderPanel/SpellDetailHeaderPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
+		<Item href="TextViews/SpellPlayerName.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="TextViews/Desc.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="TimeLapsePanel/ScrollPanel.(WidgetPanel).xdb"/>
+		<Item href="TimeLapsePanel/ScrollVertical/ScrollableContainer.(WidgetPanel).xdb"/>
+		<Item href="TimeLapsePanel/TextViews/CurrTime.(WidgetTextView).xdb"/>
+	</Children>
+	<BackLayer href="SpellInfoPanel.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Size>415</Size>
+			<Pos>333</Pos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Size>751</Size>
+			<Pos>230</Pos>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+</WidgetPanel>

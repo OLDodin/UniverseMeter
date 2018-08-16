@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetTextView>
+	<Priority>150</Priority>
+	<Name>SpellCurrTimeTextView</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>0</Pos>
+			<Size>415</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>134</Pos>
+			<Size>18</Size>
+		</Y>
+	</Placement>
+	<TransparentInput>true</TransparentInput>
+	<Visible>true</Visible>
+	<Enabled>true</Enabled>
+	<FormatFileRef href="CurrTime.txt" />
+	<TextValues />
+</WidgetTextView>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetTextView>
+	<Priority>150</Priority>
+	<Name>SpellDetailTextViewPercentage</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>0</HighPos>
+			<Size>35</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>1</Pos>
+			<HighPos>0</HighPos>
+		</Y>
+	</Placement>
+	<TransparentInput>true</TransparentInput>
+	<Visible>true</Visible>
+	<Enabled>true</Enabled>
+	<FormatFileRef href="DamagePercentage.txt" />
+	<TextValues />
+</WidgetTextView>

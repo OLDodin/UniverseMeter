@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetTextView>
+	<Priority>150</Priority>
+	<Name>DescTextView</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>18</Pos>
+			<Size>379</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>20</HighPos>
+			<Size>136</Size>
+		</Y>
+	</Placement>
+	<TransparentInput>true</TransparentInput>
+	<Visible>false</Visible>
+	<Enabled>true</Enabled>
+	<FormatFileRef href="Desc.txt" />
+	<TextValues />
+	<TextStyle>
+		
+		<ellipsis>true</ellipsis>
+		<multiline>true</multiline>
+		<wrapText>true</wrapText>
+	</TextStyle>
+</WidgetTextView>

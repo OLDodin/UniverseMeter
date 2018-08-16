@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<UITexture>
+	<mipSW>-1</mipSW>
+	<mipsNumber>1</mipsNumber>
+	<generateMipChain>false</generateMipChain>
+	<type>DXT5</type>
+	<width>256</width>
+	<height>32</height>
+	<realWidth>256</realWidth>
+	<realHeight>32</realHeight>
+	<disableLODControl>false</disableLODControl>
+	<alphaTex>true</alphaTex>
+	<binaryFileSize>57</binaryFileSize>
+	<binaryFile href="panel.(UITexture).bin" />
+	<wrap>false</wrap>
+	<LocalizationInfo />
+	<inheritedSourceFile href="" />
+</UITexture>

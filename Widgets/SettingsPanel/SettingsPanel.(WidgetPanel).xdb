@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetPanel>
+	<Name>SettingsPanel</Name>
+	<Priority>3</Priority>
+	<Children>
+		<Item href="Buttons/CloseBtn/CloseBtn.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/DefCheckBox/CheckBox.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/DefCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="Buttons/DpsCheckBox/CheckBox.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/DpsCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="Buttons/HpsCheckBox/CheckBox.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/HpsCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="Buttons/IhpsCheckBox/CheckBox.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/IhpsCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="Buttons/DescCheckBox/CheckBox.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/DescCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="Buttons/SaveBtn/Button.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/HeaderText/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+	</Children>
+	<BackLayer href="SettingsPanel.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Size>300</Size>
+			<Pos>333</Pos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Size>250</Size>
+			<Pos>230</Pos>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+</WidgetPanel>

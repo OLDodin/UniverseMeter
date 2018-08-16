@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetButton>
+<Name>UpdateTimeLapseBtn</Name>
+	<Header>
+		<Prototype href="/Mods/SampleCommon/Button/ButtonRegular.Prototype.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+	</Header>
+  <Placement>
+    <X>
+      <Align>WIDGET_ALIGN_LOW</Align>
+      <Pos>320</Pos>
+      <Size>80</Size>
+    </X>
+    <Y>
+      <Align>WIDGET_ALIGN_LOW</Align>
+      <Pos>110</Pos>
+      <Size>25</Size>
+    </Y>
+  </Placement>
+	<Variants>
+		<Item>
+			<TextFileRef href="ButtonText.txt" />
+			<Reaction>UpdateTimeLapsePressed</Reaction>
+		</Item>
+	</Variants>
+</WidgetButton>
