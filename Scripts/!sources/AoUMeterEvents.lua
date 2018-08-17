@@ -62,13 +62,13 @@ end
 onGenEvent["AOPANEL_START"] = function(params)
 	local SetVal = { val =  userMods.ToWString("D") } 
 	local params = { header =  SetVal , ptype =  "button" , size = 30 } 
-	userMods.SendEvent("AOPANEL_SEND_ADDON", { name = "AoUMeter" , sysName = "AoUMeter" , param = params } )
+	userMods.SendEvent("AOPANEL_SEND_ADDON", { name = "UniverseMeter" , sysName = "UniverseMeter" , param = params } )
 	AoPanelDetected = true
 	if DPSMeterGUI then DPSMeterGUI.ShowHideBtn:Hide() end
 end
 
 onMyEvent["AOPANEL_BUTTON_LEFT_CLICK"] = function(params)
-	if params.sender == "AoUMeter" then
+	if params.sender == "UniverseMeter" then
 		onReaction["ShowHideBtnReaction"]()
 	end
 end
