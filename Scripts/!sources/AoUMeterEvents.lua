@@ -331,9 +331,6 @@ function RetrieveDDEvent(params)
 	if Settings.ModeDPS then
 		params.DDOut = true
 		collectedDps = DPSMeterGUI.DPSMeter:CollectDamageDealedData(params)
-		--[[for i=1, 50 do
-			DPSMeterGUI.DPSMeter:CollectDamageDealedData(params)
-		end]]
 	end
 	
 	if collectedDps
@@ -423,6 +420,8 @@ function GlobalReset()
 	StrPower = GetTextLocalized("Power")
 	StrInsidiousness = GetTextLocalized("Insidiousness")
 	StrValor = GetTextLocalized("Valor")
+	StrMapModifier = GetTextLocalized("MapModifier")
+	StrExploit = GetTextLocalized("Exploit")
 	
 	Weakness = userMods.FromWString(StrWeakness)
 	Vulnerability = userMods.FromWString(StrVulnerability)

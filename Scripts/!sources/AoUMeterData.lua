@@ -973,10 +973,11 @@ local function GetSpellInfoFromParams(params)
 			local spellId = params.spellId or buffInfo and buffInfo.producer.spellId or nil
 			local spellDesc = spellId and GetSpellDescFromCache(spellId) or nil
 			local abilityInfo = params.abilityId and GetAbilityInfoFromCache(params.abilityId) or nil
-
+			local mapDmg = params.DDIn and params.mapModifierId or nil
+			local exploitDmg = params.DDIn and params.isExploit or nil
 			if spellInfo.Name == nil then
 				-- Returns if no information found
-				if not spellDesc and not buffInfo and not abilityInfo then 
+				if not spellDesc and not buffInfo and not abilityInfo and not mapDmg and not exploitDmg then 
 					if params.damageSource ~= "DamageSource_BARRIER" then
 						return nil
 					end 
@@ -985,6 +986,8 @@ local function GetSpellInfoFromParams(params)
 				spellInfo.Name = buffInfo and not common.IsEmptyWString(buffInfo.name) and buffInfo.name
 				or spellDesc and not common.IsEmptyWString(spellDesc.name) and spellDesc.name
 				or abilityInfo and not common.IsEmptyWString(abilityInfo.name) and abilityInfo.name
+				or mapDmg and StrMapModifier
+				or exploitDmg and StrExploit
 				or StrUnknown
 			end
 		

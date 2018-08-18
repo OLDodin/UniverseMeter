@@ -205,6 +205,14 @@
       <name>SettingsDesc</name>
       <resource href="SettingsDesc.txt" />
     </Item>
+	<Item>
+      <name>MapModifier</name>
+      <resource href="MapModifier.txt" />
+    </Item>
+	<Item>
+      <name>Exploit</name>
+      <resource href="Exploit.txt" />
+    </Item>
   </items>
 </UIRelatedTexts>
 

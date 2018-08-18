@@ -45,7 +45,7 @@ Global("Settings", {
         FriendlyShot = false,           -- Should we take in account friendly shot in the DPS ?
 		MagicPVPKoef = 0.62,			-- Magic pvp absorb koef
 		TimeLapsInterval = 10, 
-		CollectDescription = false,
+		CollectDescription = true,
 	})
 --------------------------------------------------------------------------------
 -- Localization
@@ -69,6 +69,8 @@ Global( "StrInsidiousness", "" )
 Global( "StrValor", "" )
 Global( "StrSettingsDesc", "" )
 Global( "StrUnknown", userMods.ToWString("?") )
+Global( "StrMapModifier", "" )
+Global( "StrExploit", "" )
 
 Global( "Weakness", "" )
 Global( "Vulnerability", "33" )
