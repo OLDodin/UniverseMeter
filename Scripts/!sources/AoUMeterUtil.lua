@@ -39,6 +39,10 @@ function IsExistUnit(id)
     return id and object.IsExist(id) and object.IsUnit(id)
 end
 
+function IsExistPet(id)
+    return id and object.IsExist(id) and unit.IsPet(id)
+end
+
 function IsPlayerOrPet(id)
     return id and object.IsExist(id) and (unit.IsPlayer(id) or unit.IsPet(id))
 end

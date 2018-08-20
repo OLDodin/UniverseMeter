@@ -159,6 +159,8 @@ onReaction["SavePressed"] = function(reaction)
 	savedData.hps = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.HpsCheckBox)
 	savedData.ihps = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.IhpsCheckBox)
 	savedData.collectDescription = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.DescCheckBox)
+	savedData.skipDmgAndHpsOnPet = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.SkipPetCheckBox)
+	savedData.skipDmgYourselfIn = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.SkipYourselfCheckBox)
 	
 	userMods.SetGlobalConfigSection( "UniverseMeterSettings", savedData )
 	common.StateUnloadManagedAddon("UserAddon/UniverseMeter")
@@ -390,6 +392,8 @@ function GlobalReset()
 		Settings.ModeDEF  = savedData.def
 		Settings.ModeIHPS = savedData.ihps
 		Settings.CollectDescription = savedData.collectDescription
+		Settings.SkipDmgAndHpsOnPet = savedData.skipDmgAndHpsOnPet
+		Settings.SkipDmgYourselfIn = savedData.skipDmgYourselfIn
 	end
 
 	StrSettingsDef = GetTextLocalized("SettingsDef")
@@ -401,6 +405,8 @@ function GlobalReset()
 	StrAllTime = GetTextLocalized("StrAllTime")
 	StrUpdateTimeLapse = GetTextLocalized("StrUpdateTimeLapse")
 	StrSettingsDesc = GetTextLocalized("SettingsDesc")
+	StrSettingsIgnorePet = GetTextLocalized("StrSettingsIgnorePet")
+	StrSettingsIgnoreYourself = GetTextLocalized("StrSettingsIgnoreYourself")
 	
 	-- Create the DPSMeter here
 	DPSMeterGUI = TUMeterGUI:CreateNewObject(TUMeter:CreateNewObject())

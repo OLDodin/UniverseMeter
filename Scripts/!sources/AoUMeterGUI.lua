@@ -69,12 +69,16 @@ function TSettingsPanelGUI:CreateNewObject(name)
 			HpsCheckBoxText = widget:GetChildByName("HpsCheckBoxText").Widget,
 			IhpsCheckBoxText = widget:GetChildByName("IhpsCheckBoxText").Widget,
 			DescCheckBoxText = widget:GetChildByName("DescCheckBoxText").Widget,
+			SkipPetCheckBoxText = widget:GetChildByName("SkipPetCheckBoxText").Widget,
+			SkipYourselfCheckBoxText = widget:GetChildByName("SkipYourselfCheckBoxText").Widget,
 			
 			DefCheckBox = widget:GetChildByName("DefCheckBox").Widget,
 			DpsCheckBox = widget:GetChildByName("DpsCheckBox").Widget,
 			HpsCheckBox = widget:GetChildByName("HpsCheckBox").Widget,
 			IhpsCheckBox = widget:GetChildByName("IhpsCheckBox").Widget,
 			DescCheckBox = widget:GetChildByName("DescCheckBox").Widget,
+			SkipPetCheckBox = widget:GetChildByName("SkipPetCheckBox").Widget,
+			SkipYourselfCheckBox = widget:GetChildByName("SkipYourselfCheckBox").Widget,
 			
 			HeaderText = widget:GetChildByName("HeaderText").Widget,
 			
@@ -645,6 +649,8 @@ function TUMeterGUI:Init()
 	self.SettingsPanel.HpsCheckBoxText:SetVal("Name", StrSettingsHps)
 	self.SettingsPanel.IhpsCheckBoxText:SetVal("Name", StrSettingsIhps)
 	self.SettingsPanel.DescCheckBoxText:SetVal("Name", StrSettingsDesc)
+	self.SettingsPanel.SkipPetCheckBoxText:SetVal("Name", StrSettingsIgnorePet)
+	self.SettingsPanel.SkipYourselfCheckBoxText:SetVal("Name", StrSettingsIgnoreYourself)
 	self.SettingsPanel.SaveBtn:SetVal("button_label", StrSave)
 	self.SettingsPanel.HeaderText:SetVal("Name", StrSettings)
 	
@@ -654,6 +660,8 @@ function TUMeterGUI:Init()
 	SetCheckedForCheckBox(self.SettingsPanel.DefCheckBox, Settings.ModeDEF)
 	SetCheckedForCheckBox(self.SettingsPanel.IhpsCheckBox, Settings.ModeIHPS)
 	SetCheckedForCheckBox(self.SettingsPanel.DescCheckBox, Settings.CollectDescription)
+	SetCheckedForCheckBox(self.SettingsPanel.SkipPetCheckBox, Settings.SkipDmgAndHpsOnPet)
+	SetCheckedForCheckBox(self.SettingsPanel.SkipYourselfCheckBox, Settings.SkipDmgYourselfIn)
 
 	-- Secondary panel with spell list / details
 	self.DetailsPanel = TDetailsPanelGUI:CreateNewObject("SpellInfoPanel")

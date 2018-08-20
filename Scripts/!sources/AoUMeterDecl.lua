@@ -46,6 +46,8 @@ Global("Settings", {
 		MagicPVPKoef = 0.62,			-- Magic pvp absorb koef
 		TimeLapsInterval = 10, 
 		CollectDescription = true,
+		SkipDmgAndHpsOnPet = false,		-- ignore dd out and hps out for pet
+		SkipDmgYourselfIn = false,
 	})
 --------------------------------------------------------------------------------
 -- Localization
@@ -71,6 +73,8 @@ Global( "StrSettingsDesc", "" )
 Global( "StrUnknown", userMods.ToWString("?") )
 Global( "StrMapModifier", "" )
 Global( "StrExploit", "" )
+Global( "StrSettingsIgnorePet", "" )
+Global( "StrSettingsIgnoreYourself", "" )
 
 Global( "Weakness", "" )
 Global( "Vulnerability", "33" )

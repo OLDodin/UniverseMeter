@@ -14,6 +14,11 @@
 		<Item href="Buttons/IhpsCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
 		<Item href="Buttons/DescCheckBox/CheckBox.(WidgetButton).xdb#xpointer(/WidgetButton)" />
 		<Item href="Buttons/DescCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="Buttons/SkipPetCheckBox/CheckBox.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/SkipPetCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="Buttons/SkipYourselfCheckBox/CheckBox.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/SkipYourselfCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		
 		<Item href="Buttons/SaveBtn/Button.(WidgetButton).xdb#xpointer(/WidgetButton)" />
 		<Item href="Buttons/HeaderText/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
 	</Children>
@@ -21,12 +26,12 @@
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Size>300</Size>
+			<Size>350</Size>
 			<Pos>333</Pos>
 		</X>
 		<Y>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Size>250</Size>
+			<Size>300</Size>
 			<Pos>230</Pos>
 		</Y>
 	</Placement>

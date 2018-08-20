@@ -1109,14 +1109,16 @@ function TUMeter:CollectDamageDealedData(params)
 	local Variant = nil
 	local CombatantID = nil
 
+	if params.source == params.target then return end
+	
 	-- look for the type of the source
 	CombatantID, Variant = self:GetSourceIdAndVariant(params.source)
 
 	-- If the source is not part of the group or the target is an ally
 	if not CombatantID then return end
 	
-	if params.source == params.target then return end
-
+	if Settings.SkipDmgAndHpsOnPet and IsExistPet(params.target) then return end
+	
 	-- If we're not collecting data, means we are not currently in fight, then start a new one
 	if not self.bCollectData and (self:ShouldCollectData() or params.lethal) then
 		self:Start()
@@ -1148,6 +1150,8 @@ function TUMeter:CollectDamageReceivedData(params)
 	local CombatantID = nil
 	local Variant = nil
 
+	if Settings.SkipDmgYourselfIn and params.source == params.target then return end
+	
 	-- look for the type of the target
 	CombatantID, Variant = self:GetSourceIdAndVariant(params.target)
 
@@ -1193,6 +1197,8 @@ function TUMeter:CollectHealData(params)
 	end
 
 	if not CombatantID then return end
+	
+	if Settings.SkipDmgAndHpsOnPet and IsExistPet(params.target) then return end
 
 	if not self.bCollectData and self:ShouldCollectData() then
 		self:Start()

@@ -213,6 +213,14 @@
       <name>Exploit</name>
       <resource href="Exploit.txt" />
     </Item>
+	<Item>
+      <name>StrSettingsIgnorePet</name>
+      <resource href="StrSettingsIgnorePet.txt" />
+    </Item>
+	<Item>
+      <name>StrSettingsIgnoreYourself</name>
+      <resource href="StrSettingsIgnoreYourself.txt" />
+    </Item>
   </items>
 </UIRelatedTexts>
 
