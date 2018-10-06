@@ -162,6 +162,18 @@ onReaction["SavePressed"] = function(reaction)
 	savedData.skipDmgAndHpsOnPet = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.SkipPetCheckBox)
 	savedData.skipDmgYourselfIn = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.SkipYourselfCheckBox)
 	
+	local parsedCombantants = common.GetIntFromWString(DPSMeterGUI.SettingsPanel.MaxCombatantTextEdit:GetText())
+	if not parsedCombantants then
+		parsedCombantants = Settings.MaxCombatants 
+	end
+	local parsedTimeLapsInterval = common.GetIntFromWString(DPSMeterGUI.SettingsPanel.TimeLapsIntervalEdit:GetText())
+	if not parsedTimeLapsInterval then
+		parsedTimeLapsInterval = Settings.TimeLapsInterval 
+	end
+	
+	savedData.timeLapsInterval = parsedTimeLapsInterval
+	savedData.maxCombatants = parsedCombantants
+	
 	userMods.SetGlobalConfigSection( "UniverseMeterSettings", savedData )
 	common.StateUnloadManagedAddon("UserAddon/UniverseMeter")
 	common.StateLoadManagedAddon("UserAddon/UniverseMeter")
@@ -394,6 +406,12 @@ function GlobalReset()
 		Settings.CollectDescription = savedData.collectDescription
 		Settings.SkipDmgAndHpsOnPet = savedData.skipDmgAndHpsOnPet
 		Settings.SkipDmgYourselfIn = savedData.skipDmgYourselfIn
+		if savedData.maxCombatants then
+			Settings.MaxCombatants = savedData.maxCombatants
+		end
+		if savedData.timeLapsInterval then 
+			Settings.TimeLapsInterval = savedData.timeLapsInterval
+		end
 	end
 
 	StrSettingsDef = GetTextLocalized("SettingsDef")
@@ -407,6 +425,8 @@ function GlobalReset()
 	StrSettingsDesc = GetTextLocalized("SettingsDesc")
 	StrSettingsIgnorePet = GetTextLocalized("StrSettingsIgnorePet")
 	StrSettingsIgnoreYourself = GetTextLocalized("StrSettingsIgnoreYourself")
+	StrCombatantCntText = GetTextLocalized("StrCombatantCntText")
+	StrTimeLapsInterval = GetTextLocalized("StrTimeLapsInterval")
 	
 	-- Create the DPSMeter here
 	DPSMeterGUI = TUMeterGUI:CreateNewObject(TUMeter:CreateNewObject())

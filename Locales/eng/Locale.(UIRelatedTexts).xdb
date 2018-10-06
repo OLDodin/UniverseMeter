@@ -221,6 +221,14 @@
       <name>StrSettingsIgnoreYourself</name>
       <resource href="StrSettingsIgnoreYourself.txt" />
     </Item>
+	<Item>
+      <name>StrCombatantCntText</name>
+      <resource href="StrCombatantCntText.txt" />
+    </Item>
+	<Item>
+      <name>StrTimeLapsInterval</name>
+      <resource href="StrTimeLapsInterval.txt" />
+    </Item>
   </items>
 </UIRelatedTexts>
 

@@ -71,6 +71,8 @@ function TSettingsPanelGUI:CreateNewObject(name)
 			DescCheckBoxText = widget:GetChildByName("DescCheckBoxText").Widget,
 			SkipPetCheckBoxText = widget:GetChildByName("SkipPetCheckBoxText").Widget,
 			SkipYourselfCheckBoxText = widget:GetChildByName("SkipYourselfCheckBoxText").Widget,
+			CombatantCntText = widget:GetChildByName("CombatantCntText").Widget,
+			TimeLapsIntervalText = widget:GetChildByName("TimeLapsIntervalText").Widget,
 			
 			DefCheckBox = widget:GetChildByName("DefCheckBox").Widget,
 			DpsCheckBox = widget:GetChildByName("DpsCheckBox").Widget,
@@ -79,6 +81,8 @@ function TSettingsPanelGUI:CreateNewObject(name)
 			DescCheckBox = widget:GetChildByName("DescCheckBox").Widget,
 			SkipPetCheckBox = widget:GetChildByName("SkipPetCheckBox").Widget,
 			SkipYourselfCheckBox = widget:GetChildByName("SkipYourselfCheckBox").Widget,
+			MaxCombatantTextEdit = widget:GetChildByName("SettingsMaxCombatant").Widget,
+			TimeLapsIntervalEdit = widget:GetChildByName("TimeLapsIntervalEdit").Widget,
 			
 			HeaderText = widget:GetChildByName("HeaderText").Widget,
 			
@@ -651,9 +655,13 @@ function TUMeterGUI:Init()
 	self.SettingsPanel.DescCheckBoxText:SetVal("Name", StrSettingsDesc)
 	self.SettingsPanel.SkipPetCheckBoxText:SetVal("Name", StrSettingsIgnorePet)
 	self.SettingsPanel.SkipYourselfCheckBoxText:SetVal("Name", StrSettingsIgnoreYourself)
+	self.SettingsPanel.CombatantCntText:SetVal("Name", StrCombatantCntText)
+	self.SettingsPanel.TimeLapsIntervalText:SetVal("Name", StrTimeLapsInterval)
 	self.SettingsPanel.SaveBtn:SetVal("button_label", StrSave)
 	self.SettingsPanel.HeaderText:SetVal("Name", StrSettings)
 	
+	self.SettingsPanel.MaxCombatantTextEdit:SetText(common.FormatInt(Settings.MaxCombatants, "%d"))
+	self.SettingsPanel.TimeLapsIntervalEdit:SetText(common.FormatInt(Settings.TimeLapsInterval, "%d"))
 	
 	SetCheckedForCheckBox(self.SettingsPanel.DpsCheckBox, Settings.ModeDPS)
 	SetCheckedForCheckBox(self.SettingsPanel.HpsCheckBox, Settings.ModeHPS)

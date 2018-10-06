@@ -75,6 +75,8 @@ Global( "StrMapModifier", "" )
 Global( "StrExploit", "" )
 Global( "StrSettingsIgnorePet", "" )
 Global( "StrSettingsIgnoreYourself", "" )
+Global( "StrCombatantCntText", "" )
+Global( "StrTimeLapsInterval", "" )
 
 Global( "Weakness", "" )
 Global( "Vulnerability", "33" )

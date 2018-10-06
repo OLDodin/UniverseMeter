@@ -20,7 +20,12 @@
 		<Item href="Buttons/SkipYourselfCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
 		
 		<Item href="Buttons/SaveBtn/Button.(WidgetButton).xdb#xpointer(/WidgetButton)" />
-		<Item href="Buttons/HeaderText/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="Buttons/HeaderText/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />		
+		
+		<Item href="Buttons/CombatantCnt.(WidgetEditLine).xdb" />
+		<Item href="Buttons/CombatantCnt_text.(WidgetTextView).xdb" />
+		<Item href="Buttons/TimeLapsIntervalEdit.(WidgetEditLine).xdb" />
+		<Item href="Buttons/TimeLapsIntervalEdit_text.(WidgetTextView).xdb" />
 	</Children>
 	<BackLayer href="SettingsPanel.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
 	<Placement>
@@ -31,7 +36,7 @@
 		</X>
 		<Y>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Size>300</Size>
+			<Size>350</Size>
 			<Pos>230</Pos>
 		</Y>
 	</Placement>
