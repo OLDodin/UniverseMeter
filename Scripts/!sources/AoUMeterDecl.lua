@@ -160,31 +160,19 @@ Global("ClassColors", {
 		["UNKNOWN"]		= { r = 127/255; g = 127/255; b = 127/255; a = 1 },
 	})
 Global( "DamageTypeColors", {
---[[
 		["ENUM_SubElement_PHYSICAL"]	= { r = 0.7; g = 0.5; b = 0.3; a = 1 },
-		["ENUM_SubElement_FIRE"]		= { r = 1.0; g = 0.0; b = 0.0; a = 1 },
-		["ENUM_SubElement_COLD"]		= { r = 0.5; g = 0.5; b = 1.0; a = 1 },
-		["ENUM_SubElement_LIGHTNING"]	= { r = 0.8; g = 0.8; b = 1.0; a = 1 },
+		
+		["ENUM_SubElement_FIRE"]		= { r = 0.2; g = 0.35; b = 1.0; a = 1 },
+		["ENUM_SubElement_COLD"]		= { r = 0.2; g = 0.35; b = 1.0; a = 1 },
+		["ENUM_SubElement_LIGHTNING"]	= { r = 0.2; g = 0.35; b = 1.0; a = 1 },
+		
 		["ENUM_SubElement_HOLY"]		= { r = 1.0; g = 1.0; b = 0.5; a = 1 },
-		["ENUM_SubElement_SHADOW"]		= { r = 0.5; g = 0.1; b = 0.7; a = 1 },
-		["ENUM_SubElement_ASTRAL"]		= { r = 1.0; g = 1.0; b = 1.0; a = 1 },
-		["ENUM_SubElement_POISON"]		= { r = 0.5; g = 1.0; b = 0.5; a = 1 },
-		["ENUM_SubElement_DISEASE"]	    = { r = 0.7; g = 0.7; b = 0.4; a = 1 },
-		["ENUM_SubElement_ACID"]		= { r = 1.0; g = 1.0; b = 0.0; a = 1 },
-
-]]
-
-
-		["ENUM_SubElement_PHYSICAL"]	= { r = 0.7; g = 0.5; b = 0.3; a = 1 },
-		["ENUM_SubElement_FIRE"]		= { r = 1.0; g = 0.0; b = 0.0; a = 1 },--красный
-		["ENUM_SubElement_COLD"]		= { r = 0.2; g = 0.35; b = 1.0; a = 1 },--синий
-		["ENUM_SubElement_LIGHTNING"]	= { r = 0.43; g = 0.48; b = 0.53; a = 1 },--серый
-		["ENUM_SubElement_HOLY"]		= { r = 1.0; g = 1.0; b = 0.5; a = 1 },
-		["ENUM_SubElement_SHADOW"]		= { r = 0.5; g = 0.1; b = 0.7; a = 1 },
-		["ENUM_SubElement_ASTRAL"]		= { r = 0.47; g = 0.92; b = 0.93; a = 1 },--голубой
-		["ENUM_SubElement_POISON"]		= { r = 0.5; g = 1.0; b = 0.5; a = 1 },
-		["ENUM_SubElement_DISEASE"]	    = { r = 0.7; g = 0.7; b = 0.4; a = 1 },
-		["ENUM_SubElement_ACID"]		= { r = 1.0; g = 1.0; b = 0.0; a = 1 },
+		["ENUM_SubElement_SHADOW"]		= { r = 1.0; g = 1.0; b = 0.5; a = 1 },
+		["ENUM_SubElement_ASTRAL"]		= { r = 1.0; g = 1.0; b = 0.5; a = 1 },
+		
+		["ENUM_SubElement_POISON"]		= { r = 0.3; g = 1.0; b = 0.3; a = 1 },
+		["ENUM_SubElement_DISEASE"]	    = { r = 0.3; g = 1.0; b = 0.3; a = 1 },
+		["ENUM_SubElement_ACID"]		= { r = 0.3; g = 1.0; b = 0.3; a = 1 },
 	})
 Global( "HitTypeColors", {
 		[1] = { r = 1.0; g = 1.0; b = 1.0; a = 1 }, -- Normal
