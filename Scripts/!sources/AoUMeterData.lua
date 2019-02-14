@@ -209,21 +209,22 @@ function TDamageSpellData:ReceiveValuesFromParams(params)
 	-- If the hit has been absorbed by a multiplier (buff/debuff)
 	if params.multipliersAbsorb ~= 0 then
 		-- isHitByDuplex - если получится как то определять удар от двойной расчет для него
+		self.ResistDetailsList[enumHitBlock.MultAbsorb]:RecalcDetails(params.multipliersAbsorb)
+		--[[
 		local multipliersAbsorb = params.multipliersAbsorb
 		if params.IsPVP then 
 			local koef = Settings.MagicPVPKoef
-			--[[if params.isHitByDuplex then
-				koef = 1 - (1 - koef) * 0.5
-			end]]
+			--if params.isHitByDuplex then
+				--koef = 1 - (1 - koef) * 0.5
+			--end
 			local magicAbsorb = koef*(params.amount + params.overallAbsorbedDamage + multipliersAbsorb + params.runesAbsorb)
 			self.ResistDetailsList[enumHitBlock.MultAbsorb]:RecalcDetails(multipliersAbsorb-magicAbsorb)
 		else
-		--[[
-			if params.isHitByDuplex then
-				multipliersAbsorb = multipliersAbsorb - (params.amount + params.overallAbsorbedDamage + params.runesAbsorb)
-			end]]
+			--if params.isHitByDuplex then
+			--	multipliersAbsorb = multipliersAbsorb - (params.amount + params.overallAbsorbedDamage + params.runesAbsorb)
+			--end
 			self.ResistDetailsList[enumHitBlock.MultAbsorb]:RecalcDetails(multipliersAbsorb)
-		end
+		end]]--
 	end
 	
 	if params.Vulnerability then 

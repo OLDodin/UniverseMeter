@@ -43,7 +43,7 @@ Global("Settings", {
 		MainPanelWideSize = 352,        -- Width of the main panel in wider mode (must be > 294)
 		CloseDist = 86,        			-- Range to consider if a combatant is close to the avatar or not (85 metr for 9.1)
         FriendlyShot = false,           -- Should we take in account friendly shot in the DPS ?
-		MagicPVPKoef = 0.62,			-- Magic pvp absorb koef
+		MagicPVPKoef = 0.62,			-- Magic pvp absorb koef //deprecated from 10.0.00.54 
 		TimeLapsInterval = 10, 
 		CollectDescription = true,
 		SkipDmgAndHpsOnPet = false,		-- ignore dd out and hps out for pet
