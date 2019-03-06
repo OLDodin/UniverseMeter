@@ -201,7 +201,7 @@ function TDamageSpellData:ReceiveValuesFromParams(params)
 	if params.absorb > 0 then self.ResistDetailsList[enumHitBlock.Absorb]:RecalcDetails(params.absorb) end
 
 	-- If the hit has been absorbed by the defensive runes
-	if params.runesAbsorb > 0 then self.ResistDetailsList[enumHitBlock.RunesAbsorb]:RecalcDetails(params.runesAbsorb) end
+	if params.runesAbsorb and params.runesAbsorb > 0 then self.ResistDetailsList[enumHitBlock.RunesAbsorb]:RecalcDetails(params.runesAbsorb) end
 
 	-- If the hit has been absorbed by the mount
 	if params.toMount > 0 then self.ResistDetailsList[enumHitBlock.Mount]:RecalcDetails(params.toMount) end
@@ -339,13 +339,13 @@ function THealSpellData:ReceiveValuesFromParams(params)
 	if params.resisted > 0 then self.ResistDetailsList[enumHealResist.Resisted]:RecalcDetails(params.resisted) end
 
 	-- If the hit has been parried
-	if params.runeResisted > 0 then self.ResistDetailsList[enumHealResist.RuneResisted]:RecalcDetails(params.runeResisted) end
+	if params.runeResisted and params.runeResisted > 0 then self.ResistDetailsList[enumHealResist.RuneResisted]:RecalcDetails(params.runeResisted) end
 
 	-- If the hit went in a absorbed
 	if params.absorbed > 0 then self.ResistDetailsList[enumHealResist.Absorbed]:RecalcDetails(params.absorbed) end
 
 	-- If the hit went in a overload
-	if params.overload > 0 then self.ResistDetailsList[enumHealResist.Overload]:RecalcDetails(params.overload) end
+	if params.overload and params.overload > 0 then self.ResistDetailsList[enumHealResist.Overload]:RecalcDetails(params.overload) end
 	
 	-- The amount of the wounds
 	--if params.lethality > 0 then self.GlobalInfoList[enumGlobalInfo.Lethality]:RecalcDetails(params.lethality) end
