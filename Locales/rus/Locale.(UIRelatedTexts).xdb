@@ -229,6 +229,10 @@
       <name>StrTimeLapsInterval</name>
       <resource href="StrTimeLapsInterval.txt" />
     </Item>
+	<Item>
+      <name>Defense</name>
+      <resource href="Defense.txt" />
+    </Item>
   </items>
 </UIRelatedTexts>
 

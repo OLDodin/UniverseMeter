@@ -129,6 +129,7 @@ function TDamageSpellData:CreateNewObject()
 				[enumMiss.Power]= TValueDetails:CreateNewObject(enumMiss.Power, "Power"),
 				[enumMiss.Insidiousness]= TValueDetails:CreateNewObject(enumMiss.Insidiousness, "Insidiousness"),
 				[enumMiss.Valor]= TValueDetails:CreateNewObject(enumMiss.Valor, "Valor"),
+				[enumMiss.Defense]= TValueDetails:CreateNewObject(enumMiss.Defense, "Defense"),
 			},
 
 			ResistAmount = 0,				-- Total amount of resist
@@ -232,6 +233,9 @@ function TDamageSpellData:ReceiveValuesFromParams(params)
 	end
 	if params.Weakness then 
 		self.MissList[enumMiss.Weakness]:RecalcDetails(params.amount)
+	end
+	if params.Defense then 
+		self.MissList[enumMiss.Defense]:RecalcDetails(params.amount)
 	end
 	if params.Power then 
 		self.MissList[enumMiss.Power]:RecalcDetails(params.amount)
@@ -1019,23 +1023,31 @@ local function GetSpellInfoFromParams(params)
 		end
 
 		local sourceId = params.source or params.healerId or nil
-		
+		--[[
 		params.IsPVP = false
 		if (params.multipliersAbsorb ~= 0) and params.DDOut and IsPlayerOrPet(params.target) then 
 			params.IsPVP = true
-		end
+		end]]
 		
 		params.Vulnerability = false
 		params.Weakness = false
 		params.Power = false
 		params.Insidiousness = false
 		params.Valor = false
+		params.Defense = false
 		
 		if params.targetTags then 
 			for i, combatTag in pairs( params.targetTags ) do
 				local info = combatTag:GetInfo()
-				if not info.isHelpful and userMods.FromWString(info.name) == Vulnerability then
-					params.Vulnerability = true
+				local infoName = userMods.FromWString(info.name)
+				if info.isHelpful then 
+					if infoName == Defense then
+						params.Defense = true
+					end
+				else
+					if infoName == Vulnerability then
+						params.Vulnerability = true
+					end
 				end
 			end
 		end
@@ -1043,9 +1055,6 @@ local function GetSpellInfoFromParams(params)
 			for i, combatTag in pairs( params.sourceTags ) do
 				local info = combatTag:GetInfo()
 				local infoName = userMods.FromWString(info.name)
-				if not info.isHelpful and infoName == Weakness then
-					params.Weakness = true
-				end
 				if info.isHelpful then
 					if infoName == Power then
 						params.Power = true
@@ -1053,6 +1062,10 @@ local function GetSpellInfoFromParams(params)
 						params.Valor = true
 					elseif infoName == Insidiousness then
 						params.Insidiousness = true
+					end
+				else
+					if infoName == Weakness then
+						params.Weakness = true
 					end
 				end
 			end
@@ -1064,10 +1077,10 @@ local function GetSpellInfoFromParams(params)
 			if spellInfo.IsPet then
 				spellInfo.PetName = object.GetName(sourceId)
 			end
-			--reduce api calls
+			--[[
 			if (params.multipliersAbsorb ~= 0) and params.DDIn and (spellInfo.IsPet or unit.IsPlayer(sourceId)) then
 				params.IsPVP = true
-			end
+			end]]
 		else
 			spellInfo.IsPet = false
 			spellInfo.Determination = nil
@@ -1152,7 +1165,7 @@ function TUMeter:CollectDamageReceivedData(params)
 	local Variant = nil
 
 	if Settings.SkipDmgYourselfIn and params.source == params.target then return end
-	
+
 	-- look for the type of the target
 	CombatantID, Variant = self:GetSourceIdAndVariant(params.target)
 

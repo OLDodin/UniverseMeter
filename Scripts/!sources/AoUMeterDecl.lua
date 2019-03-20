@@ -8,7 +8,7 @@
 -- Enumerations
 --------------------------------------------------------------------------------
 Global( "enumHit", { Normal = 1, Critical = 2 } )
-Global( "enumMiss", { Dodge = 1, Miss = 2, Power = 3, Insidiousness = 4, Valor = 5, Weakness = 6, Vulnerability = 7 } )
+Global( "enumMiss", { Dodge = 1, Miss = 2, Power = 3, Insidiousness = 4, Valor = 5, Weakness = 6, Vulnerability = 7, Defense = 8 } )
 --Global( "enumHitBlock", { Block = 1, Parry = 2, Barrier = 3, Resist = 4, Absorb = 5, RunesAbsorb = 6, MultAbsorb = 7, Mount = 8 } )
 Global( "enumHitBlock", { Barrier = 1, Absorb = 2, RunesAbsorb = 3, MultAbsorb = 4, Mount = 5 } )
 Global( "enumHealResist", { Resisted = 1, RuneResisted = 2, Absorbed = 3, Overload = 4 } )
@@ -22,7 +22,7 @@ Global( "enumWidth", { Auto = 1, Normal = 2, Wide = 3 } )
 --------------------------------------------------------------------------------
 Global( "MAXSPELLS", 24 )                   -- Maximum number of spell to display in the spell list
 Global( "DMGTYPES", 2 )                     -- Number of type of damage (see enumHit)
-Global( "MISSTYPES", 7 )                    -- Number of type of damage (see enumMiss)
+Global( "MISSTYPES", 8 )                    -- Number of type of damage (see enumMiss)
 Global( "BLOCKDMGTYPES", 5 )                -- Number of block damage (see enumHitBlock & enumHealResist)
 Global( "EXTRATYPES", 1 )                   -- Number of extra info (see enumGlobalInfo)
 --------------------------------------------------------------------------------
@@ -65,6 +65,7 @@ Global( "StrAllTime", "" )
 Global( "StrUpdateTimeLapse", "" )
 Global( "StrSettings", "" )
 Global( "StrWeakness", "" )
+Global( "StrDefense", "" )
 Global( "StrVulnerability", "" )
 Global( "StrPower", "" )
 Global( "StrInsidiousness", "" )
@@ -83,6 +84,7 @@ Global( "Vulnerability", "33" )
 Global( "Power", "" )
 Global( "Insidiousness", "" )
 Global( "Valor", "" )
+Global( "Defense", "")
 
 
 
@@ -108,6 +110,7 @@ Global( "TitleMissType", {
 		[enumMiss.Dodge] = "",
 		[enumMiss.Miss] = "",
 		[enumMiss.Weakness] = "", 
+		[enumMiss.Defense] = "", 
 		[enumMiss.Vulnerability] = "", 
 		[enumMiss.Power] = "", 
 		[enumMiss.Insidiousness] = "", 

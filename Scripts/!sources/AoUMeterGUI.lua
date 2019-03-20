@@ -338,6 +338,7 @@ function TUMeterGUI:UpdateSpellList()
 	if not detailsPanel:IsVisible() or not self:GetActiveFight() then return end
 
 	detailsPanel:HideAllChild()
+	--detailsPanel:ShowAllChild()
 	for spellIndex = 1, MAXSPELLS do
 		self.DetailsPanel.SpellList[spellIndex]:Hide()
 	end
@@ -738,7 +739,10 @@ function TUMeterGUI:Init()
 	end
 
 	-- SpellDetailsHeader
-	local spellDetailsHeaderOffset = 451--spellListOffset + MAXSPELLS * 18 + 7
+	local spellDetailsHeaderOffset = 428--spellListOffset + MAXSPELLS * 18 + 7
+	if Settings.CollectDescription then
+		spellDetailsHeaderOffset = 451
+	end
 	self.DetailsPanel.SpellDetailsHeaderPanel:SetPosition(22, spellDetailsHeaderOffset)
 
 	-- Spell info
@@ -767,9 +771,9 @@ function TUMeterGUI:Init()
 	end
 
 	if Settings.CollectDescription then
-		self.DetailsPanel:SetHeight(886)
+		self.DetailsPanel:SetHeight(909)
 		local Placement = self.DetailsPanel.SpellScrollList:GetPlacementPlain()
-		Placement.highPosY = 428
+		Placement.highPosY = 451
 		self.DetailsPanel.SpellScrollList:SetPlacementPlain( Placement )
 	end
 end
