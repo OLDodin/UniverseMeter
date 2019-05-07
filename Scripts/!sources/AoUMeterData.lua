@@ -1171,7 +1171,7 @@ function TUMeter:CollectDamageReceivedData(params)
 
 	if not CombatantID or not (Variant == 1) then return end
 
-	if not self.bCollectData and self:ShouldCollectData() then
+	if not self.bCollectData and (self:ShouldCollectData() or params.lethal) then
 		self:Start()
 	end
 
