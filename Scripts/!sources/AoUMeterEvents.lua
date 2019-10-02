@@ -309,6 +309,8 @@ onMyEvent["EVENT_SECOND_TIMER"] = function(params)
 		end
 	end
 
+	DPSMeterGUI.DPSMeter:SecondTick()
+	
 	if DPSMeterGUI.DPSMeter.bCollectData then
 		if DPSMeterGUI.DPSMeter:ShouldCollectData() then
 			DPSMeterGUI.DPSMeter:UpdateFightsTime()
@@ -362,6 +364,7 @@ function RetrieveDDEventIN(params)
 	if Settings.ModeDEF then
 		params.DDIn = true
 		collectedDef = DPSMeterGUI.DPSMeter:CollectDamageReceivedData(params)
+		DPSMeterGUI.DPSMeter:AddLastSecondData(params)
 	end
 	
 	

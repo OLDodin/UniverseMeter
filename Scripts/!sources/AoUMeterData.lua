@@ -794,6 +794,7 @@ function TUMeter:CreateNewObject()
 			OffBattleTime = 0,          -- Off-time battle allows to retrieve data coming just after the end of the fight (the events seems to not arrive in the correct order)
 			FightsTimelapseList = { Current = nil, Previous = nil, PrevPrevious = nil },
 			LastTimelapse = nil,
+			LastTwoSecondsData = { TwoSecondBefore = {}, OneSecondBefore = {}},
 		}, { __index = self })
 end
 --------------------------------------------------------------------------------
@@ -878,6 +879,15 @@ function TUMeter:UpdateCombatantPos()
 			end
 		end
 	end
+end
+
+function TUMeter:SecondTick()
+	self.LastTwoSecondsData.TwoSecondBefore = self.LastTwoSecondsData.OneSecondBefore
+	self.LastTwoSecondsData.OneSecondBefore = {}
+end
+
+function TUMeter:AddLastSecondData(aParams)
+	table.insert(self.LastTwoSecondsData.OneSecondBefore, aParams)
 end
 
 --------------------------------------------------------------------------------
@@ -1173,6 +1183,13 @@ function TUMeter:CollectDamageReceivedData(params)
 
 	if not self.bCollectData and (self:ShouldCollectData() or params.lethal) then
 		self:Start()
+		
+		for _, v in ipairs(self.LastTwoSecondsData.TwoSecondBefore) do
+			self:CollectDamageReceivedData(v)
+		end
+		for _, v in ipairs(self.LastTwoSecondsData.OneSecondBefore) do
+			self:CollectDamageReceivedData(v)
+		end
 	end
 
 	if not self.bCollectData then return end

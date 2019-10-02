@@ -37,7 +37,7 @@ Global("Settings", {
 		DefaultMode = enumMode.Dps,	    -- default mode when starts
 		MaxCombatants = 28,	            -- Number of maximum combatants to display
 		HeavyMode_MaxCombatant = 2,	    -- Below this value, the GUI is refreshed at every hit, else every second only
-		MaxOffBattleTime = 2,           -- Off-time battle (in seconds) allows to retrieve data coming just after the end of the fight (the events seems to not arrive in the correct order)
+		MaxOffBattleTime = 3,           -- Off-time battle (in seconds) allows to retrieve data coming just after the end of the fight (the events seems to not arrive in the correct order)
 		MainPanelWidth = enumWidth.Auto,    -- To determine the width of the main panel (with player list)
 		DPSMeterMode = enumMode.Dps,
 		MainPanelWideSize = 352,        -- Width of the main panel in wider mode (must be > 294)
