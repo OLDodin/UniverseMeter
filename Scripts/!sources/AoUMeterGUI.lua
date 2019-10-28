@@ -70,6 +70,7 @@ function TSettingsPanelGUI:CreateNewObject(name)
 			IhpsCheckBoxText = widget:GetChildByName("IhpsCheckBoxText").Widget,
 			DescCheckBoxText = widget:GetChildByName("DescCheckBoxText").Widget,
 			SkipPetCheckBoxText = widget:GetChildByName("SkipPetCheckBoxText").Widget,
+			StartHidedCheckBoxText = widget:GetChildByName("StartHidedCheckBoxText").Widget,
 			SkipYourselfCheckBoxText = widget:GetChildByName("SkipYourselfCheckBoxText").Widget,
 			CombatantCntText = widget:GetChildByName("CombatantCntText").Widget,
 			TimeLapsIntervalText = widget:GetChildByName("TimeLapsIntervalText").Widget,
@@ -80,6 +81,7 @@ function TSettingsPanelGUI:CreateNewObject(name)
 			IhpsCheckBox = widget:GetChildByName("IhpsCheckBox").Widget,
 			DescCheckBox = widget:GetChildByName("DescCheckBox").Widget,
 			SkipPetCheckBox = widget:GetChildByName("SkipPetCheckBox").Widget,
+			StartHidedCheckBox = widget:GetChildByName("StartHidedCheckBox").Widget,
 			SkipYourselfCheckBox = widget:GetChildByName("SkipYourselfCheckBox").Widget,
 			MaxCombatantTextEdit = widget:GetChildByName("SettingsMaxCombatant").Widget,
 			TimeLapsIntervalEdit = widget:GetChildByName("TimeLapsIntervalEdit").Widget,
@@ -655,6 +657,7 @@ function TUMeterGUI:Init()
 	self.SettingsPanel.IhpsCheckBoxText:SetVal("Name", StrSettingsIhps)
 	self.SettingsPanel.DescCheckBoxText:SetVal("Name", StrSettingsDesc)
 	self.SettingsPanel.SkipPetCheckBoxText:SetVal("Name", StrSettingsIgnorePet)
+	self.SettingsPanel.StartHidedCheckBoxText:SetVal("Name", StrSettingsStartHided)
 	self.SettingsPanel.SkipYourselfCheckBoxText:SetVal("Name", StrSettingsIgnoreYourself)
 	self.SettingsPanel.CombatantCntText:SetVal("Name", StrCombatantCntText)
 	self.SettingsPanel.TimeLapsIntervalText:SetVal("Name", StrTimeLapsInterval)
@@ -671,6 +674,7 @@ function TUMeterGUI:Init()
 	SetCheckedForCheckBox(self.SettingsPanel.DescCheckBox, Settings.CollectDescription)
 	SetCheckedForCheckBox(self.SettingsPanel.SkipPetCheckBox, Settings.SkipDmgAndHpsOnPet)
 	SetCheckedForCheckBox(self.SettingsPanel.SkipYourselfCheckBox, Settings.SkipDmgYourselfIn)
+	SetCheckedForCheckBox(self.SettingsPanel.StartHidedCheckBox, Settings.StartHided)
 
 	-- Secondary panel with spell list / details
 	self.DetailsPanel = TDetailsPanelGUI:CreateNewObject("SpellInfoPanel")

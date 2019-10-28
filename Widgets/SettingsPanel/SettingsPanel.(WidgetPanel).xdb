@@ -18,6 +18,8 @@
 		<Item href="Buttons/SkipPetCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
 		<Item href="Buttons/SkipYourselfCheckBox/CheckBox.(WidgetButton).xdb#xpointer(/WidgetButton)" />
 		<Item href="Buttons/SkipYourselfCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="Buttons/StartHidedCheckBox/CheckBox.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/StartHidedCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
 		
 		<Item href="Buttons/SaveBtn/Button.(WidgetButton).xdb#xpointer(/WidgetButton)" />
 		<Item href="Buttons/HeaderText/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />		
@@ -36,7 +38,7 @@
 		</X>
 		<Y>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Size>350</Size>
+			<Size>380</Size>
 			<Pos>230</Pos>
 		</Y>
 	</Placement>

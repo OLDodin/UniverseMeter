@@ -48,6 +48,7 @@ Global("Settings", {
 		CollectDescription = true,
 		SkipDmgAndHpsOnPet = false,		-- ignore dd out and hps out for pet
 		SkipDmgYourselfIn = false,
+		StartHided = false,
 	})
 --------------------------------------------------------------------------------
 -- Localization
@@ -75,6 +76,7 @@ Global( "StrUnknown", userMods.ToWString("?") )
 Global( "StrMapModifier", "" )
 Global( "StrExploit", "" )
 Global( "StrSettingsIgnorePet", "" )
+Global( "StrSettingsStartHided", "" )
 Global( "StrSettingsIgnoreYourself", "" )
 Global( "StrCombatantCntText", "" )
 Global( "StrTimeLapsInterval", "" )

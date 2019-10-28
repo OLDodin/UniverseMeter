@@ -233,6 +233,10 @@
       <name>Defense</name>
       <resource href="Defense.txt" />
     </Item>
+	<Item>
+      <name>StrSettingsStartHided</name>
+      <resource href="StrSettingsStartHided.txt" />
+    </Item>
   </items>
 </UIRelatedTexts>
 

@@ -161,6 +161,7 @@ onReaction["SavePressed"] = function(reaction)
 	savedData.collectDescription = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.DescCheckBox)
 	savedData.skipDmgAndHpsOnPet = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.SkipPetCheckBox)
 	savedData.skipDmgYourselfIn = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.SkipYourselfCheckBox)
+	savedData.startHided = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.StartHidedCheckBox)
 	
 	local parsedCombantants = common.GetIntFromWString(DPSMeterGUI.SettingsPanel.MaxCombatantTextEdit:GetText())
 	if not parsedCombantants then
@@ -409,6 +410,7 @@ function GlobalReset()
 		Settings.CollectDescription = savedData.collectDescription
 		Settings.SkipDmgAndHpsOnPet = savedData.skipDmgAndHpsOnPet
 		Settings.SkipDmgYourselfIn = savedData.skipDmgYourselfIn
+		Settings.StartHided = savedData.startHided
 		if savedData.maxCombatants then
 			Settings.MaxCombatants = savedData.maxCombatants
 		end
@@ -427,6 +429,7 @@ function GlobalReset()
 	StrUpdateTimeLapse = GetTextLocalized("StrUpdateTimeLapse")
 	StrSettingsDesc = GetTextLocalized("SettingsDesc")
 	StrSettingsIgnorePet = GetTextLocalized("StrSettingsIgnorePet")
+	StrSettingsStartHided = GetTextLocalized("StrSettingsStartHided")
 	StrSettingsIgnoreYourself = GetTextLocalized("StrSettingsIgnoreYourself")
 	StrCombatantCntText = GetTextLocalized("StrCombatantCntText")
 	StrTimeLapsInterval = GetTextLocalized("StrTimeLapsInterval")
@@ -570,6 +573,10 @@ function GlobalReset()
 	DPSMeterGUI.DetailsPanel.PlayerNameText:SetVal("Fight", title[DPSMeterGUI.ActiveFight])
 
 	if AoPanelDetected then DPSMeterGUI.ShowHideBtn:Hide() end
+	
+	if Settings.StartHided then
+		DPSMeterGUI.MainPanel:Hide()
+	end
 
 	-- Register now the other events & reactions
 	metricReset()
