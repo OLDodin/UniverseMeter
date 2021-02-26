@@ -158,6 +158,7 @@ function TUMeterGUI:CreateNewObject(dpsMeter)
 			SelectedCombatant = nil,            -- Selected combatant
 			SelectedCombatantInfo = nil,         -- Selected combatant info (id, persistentId, name)
 			timelapseIndex = nil,
+			SelectedSpellIndex = nil,
 
 			ShowHideBtn = nil,      -- "D" button to show/hide the addon
 			MainPanel = nil,        -- Main panel with player list
@@ -191,13 +192,12 @@ function TUMeterGUI:GetCurrentCombatant()
 end
 --------------------------------------------------------------------------------
 function TUMeterGUI:SetSelectedCombatant(member)
-	self.SelectedCombatant = nil
+	self:ResetSelectedCombatant()
 	self.SelectedCombatantInfo = member
 end
 --------------------------------------------------------------------------------
 function TUMeterGUI:SetAvatarSelectedCombatant()
-	self.SelectedCombatant = nil
-	self.timelapseIndex = nil
+	self:ResetSelectedCombatant()
 	self.SelectedCombatantInfo = {}
 	self.SelectedCombatantInfo.id = avatar.GetId()
 	self.SelectedCombatantInfo.name = object.GetName(avatar.GetId())
@@ -301,6 +301,8 @@ function TUMeterGUI:DisplayGlobalInfo(GlobalInfoIndex)
 		GlobalInfoPanel.Damage:SetVal("Avg", common.FormatFloat(GlobalInfoData.Avg , "%f3K5"))
 		GlobalInfoPanel.Damage:SetVal("Max", common.FormatFloat(GlobalInfoData.Max , "%f3K5"))
 		GlobalInfoPanel.Percent:SetVal("Percentage", common.FormatInt(GlobalInfoData.Percentage , "%d"))
+	else
+		GlobalInfoPanel:Hide()
 	end
 end
 --------------------------------------------------------------------------------
@@ -311,25 +313,29 @@ function TUMeterGUI:DisplaySpell(spellIndex)
 
 	local spellData = self.SelectedCombatant:GetSpellByIndex(spellIndex, self.ActiveMode)
 	local spellPanel = self.DetailsPanel.SpellList[spellIndex]
+	if spellPanel then
+		if spellData then
+			spellPanel:Show()
+			
+			--LogInfo(spellData.Element)
+			
+			spellPanel.Bar:SetColor(DamageTypeColors[spellData.Element] or { r = 1.0; g = 1.0; b = 1.0; a = 1 } )
+			spellPanel.Bar:SetWidth(356 * (spellData.Percentage / 100))
 
-	if spellData and spellPanel then
-		self.DetailsPanel.SpellList[spellIndex]:Show()
-		
-		--LogInfo(spellData.Element)
-		
-		spellPanel.Bar:SetColor(DamageTypeColors[spellData.Element] or { r = 1.0; g = 1.0; b = 1.0; a = 1 } )
-		spellPanel.Bar:SetWidth(356 * (spellData.Percentage / 100))
-
-		spellPanel.Name:SetVal("Index", common.FormatInt(spellIndex , "%d"))
-		spellPanel.Name:SetVal("Prefix", spellData.Prefix)
-		spellPanel.Name:SetVal("PetName", spellData.PetName)
-		spellPanel.Name:SetVal("Name", spellData.Name)
-		spellPanel.Name:SetVal("Suffix", spellData.Suffix)
-		--spellPanel.Widget:SetBackgroundTexture(spellData.TextureId)
-		spellPanel.Damage:SetVal("DamageDone", common.FormatFloat(spellData.Amount , "%f3K5"))
-		spellPanel.Damage:SetVal("DPS", common.FormatFloat(spellData.AmountPerSec , "%f3K5"))
-		spellPanel.Damage:SetVal("DamageBlock", common.FormatFloat(spellData.ResistPercentage , "%g"))
-		spellPanel.Percent:SetVal("Percentage", common.FormatInt(spellData.Percentage , "%d"))
+			spellPanel.Name:SetVal("Index", common.FormatInt(spellIndex , "%d"))
+			spellPanel.Name:SetVal("Prefix", spellData.Prefix)
+			spellPanel.Name:SetVal("PetName", spellData.PetName)
+			spellPanel.Name:SetVal("Name", spellData.Name)
+			spellPanel.Name:SetVal("Suffix", spellData.Suffix)
+			--spellPanel.Widget:SetBackgroundTexture(spellData.TextureId)
+			spellPanel.Damage:SetVal("DamageDone", common.FormatFloat(spellData.Amount , "%f3K5"))
+			spellPanel.Damage:SetVal("DPS", common.FormatFloat(spellData.AmountPerSec , "%f3K5"))
+			spellPanel.Damage:SetVal("CPS", common.FormatFloat(spellData.HitPerSec , "%.1f"))
+			spellPanel.Damage:SetVal("DamageBlock", common.FormatFloat(spellData.ResistPercentage , "%g"))
+			spellPanel.Percent:SetVal("Percentage", common.FormatInt(spellData.Percentage , "%d"))
+		else
+			spellPanel:Hide()
+		end
 	end
 end
 --------------------------------------------------------------------------------
@@ -339,12 +345,10 @@ function TUMeterGUI:UpdateSpellList()
 	local detailsPanel = self.DetailsPanel
 	if not detailsPanel:IsVisible() or not self:GetActiveFight() then return end
 
-	detailsPanel:HideAllChild()
-	--detailsPanel:ShowAllChild()
-	for spellIndex = 1, MAXSPELLS do
-		self.DetailsPanel.SpellList[spellIndex]:Hide()
-	end
-
+	self:HideAllSpellDetailsPanel()
+	detailsPanel.SpellHeaderPanel:Hide()
+	detailsPanel.GlobalInfoHeaderPanel:Hide()
+		
 	
 	detailsPanel.CloseButton:Show()
 
@@ -374,10 +378,12 @@ function TUMeterGUI:UpdateSpellList()
 		detailsPanel.AllTimeBtn:Show(true)
 		detailsPanel.UpdateTimeLapseBtn:Show(true)
 		detailsPanel.SpellCurrTimeText:Show(true)
-		
+
+		detailsPanel.SpellDetailsHeaderPanel:Show()	
+		self:UpdateSpellDetailsList(self.SelectedSpellIndex)
+	else
+		detailsPanel:HideAllChild()
 	end
-	
-	--detailsPanel:ShowAllChild()
 end
 
 function TUMeterGUI:CreateTimeLapse()
@@ -408,22 +414,30 @@ function TUMeterGUI:CreateTimeLapse()
 	end
 end
 
+function TUMeterGUI:SetSelectedSpellIndex(anIndex)
+	self.SelectedSpellIndex = anIndex
+end
+
 function TUMeterGUI:SwitchToTimeLapseElement(anIndex)
-	self.SelectedCombatant = nil
+	self:ResetSelectedCombatant()
 	self.timelapseIndex = anIndex
 	self:UpdateValues()
 end
 
 function TUMeterGUI:StartNewFight()
 	self.DetailsPanel.TimeLapseScroll.Widget:RemoveItems()
-	self.timelapseIndex = nil
-	self.SelectedCombatant = nil
+	self:ResetSelectedCombatant()
 end
 
 function TUMeterGUI:SwitchToAll()
+	self:ResetSelectedCombatant()
+	self:UpdateValues()
+end
+
+function TUMeterGUI:ResetSelectedCombatant()
 	self.SelectedCombatant = nil
 	self.timelapseIndex = nil
-	self:UpdateValues()
+	self.SelectedSpellIndex = nil
 end
 
 --------------------------------------------------------------------------------
@@ -434,8 +448,7 @@ function TUMeterGUI:UpdateValues()
 	if self.SelectedCombatant and self.timelapseIndex then
 		if not self:GetActiveTimeLapse()[self.timelapseIndex] then
 			self.DetailsPanel.TimeLapseScroll.Widget:RemoveItems()
-			self.timelapseIndex = nil
-			self.SelectedCombatant = nil
+			self:ResetSelectedCombatant()
 		end
 	end
 	if not self.SelectedCombatant and self.SelectedCombatantInfo and self:GetActiveFight()then
@@ -452,6 +465,7 @@ function TUMeterGUI:UpdateValues()
 			end
 		end
 	end
+	
 	self:UpdatePlayerList()
 	self:UpdateSpellList()
 	
@@ -483,7 +497,11 @@ end
 -- Fill the spell panel
 --------------------------------------------------------------------------------
 function TUMeterGUI:UpdateSpellDetailsList(spellIndex)
-	if (self.SelectedCombatant) then
+	if spellIndex == nil then
+		self:HideAllSpellDetailsPanel()
+		return
+	end
+	if self.SelectedCombatant then
 		local index
 		local spellData = self.SelectedCombatant:GetSpellByIndex(spellIndex, self.ActiveMode)
 
@@ -567,8 +585,8 @@ function TUMeterGUI:SwapFight()
 		[self.DPSMeter.Fight.PrevPrevious] = self.DPSMeter.Fight.Total
 	}
 	self.ActiveFight = rotateFight[self.ActiveFight]
-	self.SelectedCombatant = nil -- invalidate the current combatant
-	self.timelapseIndex = nil
+	self:ResetSelectedCombatant() -- invalidate the current combatant
+
 
 	-- DPSMeter.Fight.x indices can change during the execution
 	local title = {
@@ -598,7 +616,7 @@ function TUMeterGUI:SwapMode()
 		[enumMode.IHps]= Settings.ModeDPS and enumMode.Dps or Settings.ModeHPS and enumMode.Hps or Settings.ModeDEF and enumMode.Def or enumMode.IHps
 	}
 	self.ActiveMode = rotateMode[self.ActiveMode]
-	self.SelectedCombatant = nil -- invalidate the current combatant
+	self:ResetSelectedCombatant() -- invalidate the current combatant
 
 	-- Update the mode in the fight panel (at the top of the player list)
 	self.MainPanel.ModeText:SetVal("Name", TitleMode[self.ActiveMode])

@@ -237,6 +237,10 @@
       <name>StrSettingsStartHided</name>
       <resource href="StrSettingsStartHided.txt" />
     </Item>
+	<Item>
+      <name>CPS</name>
+      <resource href="CPS.txt" />
+    </Item>
   </items>
 </UIRelatedTexts>
 

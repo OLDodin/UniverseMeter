@@ -120,14 +120,12 @@ end
 -- occurred when the player point a spell in the spell panel
 --------------------------------------------------------------------------------
 onReaction["SpellPanelOnPointing"] = function (reaction)
-	DPSMeterGUI:HideAllSpellDetailsPanel()
-
 	if reaction.active then
-		DPSMeterGUI.DetailsPanel.SpellDetailsHeaderPanel:Show()
-		DPSMeterGUI:UpdateSpellDetailsList(GetSpellPanelIndex(reaction))
+		DPSMeterGUI:SetSelectedSpellIndex(GetSpellPanelIndex(reaction))		
 	else
-		DPSMeterGUI.DetailsPanel.SpellDetailsHeaderPanel:Hide()
+		DPSMeterGUI:SetSelectedSpellIndex(nil)
 	end
+	DPSMeterGUI:UpdateValues()
 end
 --------------------------------------------------------------------------------
 -- occurred when the player press the reset button
@@ -515,6 +513,7 @@ function GlobalReset()
 	DPSMeterGUI.DetailsPanel.SpellHeaderNameText:SetVal("Name", GetTextLocalized("Ability"))
 	DPSMeterGUI.DetailsPanel.SpellHeaderStatsText:SetVal("DamageDone", GetTextLocalized("Dmg"))
 	DPSMeterGUI.DetailsPanel.SpellHeaderStatsText:SetVal("Absorbed", GetTextLocalized("Abs"))
+	DPSMeterGUI.DetailsPanel.SpellHeaderStatsText:SetVal("CPS", GetTextLocalized("CPS"))
 
 	DPSMeterGUI.DetailsPanel.SpellDetailsHeaderNameText:SetVal("Name", GetTextLocalized("Type"))
 	DPSMeterGUI.DetailsPanel.SpellDetailsHeaderStatsText:SetVal("Min", GetTextLocalized("Min"))

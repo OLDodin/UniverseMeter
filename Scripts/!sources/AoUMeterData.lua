@@ -110,6 +110,10 @@ function TDamageSpellData:CreateNewObject()
 			Count = 0,					-- Count how many spell input
 			Hits = 0,					-- Count how many efficient spell input
 			Type = "",					-- Damage type of the spell
+			
+			FirstHitTime = 0,
+			LastHitTime = 0,
+			HitPerSec = 0,
 
 			Amount = 0,					-- Total damage amount
 			AmountPerSec = 0,			-- Damage per second
@@ -246,6 +250,15 @@ function TDamageSpellData:ReceiveValuesFromParams(params)
 	if params.Valor then 
 		self.MissList[enumMiss.Valor]:RecalcDetails(params.amount)
 	end
+	
+	self.LastHitTime = params.spellTime
+end
+
+function TDamageSpellData:GetAverageCntPerSecond()
+	if self.LastHitTime - self.FirstHitTime == 0 then 
+		return self.Count
+	end
+	return self.Count / (self.LastHitTime - self.FirstHitTime)
 end
 --------------------------------------------------------------------------------
 -- Get the total blocked damage acount
@@ -287,6 +300,10 @@ function THealSpellData:CreateNewObject()
 			DebugName = "",				-- Debug name of the spell
 			Count = 0,					-- Count how many spell inpu
 			Type = "",					-- Type of the heal
+			
+			FirstHitTime = 0,
+			LastHitTime = 0,
+			HitPerSec = 0,
 
 			Amount = 0,					-- Total heal amount
 			AmountPerSec = 0,			-- Heal per second
@@ -353,6 +370,18 @@ function THealSpellData:ReceiveValuesFromParams(params)
 	
 	-- The amount of the wounds
 	--if params.lethality > 0 then self.GlobalInfoList[enumGlobalInfo.Lethality]:RecalcDetails(params.lethality) end
+	
+	self.LastHitTime = params.spellTime
+end
+
+function THealSpellData:GetAverageCntPerSecond()
+	if self.Count == 0 then 
+		return 0
+	end
+	if self.LastHitTime - self.FirstHitTime == 0 then 
+		return self.Count
+	end
+	return (self.LastHitTime - self.FirstHitTime) / self.Count
 end
 --------------------------------------------------------------------------------
 -- Get the total resisted heal acount
@@ -485,6 +514,7 @@ function TCombatant:AddNewSpell(SpellInfo, Mode, params)
 			SpellData.Identifier = SpellInfo.Identifier
 			SpellData.ID = SpellInfo.Id
 			SpellData.Desc = SpellInfo.Desc
+			SpellData.FirstHitTime = params.spellTime
 			--SpellData.TextureId = SpellInfo.TextureId
 
 			table.insert(self.Data[Mode].SpellsList, SpellData)
@@ -526,6 +556,7 @@ function TCombatant:CalculateSpell(FightTime, Mode)
 		SpellData.ResistAmount = SpellData:GetResistAmount()
 		SpellData.AmountPerSec = SpellData.Amount / FightTime
 		SpellData.Percentage = GetPercentageAt(SpellData.Amount, self.Data[Mode].Amount)
+		SpellData.HitPerSec = SpellData:GetAverageCntPerSecond()
 		SpellData:CalculateSpellDetailsPercentage()
 		SpellData.ResistPercentage = GetPercentageAt(SpellData.ResistAmount, (SpellData.Amount + SpellData.ResistAmount))
 		if Mode == enumMode.Dps or Mode == enumMode.Def then
@@ -1303,6 +1334,7 @@ function TUMeter:UpdateFightData(aFight, combatantID, mode, params, spellInfo, a
 		Combatant.Data[mode].Amount = Combatant.Data[mode].Amount + params.amount
 
 		if spellInfo then
+			params.spellTime = aFight.Timer:GetElapsedTime()
 			local SpellData = Combatant:GetSpellByIdentifier(spellInfo, mode, params)
 			if not SpellData then
 				SpellData = Combatant:AddNewSpell(spellInfo, mode, params)
