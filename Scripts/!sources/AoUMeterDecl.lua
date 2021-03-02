@@ -41,7 +41,7 @@ Global("Settings", {
 		MainPanelWidth = enumWidth.Auto,    -- To determine the width of the main panel (with player list)
 		DPSMeterMode = enumMode.Dps,
 		MainPanelWideSize = 352,        -- Width of the main panel in wider mode (must be > 294)
-		CloseDist = 86,        			-- Range to consider if a combatant is close to the avatar or not (85 metr for 9.1)
+		CloseDist = 86,        			-- Range to consider if a combatant is close to the avatar or not (85 metr for 9.1) 	deprecated
         FriendlyShot = false,           -- Should we take in account friendly shot in the DPS ?
 		MagicPVPKoef = 0.62,			-- Magic pvp absorb koef //deprecated from 10.0.00.54 
 		TimeLapsInterval = 10, 

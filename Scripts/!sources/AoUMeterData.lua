@@ -580,6 +580,7 @@ end
 --------------------------------------------------------------------------------
 -- Update the Range attribute according to the avatar
 --------------------------------------------------------------------------------
+--[[
 function TCombatant:UpdateRange()	
 	if self.ID == avatar.GetId() then
 		self.Range = 0
@@ -591,12 +592,13 @@ function TCombatant:UpdateRange()
 
 		self.Range = PosRange(avatar.GetPos(), pos)
 	end
-end
+end]]
 --------------------------------------------------------------------------------
 -- Is the combatant close to the avatar
 --------------------------------------------------------------------------------
 function TCombatant:IsClose()
-	return self.IsNear and self.Range <= Settings.CloseDist
+--from 8 or 9 AO version game engine check distance by himself
+	return self.IsNear --and self.Range <= Settings.CloseDist
 end
 --------------------------------------------------------------------------------
 -- Type TFightData
@@ -850,7 +852,7 @@ end
 -- Add a new combatant
 --------------------------------------------------------------------------------
 function TUMeter:AddNewCombatant(member)
-	self.FightsList[self.Fight.Current]:AddNewCombatant(member):UpdateRange()
+	self.FightsList[self.Fight.Current]:AddNewCombatant(member)--:UpdateRange()
 	self.FightsTimelapseList[self.Fight.Current][self.LastTimelapse]:AddNewCombatant(member)
 	self.FightsList[self.Fight.Total]:AddNewCombatant(member)
 end
@@ -866,7 +868,7 @@ end
 -- Update combatant by ID
 --------------------------------------------------------------------------------
 function TUMeter:UpdateCombatant(member)
-	self.FightsList[self.Fight.Current]:UpdateCombatant(member):UpdateRange()
+	self.FightsList[self.Fight.Current]:UpdateCombatant(member)--:UpdateRange()
 	self.FightsList[self.Fight.Total]:UpdateCombatant(member)
 	self.FightsTimelapseList[self.Fight.Current][self.LastTimelapse]:UpdateCombatant(member)
 end
@@ -899,6 +901,7 @@ end
 --------------------------------------------------------------------------------
 -- Update the position of all members
 --------------------------------------------------------------------------------
+--[[
 function TUMeter:UpdateCombatantPos()
 	local currentFight = DPSMeterGUI.DPSMeter:GetFight(DPSMeterGUI.DPSMeter.Fight.Current)
 	for i, member in pairs( GetPartyMembers() ) do
@@ -911,7 +914,7 @@ function TUMeter:UpdateCombatantPos()
 		end
 	end
 end
-
+]]
 function TUMeter:SecondTick()
 	self.LastTwoSecondsData.TwoSecondBefore = self.LastTwoSecondsData.OneSecondBefore
 	self.LastTwoSecondsData.OneSecondBefore = {}
@@ -921,20 +924,17 @@ function TUMeter:AddLastSecondData(aParams)
 	table.insert(self.LastTwoSecondsData.OneSecondBefore, aParams)
 end
 
---------------------------------------------------------------------------------
--- Get source Id and variant of the given ID:
---  If it's player
---------------------------------------------------------------------------------
-function TUMeter:GetSourceIdAndVariant(ID)
+
+function TUMeter:GetSourceAndVariant(ID)
 	if not ID then return end
 
 	local Variant = nil
-	local CombatantID = nil
+	local CurrFightCombatant = nil
 	-- look for the type of the source
 	for i, C in pairs( self.FightsList[self.Fight.Current].CombatantsList ) do
 		if (ID == C.ID) then
 			Variant = 1 -- Player or Mercenary.
-			CombatantID = C.ID
+			CurrFightCombatant = C
 			break
 		end
 	end
@@ -944,14 +944,14 @@ function TUMeter:GetSourceIdAndVariant(ID)
 			for i, C in pairs( self.FightsList[self.Fight.Current].CombatantsList ) do
 				if (MasterID == C.ID) then
 					Variant = 2 -- Player's Pet.
-					CombatantID = C.ID
+					CurrFightCombatant = C
 					break
 				end
 			end
 		end
 	end
 
-	return CombatantID, Variant
+	return CurrFightCombatant, Variant
 end
 
 local m_buffInfoCache = {}
@@ -1152,67 +1152,59 @@ function TUMeter:ShouldCollectData()
 
 	return false
 end
---------------------------------------------------------------------------------
--- Collect damage data from event EVENT_UNIT_DAMAGE_RECEIVED
---------------------------------------------------------------------------------
 
+
+function TUMeter:CollectData(aMode, aCombatantID, aParams)
+	local spellInfo = GetSpellInfoFromParams(aParams)
+
+	if spellInfo then
+		self:UpdateFightData(self.FightsList[self.Fight.Current], aCombatantID, aMode, aParams, spellInfo)
+		self:UpdateFightData(self.FightsList[self.Fight.Total], aCombatantID, aMode, aParams, spellInfo)
+		self:UpdateFightData(self.FightsTimelapseList[self.Fight.Current][self.LastTimelapse], aCombatantID, aMode, aParams, spellInfo)
+		return true
+	end
+end
 
 --------------------------------------------------------------------------------
 -- Collect damage dealed data by someone in the party
 --------------------------------------------------------------------------------
-function TUMeter:CollectDamageDealedData(params)
-	local Variant = nil
-	local CombatantID = nil
-
-	if params.source == params.target then return end
+function TUMeter:CollectDamageDealedData(aParams)
+	if aParams.source == aParams.target then return end
 	
 	-- look for the type of the source
-	CombatantID, Variant = self:GetSourceIdAndVariant(params.source)
+	local currFightCombatant, variant = self:GetSourceAndVariant(aParams.source)
 
 	-- If the source is not part of the group or the target is an ally
-	if not CombatantID then return end
+	if not currFightCombatant then return end
 	
-	if Settings.SkipDmgAndHpsOnPet and IsExistPet(params.target) then return end
+	if Settings.SkipDmgAndHpsOnPet and IsExistPet(aParams.target) then return end
 	
 	-- If we're not collecting data, means we are not currently in fight, then start a new one
-	if not self.bCollectData and (self:ShouldCollectData() or params.lethal) then
+	if not self.bCollectData and currFightCombatant:IsClose() and (self:ShouldCollectData() or aParams.lethal) then
 		self:Start()
 	end
+	
+	if not self.bCollectData then return end
 
 	-- update last hit time
 	self.FightsList[self.Fight.Current].Timer:SetLastHit()
 	self.FightsList[self.Fight.Total].Timer:SetLastHit()
 
 	-- if collecting dps data
-	local SpellInfo = GetSpellInfoFromParams(params)
-
-	if SpellInfo then
-		-- Update damage amount in the current fight
-		self:UpdateData(self.Fight.Current, CombatantID, enumMode.Dps, params, SpellInfo)
-
-		-- Update damage amount in the overall fight
-		self:UpdateData(self.Fight.Total, CombatantID, enumMode.Dps, params, SpellInfo)
-		
-		self:UpdateFightData(self.FightsTimelapseList[self.Fight.Current][self.LastTimelapse], CombatantID, enumMode.Dps, params, SpellInfo)
-
-		return true
-	end
+	return self:CollectData(enumMode.Dps, currFightCombatant.ID, aParams)
 end
 --------------------------------------------------------------------------------
 -- Collect damage received data by someone in the party
 --------------------------------------------------------------------------------
-function TUMeter:CollectDamageReceivedData(params)
-	local CombatantID = nil
-	local Variant = nil
-
-	if Settings.SkipDmgYourselfIn and params.source == params.target then return end
+function TUMeter:CollectDamageReceivedData(aParams)
+	if Settings.SkipDmgYourselfIn and aParams.source == aParams.target then return end
 
 	-- look for the type of the target
-	CombatantID, Variant = self:GetSourceIdAndVariant(params.target)
+	local currFightCombatant, variant = self:GetSourceAndVariant(aParams.target)
 
-	if not CombatantID or not (Variant == 1) then return end
+	if not currFightCombatant or not (variant == 1) then return end
 
-	if not self.bCollectData and (self:ShouldCollectData() or params.lethal) then
+	if not self.bCollectData and currFightCombatant:IsClose() and (self:ShouldCollectData() or aParams.lethal) then
 		self:Start()
 		
 		for _, v in ipairs(self.LastTwoSecondsData.TwoSecondBefore) do
@@ -1225,44 +1217,30 @@ function TUMeter:CollectDamageReceivedData(params)
 
 	if not self.bCollectData then return end
 
-	local SpellInfo = GetSpellInfoFromParams(params)
-
-	if SpellInfo then
-		-- Update damage amount in the current fight
-		self:UpdateData(self.Fight.Current, CombatantID, enumMode.Def, params, SpellInfo)
-
-		-- Update damage amount in the overall fight
-		self:UpdateData(self.Fight.Total, CombatantID, enumMode.Def, params, SpellInfo)
-		
-		self:UpdateFightData(self.FightsTimelapseList[self.Fight.Current][self.LastTimelapse], CombatantID, enumMode.Def, params, SpellInfo)
-
-		return true
-	end
+	return self:CollectData(enumMode.Def, currFightCombatant.ID, aParams)
 end
 
 --------------------------------------------------------------------------------
 -- Collect heal data from event EVENT_HEALING_RECEIVED
 --------------------------------------------------------------------------------
-function TUMeter:CollectHealData(params)
-	if params.isFall then
+function TUMeter:CollectHealData(aParams)
+	if aParams.isFall then
 		return
 	end
 
 	-- Check that the healer is part of the group
-	local CombatantID = nil
-	local Variant = nil
-	CombatantID, Variant = self:GetSourceIdAndVariant(params.healerId)
+	local currFightCombatant, variant = self:GetSourceAndVariant(aParams.healerId)
 
 	-- if this happen, most probably it's a bloodlust but the heal is coming from the target...
-	if not CombatantID then
-		CombatantID, Variant = self:GetSourceIdAndVariant(params.unitId)
+	if not currFightCombatant then
+		currFightCombatant, variant = self:GetSourceAndVariant(aParams.unitId)
 	end
 
-	if not CombatantID then return end
+	if not currFightCombatant then return end
 	
-	if Settings.SkipDmgAndHpsOnPet and IsExistPet(params.target) then return end
+	if Settings.SkipDmgAndHpsOnPet and IsExistPet(aParams.target) then return end
 
-	if not self.bCollectData and self:ShouldCollectData() then
+	if not self.bCollectData and currFightCombatant:IsClose() and self:ShouldCollectData() then
 		self:Start()
 	end
 
@@ -1271,35 +1249,22 @@ function TUMeter:CollectHealData(params)
 	-- update last hit time
 	self.FightsList[self.Fight.Current].Timer:SetLastHit()
 
-	params.amount = params.heal
-	local SpellInfo = GetSpellInfoFromParams(params)
+	aParams.amount = aParams.heal
 
-	if SpellInfo then
-		-- Update heal amount in the current fight
-		self:UpdateData(self.Fight.Current, CombatantID, enumMode.Hps, params, SpellInfo)
-
-		-- Update heal amount in the overall fight
-		self:UpdateData(self.Fight.Total, CombatantID, enumMode.Hps, params, SpellInfo)	
-		
-		self:UpdateFightData(self.FightsTimelapseList[self.Fight.Current][self.LastTimelapse], CombatantID, enumMode.Hps, params, SpellInfo)	
-		return true
-	end
+	return self:CollectData(enumMode.Hps, currFightCombatant.ID, aParams)
 end
 
-function TUMeter:CollectHealDataIN(params)
-	if params.isFall then
+function TUMeter:CollectHealDataIN(aParams)
+	if aParams.isFall then
 		return
 	end
 
 	-- Check that the healer is part of the group
-	local CombatantID = nil
-	local Variant = nil
+	local currFightCombatant, variant = self:GetSourceAndVariant(aParams.unitId)
 
-	CombatantID, Variant = self:GetSourceIdAndVariant(params.unitId)
+	if not currFightCombatant then return end
 
-	if not CombatantID then return end
-
-	if not self.bCollectData and self:ShouldCollectData() then
+	if not self.bCollectData and currFightCombatant:IsClose() and self:ShouldCollectData() then
 		self:Start()
 	end
 
@@ -1308,47 +1273,33 @@ function TUMeter:CollectHealDataIN(params)
 	-- update last hit time
 	self.FightsList[self.Fight.Current].Timer:SetLastHit()
 
-	params.amount = params.heal
-	local SpellInfo = GetSpellInfoFromParams(params)
-
-	if SpellInfo then
-		self:UpdateData(self.Fight.Current, CombatantID, enumMode.IHps, params, SpellInfo)
-		self:UpdateData(self.Fight.Total, CombatantID, enumMode.IHps, params, SpellInfo)	
-		self:UpdateFightData(self.FightsTimelapseList[self.Fight.Current][self.LastTimelapse], CombatantID, enumMode.IHps, params, SpellInfo)		
-		return true
-	end
+	aParams.amount = aParams.heal
+	
+	return self:CollectData(enumMode.IHps, currFightCombatant.ID, aParams)
 end
 --------------------------------------------------------------------------------
 -- Update the data in the given mode
 --------------------------------------------------------------------------------
-function TUMeter:UpdateData(fightId, combatantID, mode, params, spellInfo)
-	local Fight = self.FightsList[fightId]
-	self:UpdateFightData(Fight, combatantID, mode, params, spellInfo, true)
-end
-
-function TUMeter:UpdateFightData(aFight, combatantID, mode, params, spellInfo, aCheckClose)
+function TUMeter:UpdateFightData(aFight, aCombatantID, aMode, aParams, aSpellInfo)
 	local member = {}
-	member.id = combatantID
-	local Combatant = aFight:GetCombatant(member)
-	if Combatant and (not aCheckClose or (aCheckClose and Combatant:IsClose())) then 
-		Combatant.Data[mode].Amount = Combatant.Data[mode].Amount + params.amount
+	member.id = aCombatantID
+	local combatant = aFight:GetCombatant(member)
+	if not combatant then return end
+	
+	combatant.Data[aMode].Amount = combatant.Data[aMode].Amount + aParams.amount
+	aParams.spellTime = aFight.Timer:GetElapsedTime()
+	local SpellData = combatant:GetSpellByIdentifier(aSpellInfo, aMode, aParams)
+	if not SpellData then
+		SpellData = combatant:AddNewSpell(aSpellInfo, aMode, aParams)
+	end
 
-		if spellInfo then
-			params.spellTime = aFight.Timer:GetElapsedTime()
-			local SpellData = Combatant:GetSpellByIdentifier(spellInfo, mode, params)
-			if not SpellData then
-				SpellData = Combatant:AddNewSpell(spellInfo, mode, params)
-			end
+	if SpellData then
+		SpellData:ReceiveValuesFromParams(aParams)
+		aFight.Timer:SetLastHit()
+	end
 
-			if SpellData then
-				SpellData:ReceiveValuesFromParams(params)
-				aFight.Timer:SetLastHit()
-			end
-
-			if spellInfo.Determination then
-				Combatant:UpdateGlobalInfo(params, spellInfo.Determination, mode)
-			end
-		end
+	if aSpellInfo.Determination then
+		combatant:UpdateGlobalInfo(aParams, aSpellInfo.Determination, aMode)
 	end
 end
 --------------------------------------------------------------------------------

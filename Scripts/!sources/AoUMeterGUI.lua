@@ -225,7 +225,7 @@ function TUMeterGUI:DisplayTotal()
 
 	local minute, second = 0, 0
 	local fightTime = self:GetActiveFight().Timer:GetElapsedTime()
-	if fightTime > 0 then
+	if fightTime >= 0 then
 		minute, second = GetMinSec(fightTime)
 	end
 
