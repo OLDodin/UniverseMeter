@@ -303,16 +303,17 @@ onMyEvent["EVENT_SECOND_TIMER"] = function(params)
 		if mustRegenList then
 			DPSMeterGUI.DPSMeter:RegenCombatantList()
 			metricReset()
-	--	else
-	--		DPSMeterGUI.DPSMeter:UpdateCombatantPos()
+		else
+			DPSMeterGUI.DPSMeter:UpdateCombatantPos()
 		end
 	end
 
 	DPSMeterGUI.DPSMeter:SecondTick()
 	
 	if DPSMeterGUI.DPSMeter.bCollectData then
+		DPSMeterGUI.DPSMeter:UpdateFightsTime()
 		if DPSMeterGUI.DPSMeter:ShouldCollectData() then
-			DPSMeterGUI.DPSMeter:UpdateFightsTime()
+			DPSMeterGUI.DPSMeter:ResetOffBattleTime()
 		else
 			local offBattleTime = DPSMeterGUI.DPSMeter:UpdateOffBattleTime()
 			local maxOffBattleTime = Settings.MaxOffBattleTime
@@ -324,7 +325,6 @@ onMyEvent["EVENT_SECOND_TIMER"] = function(params)
 			end
 		end
 		
-
 		DPSMeterGUI:UpdateValues()
 	elseif mustRegenList then
 		DPSMeterGUI:UpdateValues()

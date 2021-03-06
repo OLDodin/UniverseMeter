@@ -580,7 +580,6 @@ end
 --------------------------------------------------------------------------------
 -- Update the Range attribute according to the avatar
 --------------------------------------------------------------------------------
---[[
 function TCombatant:UpdateRange()	
 	if self.ID == avatar.GetId() then
 		self.Range = 0
@@ -592,13 +591,12 @@ function TCombatant:UpdateRange()
 
 		self.Range = PosRange(avatar.GetPos(), pos)
 	end
-end]]
+end
 --------------------------------------------------------------------------------
 -- Is the combatant close to the avatar
 --------------------------------------------------------------------------------
 function TCombatant:IsClose()
---from 8 or 9 AO version game engine check distance by himself
-	return self.IsNear --and self.Range <= Settings.CloseDist
+	return self.IsNear and self.Range <= Settings.CloseDist
 end
 --------------------------------------------------------------------------------
 -- Type TFightData
@@ -852,7 +850,7 @@ end
 -- Add a new combatant
 --------------------------------------------------------------------------------
 function TUMeter:AddNewCombatant(member)
-	self.FightsList[self.Fight.Current]:AddNewCombatant(member)--:UpdateRange()
+	self.FightsList[self.Fight.Current]:AddNewCombatant(member):UpdateRange()
 	self.FightsTimelapseList[self.Fight.Current][self.LastTimelapse]:AddNewCombatant(member)
 	self.FightsList[self.Fight.Total]:AddNewCombatant(member)
 end
@@ -868,7 +866,7 @@ end
 -- Update combatant by ID
 --------------------------------------------------------------------------------
 function TUMeter:UpdateCombatant(member)
-	self.FightsList[self.Fight.Current]:UpdateCombatant(member)--:UpdateRange()
+	self.FightsList[self.Fight.Current]:UpdateCombatant(member):UpdateRange()
 	self.FightsList[self.Fight.Total]:UpdateCombatant(member)
 	self.FightsTimelapseList[self.Fight.Current][self.LastTimelapse]:UpdateCombatant(member)
 end
@@ -901,7 +899,6 @@ end
 --------------------------------------------------------------------------------
 -- Update the position of all members
 --------------------------------------------------------------------------------
---[[
 function TUMeter:UpdateCombatantPos()
 	local currentFight = DPSMeterGUI.DPSMeter:GetFight(DPSMeterGUI.DPSMeter.Fight.Current)
 	for i, member in pairs( GetPartyMembers() ) do
@@ -914,7 +911,7 @@ function TUMeter:UpdateCombatantPos()
 		end
 	end
 end
-]]
+
 function TUMeter:SecondTick()
 	self.LastTwoSecondsData.TwoSecondBefore = self.LastTwoSecondsData.OneSecondBefore
 	self.LastTwoSecondsData.OneSecondBefore = {}
@@ -1319,7 +1316,7 @@ function TUMeter:Start()
 	self.FightsTimelapseList[self.Fight.Current][self.LastTimelapse]:StartFight()
 
 	self.bCollectData = true
-	self.OffBattleTime = 0
+	self:ResetOffBattleTime()
 	DPSMeterGUI:StartNewFight()
 end
 --------------------------------------------------------------------------------
@@ -1347,7 +1344,9 @@ function TUMeter:UpdateFightsTime()
 		newTimeLapse:CleanCopyCombantants(lastTimeLapse)
 		newTimeLapse:StartFight()
 	end
-	-- Reset the offtime battle
+end
+
+function TUMeter:ResetOffBattleTime()
 	self.OffBattleTime = 0
 end
 --------------------------------------------------------------------------------
