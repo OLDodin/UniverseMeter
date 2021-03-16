@@ -121,6 +121,7 @@ Global( "TWidget", {} )
 function TWidget:CreateNewObject( WidgetName )
 	return setmetatable( {
 			Widget = WidgetName and mainForm:GetChildUnchecked( WidgetName, true ),
+			LastTagValues = {},
 			bDraggable = false
 		}, { __index = self } )
 end
@@ -131,7 +132,7 @@ function TWidget:CreateNewObjectByDesc( WidgetName, Desc, Parent )
 	if Parent then
 		Parent.Widget:AddChild( Widget )
 	end
-	return setmetatable( { Widget = Widget, bDraggable = false }, { __index = self } )
+	return setmetatable( { Widget = Widget, LastTagValues = {}, bDraggable = false }, { __index = self } )
 end
 --------------------------------------------------------------------------------
 function TWidget:GetDesc()
@@ -249,13 +250,13 @@ function TWidget:SetTransparency( Alpha )
 end
 --------------------------------------------------------------------------------
 function TWidget:Show()
-	if self.Widget then
+	if self.Widget and not self.Widget:IsVisible() then
 		self.Widget:Show( true )
 	end
 end
 --------------------------------------------------------------------------------
 function TWidget:Hide()
-	if self.Widget then
+	if self.Widget and self.Widget:IsVisible() then
 		self.Widget:Show( false )
 	end
 end
@@ -284,6 +285,13 @@ function TWidget:ShowAllChild()
 		end
 	end
 end
+--------------------------------------------------------------------------------
+function TWidget:SetVal(aTag, aValue)
+	if self.Widget then
+		self.Widget:SetVal(aTag, aValue)
+	end
+end
+
 ---------------------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------- INITIALIZATION ------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------

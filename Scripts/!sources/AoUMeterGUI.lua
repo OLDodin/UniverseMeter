@@ -99,8 +99,8 @@ function TTotalPanelGUI:CreateNewObjectByDesc(name, desc, owner)
 	local widget = TWidget:CreateNewObjectByDesc(name, desc, owner)
 	return setmetatable({
 			Bar = widget:GetChildByName("PlayerInfoBar"),
-			Name = widget:GetChildByName("TotalInfoTextViewName").Widget,
-			Value = widget:GetChildByName("PlayerInfoTextViewStats").Widget
+			Name = widget:GetChildByName("TotalInfoTextViewName"),
+			Value = widget:GetChildByName("PlayerInfoTextViewStats")
 		}, { __index = widget })
 end
 --------------------------------------------------------------------------------
@@ -111,9 +111,9 @@ function TPlayerPanelGUI:CreateNewObjectByDesc(name, desc, owner)
 	local widget = TWidget:CreateNewObjectByDesc(name, desc, owner)
 	return setmetatable({
 			Bar = widget:GetChildByName("PlayerInfoBar"),
-			Name = widget:GetChildByName("PlayerInfoTextViewName").Widget,
-			Value = widget:GetChildByName("PlayerInfoTextViewStats").Widget,
-			Percent = widget:GetChildByName("PlayerInfoTextViewPercentage").Widget,
+			Name = widget:GetChildByName("PlayerInfoTextViewName"),
+			Value = widget:GetChildByName("PlayerInfoTextViewStats"),
+			Percent = widget:GetChildByName("PlayerInfoTextViewPercentage"),
 		}, { __index = widget })
 end
 --------------------------------------------------------------------------------
