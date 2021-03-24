@@ -1421,7 +1421,9 @@ function TUMeter:CopyFightFromCurrenToPrev()
 	if currentFight.Data[enumMode.Dps].Amount > 0 or currentFight.Data[enumMode.Hps].Amount > 0 
 	or currentFight.Data[enumMode.Def].Amount > 0 or currentFight.Data[enumMode.IHps].Amount > 0 then
 		self.FightsList[self.Fight.PrevPrevious] = self.FightsList[self.Fight.Previous]
-		self.FightsList[self.Fight.Previous] = DeepCopyObject(self.FightsList[self.Fight.Current])
+		--self.FightsList[self.Fight.Previous] = DeepCopyObject(self.FightsList[self.Fight.Current])
+		self.FightsList[self.Fight.Previous] = self.FightsList[self.Fight.Current]
+		self.FightsList[self.Fight.Current] = TFight:CreateNewObject(self.Fight.Current)
 		
 		self.FightsTimelapseList[self.Fight.PrevPrevious] = self.FightsTimelapseList[self.Fight.Previous]
 		self.FightsTimelapseList[self.Fight.Previous] = self.FightsTimelapseList[self.Fight.Current]

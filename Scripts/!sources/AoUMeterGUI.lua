@@ -348,9 +348,6 @@ function TUMeterGUI:UpdateSpellList()
 	self:HideAllSpellDetailsPanel()
 	detailsPanel.SpellHeaderPanel:Hide()
 	detailsPanel.GlobalInfoHeaderPanel:Hide()
-		
-	
-	detailsPanel.CloseButton:Show()
 
 	if self.SelectedCombatant then
 		if self.timelapseIndex then
@@ -384,9 +381,14 @@ function TUMeterGUI:UpdateSpellList()
 	else
 		detailsPanel:HideAllChild()
 	end
+	
+	detailsPanel.CloseButton:Show()
 end
 
 function TUMeterGUI:CreateTimeLapse()
+	if not self.DetailsPanel:IsVisible() then
+		return
+	end
 	local timeLapse = self:GetActiveTimeLapse()
 	
 	self.DetailsPanel.TimeLapseScroll.Widget:RemoveItems()
