@@ -170,10 +170,6 @@
       <resource href="StrUpdateTimeLapse.txt" />
     </Item>
 	<Item>
-      <name>StrUpdateTimeLapse</name>
-      <resource href="StrUpdateTimeLapse.txt" />
-    </Item>
-	<Item>
       <name>StrAllTime</name>
       <resource href="StrAllTime.txt" />
     </Item>

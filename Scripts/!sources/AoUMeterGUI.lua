@@ -248,7 +248,7 @@ function TUMeterGUI:DisplayPlayer(playerIndex)
 
 	playerPanel:Show()
 
-	playerPanel.Bar:SetWidth(self.BarWidth * (combatant.Data[self.ActiveMode].LeaderPercentage / 100))
+	playerPanel.Bar:SetWidth(math.max(self.BarWidth * (combatant.Data[self.ActiveMode].LeaderPercentage / 100), 1))
 	playerPanel.Bar:SetColor(ClassColors[combatant.Class] or ClassColors["UNKNOWN"])
 
 	playerPanel.Name:SetVal("Index", common.FormatInt(playerIndex , "%d"))
@@ -293,7 +293,7 @@ function TUMeterGUI:DisplayGlobalInfo(GlobalInfoIndex)
 		GlobalInfoPanel:Show()
 
 		GlobalInfoPanel.Bar:SetColor(HitTypeColors[GlobalInfoData.ID])
-		GlobalInfoPanel.Bar:SetWidth(356 * (GlobalInfoData.Percentage / 100))
+		GlobalInfoPanel.Bar:SetWidth(math.max(356 * (GlobalInfoData.Percentage / 100), 1))
 
 		GlobalInfoPanel.Name:SetVal("Name", TitleGlobalInfoType[GlobalInfoData.ID])
 		GlobalInfoPanel.Count:SetVal("Count", common.FormatInt(GlobalInfoData.Count , "%d"))
@@ -320,7 +320,7 @@ function TUMeterGUI:DisplaySpell(spellIndex)
 			--LogInfo(spellData.Element)
 			
 			spellPanel.Bar:SetColor(DamageTypeColors[spellData.Element] or { r = 1.0; g = 1.0; b = 1.0; a = 1 } )
-			spellPanel.Bar:SetWidth(356 * (spellData.Percentage / 100))
+			spellPanel.Bar:SetWidth(math.max(356 * (spellData.Percentage / 100), 1))
 
 			spellPanel.Name:SetVal("Index", common.FormatInt(spellIndex , "%d"))
 			spellPanel.Name:SetVal("Prefix", spellData.Prefix)
@@ -485,7 +485,7 @@ function TUMeterGUI:DisplaySpellDetails(spellInfoData, spellInfoPanel, title)
 		spellInfoPanel:Show()
 
 		spellInfoPanel.Bar:SetColor(HitTypeColors[spellInfoData.ID])
-		spellInfoPanel.Bar:SetWidth(356 * (math.abs(spellInfoData.Percentage) / 100))
+		spellInfoPanel.Bar:SetWidth(math.max(356 * (math.abs(spellInfoData.Percentage) / 100), 1))
 
 		spellInfoPanel.Name:SetVal("Name", title[spellInfoData.ID])
 		spellInfoPanel.Count:SetVal("Count", common.FormatInt(spellInfoData.Count , "%d"))

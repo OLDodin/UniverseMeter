@@ -6,7 +6,6 @@
 		<Item href="Buttons/CloseBtn/CloseBtn.(WidgetButton).xdb#xpointer(/WidgetButton)" />
 		<Item href="Buttons/AllTimeBtn/Button.(WidgetButton).xdb#xpointer(/WidgetButton)" />
 		<Item href="Buttons/UpdateTimeLapseBtn/Button.(WidgetButton).xdb#xpointer(/WidgetButton)" />
-		<Item href="GlobalInfoPanel/GlobalInfoPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
 		<Item href="GlobalInfoHeaderPanel/GlobalInfoHeaderPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
 		<Item href="SpellPanel/SpellPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
 		<Item href="SpellHeaderPanel/SpellHeaderPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />

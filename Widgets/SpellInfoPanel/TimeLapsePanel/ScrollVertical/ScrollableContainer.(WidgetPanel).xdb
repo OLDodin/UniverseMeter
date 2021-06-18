@@ -2,9 +2,6 @@
 <WidgetScrollableContainer>
  <Name>ScrollableContainerV</Name>
 	<Priority>0</Priority>
-	<Children>
-		<Item href="ResizingCorner/ResizingCorner.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
-	</Children>
 	<BackLayer href="Textures/panel.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
   <Placement>
     <X>
