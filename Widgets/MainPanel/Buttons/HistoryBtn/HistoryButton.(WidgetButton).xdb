@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetButton>
+	<Name>HistoryButton</Name>
+	<IgnoreDblClick>true</IgnoreDblClick>
+	<Children>
+	</Children>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>110</HighPos>
+			<Size>22</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>14</Pos>
+			<Size>22</Size>
+		</Y>
+	</Placement>
+	<TransparentInput>false</TransparentInput>
+	<Variants>
+		<Item>
+			<LayerHighlight href="Textures/HistoryLight.(WidgetLayerSimpleTexture).xdb" />
+			<PushedOffset x="-1" y="1" />
+			<StateNormal>
+				<LayerMain href="Textures/History.(WidgetLayerSimpleTexture).xdb" />
+			</StateNormal>
+			<ReactionOnUp>true</ReactionOnUp>
+			<Reaction>OnHistoryPressed</Reaction>
+		</Item>
+	</Variants>
+</WidgetButton>

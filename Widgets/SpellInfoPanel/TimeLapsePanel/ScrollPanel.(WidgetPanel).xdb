@@ -5,17 +5,18 @@
 	<Children>
 		<Item href="ScrollHorizontal\ScrollableContainer.(WidgetPanel).xdb"/>
 		<Item href="ElementPanel.(WidgetPanel).xdb" />
+		<Item href="BigPanel.(WidgetPanel).xdb" />
 	</Children>
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Size>300</Size>
+			<Size>380</Size>
 			<Pos>15</Pos>
 		</X>
 		<Y>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Size>100</Size>
-			<Pos>35</Pos>
+			<Size>270</Size>
+			<Pos>55</Pos>
 		</Y>
 	</Placement>
 	<Visible>true</Visible>

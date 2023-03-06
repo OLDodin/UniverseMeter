@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <WidgetTextView>
-	<Name>DescCheckBoxText</Name>
+	<Name>HeaderCurrentText</Name>
 	<Priority>1</Priority>
   <Placement>
     <X>
-      <Align>WIDGET_ALIGN_LOW</Align>
-      <Pos>55</Pos>
-      <Size>200</Size>
+      <Align>WIDGET_ALIGN_BOTH</Align>
+      <Pos>0</Pos>
+      <Size>0</Size>
     </X>
     <Y>
       <Align>WIDGET_ALIGN_LOW</Align>
-      <Pos>157</Pos>
+      <Pos>2</Pos>
       <Size>30</Size>
     </Y>
   </Placement>
-	<FormatFileRef href="../TextTemp/Text.txt" />
+	<FormatFileRef href="Text.txt" />
 	<TextValues />
 	<BackLayer href="" />
 	<Visible>True</Visible>

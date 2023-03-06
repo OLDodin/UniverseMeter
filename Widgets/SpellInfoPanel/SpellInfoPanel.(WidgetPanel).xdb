@@ -16,17 +16,20 @@
 		<Item href="TimeLapsePanel/ScrollPanel.(WidgetPanel).xdb"/>
 		<Item href="TimeLapsePanel/ScrollVertical/ScrollableContainer.(WidgetPanel).xdb"/>
 		<Item href="TimeLapsePanel/TextViews/CurrTime.(WidgetTextView).xdb"/>
+		
+		<Item href="../MainPanel/FightDropDownPanel/FightDropDownPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
+		<Item href="../MainPanel/ModeDropDownPanel/ModeDropDownPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
 	</Children>
 	<BackLayer href="SpellInfoPanel.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Size>415</Size>
+			<Size>1150</Size>
 			<Pos>333</Pos>
 		</X>
 		<Y>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Size>751</Size>
+			<Size>480</Size>
 			<Pos>230</Pos>
 		</Y>
 	</Placement>

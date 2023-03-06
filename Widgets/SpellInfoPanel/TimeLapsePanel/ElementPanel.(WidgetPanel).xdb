@@ -5,16 +5,16 @@
 	<Children>
 		<Item href="DpsTemplateBtn/TimeTxt.(WidgetTextView).xdb" />
 		<Item href="DpsTemplateBtn/Button.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="DpsTemplateBtn/LinePanel.(WidgetPanel).xdb" />
 	</Children>
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Size>22</Size>
+			<Size>10</Size>
 			<Pos>0</Pos>
 		</X>
 		<Y>
-			<Align>WIDGET_ALIGN_LOW</Align>
-			<Size>100</Size>
+			<Align>WIDGET_ALIGN_BOTH</Align>
 			<Pos>0</Pos>
 		</Y>
 	</Placement>

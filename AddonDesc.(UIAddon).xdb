@@ -11,12 +11,22 @@
   <Name>UniverseMeter</Name>
   <ScriptFileRefs>
     <Item href="Scripts/LibDnD.lua"/>
+	<Item href="Scripts/FastLibDnD.lua"/>
+	<Item href="Scripts/LinkedList.lua"/>
+	<Item href="Scripts/AVL/avl_WStr.lua"/>
     <Item href="Scripts/AOClassLibrary.lua"/>
     <Item href="Scripts/AoUMeterDecl.lua"/>
 	<Item href="Scripts/AoUMeterUtil.lua"/>
-    <Item href="Scripts/AoUMeterData.lua"/>
+	<Item href="Scripts/TSpellData.lua"/>
+	<Item href="Scripts/TCombatant.lua"/>
+	<Item href="Scripts/TFight.lua"/>
+	<Item href="Scripts/TUMeter.lua"/>
     <Item href="Scripts/AoUMeterGUI.lua"/>
-    <Item href="Scripts/AoUMeterEvents.lua"/>
+	<Item href="Scripts/PlayerInfo/PlayerBase.lua"/>
+	<Item href="Scripts/PlayerInfo/PlayerBuffs.lua"/>
+	<Item href="Scripts/BuffCondition.lua"/>
+	<Item href="Scripts/PlayerInfoCache.lua"/>
+	<Item href="Scripts/AoUMeterEvents.lua"/>
     <Item href="Scripts/AoUMeterInit.lua"/>
   </ScriptFileRefs>
   <author>OLDodin</author>

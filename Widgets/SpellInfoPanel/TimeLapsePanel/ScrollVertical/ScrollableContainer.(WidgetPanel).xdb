@@ -6,13 +6,15 @@
   <Placement>
     <X>
       <Align>WIDGET_ALIGN_BOTH</Align>
-      <Pos>-5</Pos>
-      <HighPos>15</HighPos>
+      <Pos>0</Pos>
+      <HighPos>0</HighPos>
+	  <Size>0</Size>
     </X>
     <Y>
       <Align>WIDGET_ALIGN_BOTH</Align>
-      <Pos>215</Pos>
-      <HighPos>368</HighPos>
+      <Pos>0</Pos>
+      <HighPos>0</HighPos>
+	  <Size>0</Size>
     </Y>
   </Placement>
 

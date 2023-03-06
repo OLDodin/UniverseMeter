@@ -10,12 +10,13 @@
 		<Item href="FightDropDownPanel/FightDropDownPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
 		<Item href="ModeDropDownPanel/ModeDropDownPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
 		<Item href="Buttons/ConfigBtn/ConfigButton.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/HistoryBtn/HistoryButton.(WidgetButton).xdb#xpointer(/WidgetButton)" />
 	</Children>
 	<BackLayer href="AOHeader.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Size>294</Size>
+			<Size>330</Size>
 			<Pos>35</Pos>
 		</X>
 		<Y>

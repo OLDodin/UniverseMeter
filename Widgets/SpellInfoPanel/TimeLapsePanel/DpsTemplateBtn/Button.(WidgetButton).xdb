@@ -8,15 +8,24 @@
     <X>
       <Align>WIDGET_ALIGN_LOW</Align>
       <Pos>0</Pos>
-      <Size>20</Size>
+      <Size>10</Size>
     </X>
     <Y>
       <Align>WIDGET_ALIGN_HIGH</Align>
-      <HighPos>25</HighPos>
+      <HighPos>24</HighPos>
       <Size>74</Size>
     </Y>
   </Placement>
 	<Variants>
+		<Item>
+			<Reaction>DpsTimeLapsePressed</Reaction>
+		</Item>
+		<Item>
+			<Reaction>DpsTimeLapsePressed</Reaction>
+		</Item>
+		<Item>
+			<Reaction>DpsTimeLapsePressed</Reaction>
+		</Item>
 		<Item>
 			<Reaction>DpsTimeLapsePressed</Reaction>
 		</Item>

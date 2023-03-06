@@ -25,7 +25,7 @@
 				<LayerMain href="Textures/Settings.xdb#xpointer(/WidgetLayerTiledTexture)" />
 			</StateNormal>
 			<ReactionOnUp>true</ReactionOnUp>
-			<Reaction>OnConfigRaidChange</Reaction>
+			<Reaction>OnConfigPressed</Reaction>
 		</Item>
 	</Variants>
 </WidgetButton>

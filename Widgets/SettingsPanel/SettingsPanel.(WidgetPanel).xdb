@@ -12,22 +12,20 @@
 		<Item href="Buttons/HpsCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
 		<Item href="Buttons/IhpsCheckBox/CheckBox.(WidgetButton).xdb#xpointer(/WidgetButton)" />
 		<Item href="Buttons/IhpsCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
-		<Item href="Buttons/DescCheckBox/CheckBox.(WidgetButton).xdb#xpointer(/WidgetButton)" />
-		<Item href="Buttons/DescCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
 		<Item href="Buttons/SkipPetCheckBox/CheckBox.(WidgetButton).xdb#xpointer(/WidgetButton)" />
 		<Item href="Buttons/SkipPetCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
 		<Item href="Buttons/SkipYourselfCheckBox/CheckBox.(WidgetButton).xdb#xpointer(/WidgetButton)" />
 		<Item href="Buttons/SkipYourselfCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
 		<Item href="Buttons/StartHidedCheckBox/CheckBox.(WidgetButton).xdb#xpointer(/WidgetButton)" />
 		<Item href="Buttons/StartHidedCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="Buttons/TotalTimelapseCheckBox/CheckBox.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/TotalTimelapseCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
 		
 		<Item href="Buttons/SaveBtn/Button.(WidgetButton).xdb#xpointer(/WidgetButton)" />
 		<Item href="Buttons/HeaderText/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />		
 		
 		<Item href="Buttons/CombatantCnt.(WidgetEditLine).xdb" />
 		<Item href="Buttons/CombatantCnt_text.(WidgetTextView).xdb" />
-		<Item href="Buttons/TimeLapsIntervalEdit.(WidgetEditLine).xdb" />
-		<Item href="Buttons/TimeLapsIntervalEdit_text.(WidgetTextView).xdb" />
 	</Children>
 	<BackLayer href="SettingsPanel.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
 	<Placement>

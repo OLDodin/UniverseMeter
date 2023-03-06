@@ -7,6 +7,8 @@
 		<Item href="MainPanel/MainPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
 		<Item href="SpellInfoPanel/SpellInfoPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
 		<Item href="SettingsPanel/SettingsPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
+		<Item href="HistoryPanel/HistoryPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
+		<Item href="Timer.xdb" />
 	</Children>
 	<BackLayer href="" />
 	<FrontLayer href="" />

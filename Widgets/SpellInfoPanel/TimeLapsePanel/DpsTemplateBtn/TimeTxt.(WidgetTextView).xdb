@@ -6,22 +6,23 @@
 		<X>
 			<Align>WIDGET_ALIGN_LOW</Align>
 			<Pos>0</Pos>
-			<Size>22</Size>
+			<Size>36</Size>
 		</X>
 		<Y>
 			<Align>WIDGET_ALIGN_HIGH</Align>
-			<HighPos>23</HighPos>
+			<HighPos>5</HighPos>
 			<Size>18</Size>
 		</Y>
 	</Placement>
 	<TransparentInput>true</TransparentInput>
 	<Visible>true</Visible>
-	<Enabled>true</Enabled>
 	<FormatFileRef href="TimeTxt.txt" />
 	<TextValues />
 	<TextStyle>
 		<Align>ALIGNY_BOTTOM</Align>
-		<showClippedLine>true</showClippedLine>
-		<showClippedSymbol>true</showClippedSymbol>
+		<multiline>false</multiline>
+		<wrapText>false</wrapText>
+		<showClippedSymbol>false</showClippedSymbol>
+		<showClippedLine>false</showClippedLine>
 	</TextStyle>
 </WidgetTextView>

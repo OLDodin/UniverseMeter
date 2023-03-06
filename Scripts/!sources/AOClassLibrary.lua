@@ -1,10 +1,4 @@
 ---------------------------------------------------------------------------------------------------------------------------
--- AOClassLibrary - Library for working with Widgets in Addons for "Allods Online" (See DarkDPSMeter addon for example)  --
---         Originally created by DarkMaster. Currently maintained by UI9 community: http://ui9.ru/forum/develop          --
---                      Licensed under WTFPL v2.0 public license: http://sam.zoy.org/wtfpl/COPYING                       --
----------------------------------------------------------------------------------------------------------------------------
-
----------------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------------- HELPER FUNCTIONS -----------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------
 function GetTableSize( t )
@@ -18,38 +12,20 @@ function GetTableSize( t )
 	return count
 end
 --------------------------------------------------------------------------------
-function CloneTable( t )
-	if type( t ) ~= "table" then return t end
-	local c = {}
-	for i, v in pairs( t ) do c[ i ] = CloneTable( v ) end
-	return c
-end
+
 --------------------------------------------------------------------------------
 function LogInfo( ... )
 	local arg = {...}
-	local timestamp = ""
-	if mission.GetWorldTimeHMS then
-		if mission.GetLocalTimeHMS then -- AO 2.0.01+
-			local t = mission.GetLocalTimeHMS()
-			local d = mission.GetLocalDateYMD()
-			timestamp = string.format( "%d-%02d-%02d %02d:%02d:%02d.%03d: ", d.y,d.m,d.d,t.h,t.m,t.s,t.ms )
-		else -- AO 1.1.03-2.0.00
-			local t = mission.GetWorldTimeHMS()
-			local d = mission.GetWorldDateYMD()
-			timestamp = string.format( "%d-%02d-%02d %02d:%02d:%02d: ", d.y,d.m,d.d,t.h,t.m,t.s )
-		end
-	end
 	local argNorm = {}
 
 	for i, value in pairs(arg) do
-	--for i = 1, arg.n do
 		if common.IsWString( arg[ i ] ) then
 			argNorm[ i ] = arg[ i ]
 		else
 			argNorm[ i ] = tostring( arg[ i ] )
 		end
 	end
-	common.LogInfo( common.GetAddonName(), timestamp, unpack( argNorm ) )
+	common.LogInfo( common.GetAddonName(), unpack( argNorm ) )
 end
 --------------------------------------------------------------------------------
 function LogTable( t, tabstep )
@@ -180,10 +156,9 @@ function TWidget:DragNDrop( bDraggable, bUseCfg, bLockedToScreenArea, Padding )
 	if self.Widget then
 		self.bDraggable = bDraggable
 		if bUseCfg ~= nil then
-			--DnD:Init( ID, self.Widget, wtMovable, bUseCfg, bLockedToScreenArea, Padding )
-			DnD:Init( self.Widget, self.Widget, bUseCfg, bLockedToScreenArea, Padding  )
+			DnD.Init( self.Widget, self.Widget, bUseCfg, bLockedToScreenArea, Padding  )
 		else
-			DnD:Enable( self.Widget, bDraggable )
+			DnD.Enable( self.Widget, bDraggable )
 		end
 	end
 end
@@ -261,6 +236,18 @@ function TWidget:Hide()
 	end
 end
 --------------------------------------------------------------------------------
+function TWidget:DnDShow()
+	if self.Widget then
+		DnD.ShowWdg(self.Widget)
+	end
+end
+--------------------------------------------------------------------------------
+function TWidget:DnDHide()
+	if self.Widget then
+		DnD.HideWdg(self.Widget)
+	end
+end
+--------------------------------------------------------------------------------
 function TWidget:IsVisible()
 	if self.Widget then
 		return self.Widget:IsVisible()
@@ -276,6 +263,16 @@ function TWidget:HideAllChild()
 		end
 	end
 end
+
+function TWidget:DestroyAllChild()
+	if self.Widget then
+		local wtChildren = self.Widget:GetNamedChildren()
+		for _, wtChild in pairs( wtChildren ) do
+			wtChild:DestroyWidget()
+		end
+	end
+end
+
 --------------------------------------------------------------------------------
 function TWidget:ShowAllChild()
 	if self.Widget then

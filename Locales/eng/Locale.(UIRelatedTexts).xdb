@@ -29,6 +29,10 @@
       <name>HPS</name>
       <resource href="HPS.txt" />
     </Item>
+	 <Item>
+      <name>IHPS</name>
+      <resource href="IHPS.txt" />
+    </Item>
     <Item>
       <name>Max</name>
       <resource href="Max.txt" />
@@ -236,6 +240,154 @@
 	<Item>
       <name>CPS</name>
       <resource href="CPS.txt" />
+    </Item>
+	<Item>
+      <name>Fall</name>
+      <resource href="Fall.txt" />
+    </Item>
+	<Item>
+      <name>HeaderCurrent</name>
+      <resource href="HeaderCurrent.txt" />
+    </Item>
+	<Item>
+      <name>HeaderTotal</name>
+      <resource href="HeaderTotal.txt" />
+    </Item>
+	<Item>
+      <name>History</name>
+      <resource href="History.txt" />
+    </Item>
+	<Item>
+      <name>TotalTimelapseCheckBoxText</name>
+      <resource href="TotalTimelapseCheckBoxText.txt" />
+    </Item>
+	<Item>
+      <name>HpsBuff1</name>
+      <resource href="HpsBuff1.txt" />
+    </Item>
+	<Item>
+      <name>HpsBuff2</name>
+      <resource href="HpsBuff2.txt" />
+    </Item>
+	<Item>
+      <name>HpsBuff3</name>
+      <resource href="HpsBuff3.txt" />
+    </Item>
+	<Item>
+      <name>IHpsBuff1</name>
+      <resource href="IHpsBuff1.txt" />
+    </Item>
+	<Item>
+      <name>DpsBuff1</name>
+      <resource href="DpsBuff1.txt" />
+    </Item>
+	<Item>
+      <name>DpsHpsBuff1</name>
+      <resource href="DpsHpsBuff1.txt" />
+    </Item>
+	<Item>
+      <name>DpsHpsBuff2</name>
+      <resource href="DpsHpsBuff2.txt" />
+    </Item>
+	<Item>
+      <name>DpsHpsBuff3</name>
+      <resource href="DpsHpsBuff3.txt" />
+    </Item>
+	<Item>
+      <name>DefBuff1</name>
+      <resource href="DefBuff1.txt" />
+    </Item>
+	<Item>
+      <name>DefBuff2</name>
+      <resource href="DefBuff2.txt" />
+    </Item>
+	<Item>
+      <name>DefBuff3</name>
+      <resource href="DefBuff3.txt" />
+    </Item>
+	<Item>
+      <name>DefBuff4</name>
+      <resource href="DefBuff4.txt" />
+    </Item>
+	<Item>
+      <name>DefBuff5</name>
+      <resource href="DefBuff5.txt" />
+    </Item>
+	<Item>
+      <name>DefBuff6</name>
+      <resource href="DefBuff6.txt" />
+    </Item>
+	<Item>
+      <name>DefBuff7</name>
+      <resource href="DefBuff7.txt" />
+    </Item>
+	<Item>
+      <name>DefBuff8</name>
+      <resource href="DefBuff8.txt" />
+    </Item>
+	<Item>
+      <name>DefBuff9</name>
+      <resource href="DefBuff9.txt" />
+    </Item>
+	<Item>
+      <name>DefBuff10</name>
+      <resource href="DefBuff10.txt" />
+    </Item>
+	<Item>
+      <name>DefBuff11</name>
+      <resource href="DefBuff11.txt" />
+    </Item>
+	<Item>
+      <name>DefBuff12</name>
+      <resource href="DefBuff12.txt" />
+    </Item>
+	<Item>
+      <name>DefBuff13</name>
+      <resource href="DefBuff13.txt" />
+    </Item>
+	<Item>
+      <name>DefBuff14</name>
+      <resource href="DefBuff14.txt" />
+    </Item>
+	<Item>
+      <name>DefBuff15</name>
+      <resource href="DefBuff15.txt" />
+    </Item>
+	<Item>
+      <name>DefBuff16</name>
+      <resource href="DefBuff16.txt" />
+    </Item>
+	<Item>
+      <name>DefBuff17</name>
+      <resource href="DefBuff17.txt" />
+    </Item>
+	<Item>
+      <name>DefBuff18</name>
+      <resource href="DefBuff18.txt" />
+    </Item>
+	<Item>
+      <name>DefBuff19</name>
+      <resource href="DefBuff19.txt" />
+    </Item>
+	<Item>
+      <name>DefBuff20</name>
+      <resource href="DefBuff20.txt" />
+    </Item>
+	<Item>
+      <name>DefBuff21</name>
+      <resource href="DefBuff21.txt" />
+    </Item>
+	<Item>
+      <name>DefBuff22</name>
+      <resource href="DefBuff22.txt" />
+    </Item>
+	<Item>
+      <name>DefBuff23</name>
+      <resource href="DefBuff23.txt" />
+    </Item>
+	<Item>
+      <name>DefBuff24</name>
+      <resource href="DefBuff24.txt" />
     </Item>
   </items>
 </UIRelatedTexts>

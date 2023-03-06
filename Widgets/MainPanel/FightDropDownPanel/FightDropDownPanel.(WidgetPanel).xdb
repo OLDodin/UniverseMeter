@@ -9,8 +9,8 @@
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Size>80</Size>
-			<Pos>85</Pos>
+			<Size>90</Size>
+			<Pos>95</Pos>
 		</X>
 		<Y>
 			<Align>WIDGET_ALIGN_LOW</Align>

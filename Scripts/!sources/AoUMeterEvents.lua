@@ -1,56 +1,5 @@
---------------------------------------------------------------------------------
--- File: AoUMeterEvents.lua
--- Desc: All events managed by AoUMeter
---------------------------------------------------------------------------------
-
---==============================================================================
---=========================== EVENTS - Addon manager ===========================
---==============================================================================
-
---------------------------------------------------------------------------------
-onGenEvent["SCRIPT_ADDON_INFO_REQUEST"] = function(params)
-	if params.target == common.GetAddonName() then
-		userMods.SendEvent("SCRIPT_ADDON_INFO_RESPONSE", {
-				sender = params.target,
-				desc = userMods.FromWString(GetTextLocalized("Description")),
-				showDNDButton = true,
-				showHideButton = true,
-				showSettingsButton = true,
-			})
-	end
-end
---------------------------------------------------------------------------------
-onGenEvent["SCRIPT_ADDON_MEM_REQUEST"] = function(params)
-	if params.target == common.GetAddonName() then
-		userMods.SendEvent("SCRIPT_ADDON_MEM_RESPONSE", { sender = params.target, memUsage = gcinfo() })
-	end
-end
---------------------------------------------------------------------------------
-onMyEvent["SCRIPT_SHOW_SETTINGS"] = function(params)
-	if not DPSMeterGUI.MainPanel:IsVisible() then
-		onReaction["ShowHideBtnReaction"]()
-	end
-end
---------------------------------------------------------------------------------
-onMyEvent["SCRIPT_TOGGLE_VISIBILITY"] = function(params)
-	if params.target == common.GetAddonName() then
-		if params.state then
-			DPSMeterGUI.MainPanel:Show()
-			if not AoPanelDetected then
-				DPSMeterGUI.ShowHideBtn:Show()
-			end
-		else
-			DPSMeterGUI.MainPanel:Hide()
-			DPSMeterGUI.ShowHideBtn:Hide()
-		end
-	end
-end
---------------------------------------------------------------------------------
-onMyEvent["SCRIPT_TOGGLE_DND"] = function(params)
-	if params.target == common.GetAddonName() then
-		DPSMeterGUI.ShowHideBtn:DragNDrop(params.state)
-	end
-end
+local m_mustUpdateGUI = true
+local m_buffListener = {}
 
 --==============================================================================
 --================== AoPanelMod Compatibility ==================================
@@ -64,7 +13,7 @@ onGenEvent["AOPANEL_START"] = function(params)
 	local params = { header =  SetVal , ptype =  "button" , size = 30 } 
 	userMods.SendEvent("AOPANEL_SEND_ADDON", { name = "UniverseMeter" , sysName = "UniverseMeter" , param = params } )
 	AoPanelDetected = true
-	if DPSMeterGUI then DPSMeterGUI.ShowHideBtn:Hide() end
+	if DPSMeterGUI then DPSMeterGUI.ShowHideBtn:DnDHide() end
 end
 
 onMyEvent["AOPANEL_BUTTON_LEFT_CLICK"] = function(params)
@@ -132,18 +81,35 @@ end
 --------------------------------------------------------------------------------
 onReaction["ResetBtnReaction"] = function(reaction)
 	DPSMeterGUI:Reset(true)
+	m_mustUpdateGUI = true
 end
 
-onReaction["OnConfigRaidChange"] = function(reaction)
+onReaction["OnConfigPressed"] = function(reaction)
 	if DPSMeterGUI.SettingsPanel:IsVisible() then
-		DPSMeterGUI.SettingsPanel:Hide()
+		DPSMeterGUI.SettingsPanel:DnDHide()
 	else
-		DPSMeterGUI.SettingsPanel:Show()
+		DPSMeterGUI.SettingsPanel:DnDShow()
 	end
 end
 
+onReaction["OnHistoryPressed"] = function(reaction)
+	collectgarbage()
+	LogMemoryUsage()
+	
+	if DPSMeterGUI.HistoryPanel:IsVisible() then
+		DPSMeterGUI.HistoryPanel:DnDHide()
+	else
+		DPSMeterGUI:UpdateHistory()
+		DPSMeterGUI.HistoryPanel:DnDShow()
+	end
+end
+
+onReaction["CloseHistoryPanelBtnReaction"] = function(reaction)
+	DPSMeterGUI.HistoryPanel:DnDHide()
+end
+
 onReaction["CloseSettingsPanelBtnReaction"] = function(reaction)
-	DPSMeterGUI.SettingsPanel:Hide()
+	DPSMeterGUI.SettingsPanel:DnDHide()
 end
 
 onReaction["DefCheckBoxPressed"] = function(reaction)
@@ -156,36 +122,32 @@ onReaction["SavePressed"] = function(reaction)
 	savedData.dps = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.DpsCheckBox)
 	savedData.hps = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.HpsCheckBox)
 	savedData.ihps = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.IhpsCheckBox)
-	savedData.collectDescription = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.DescCheckBox)
 	savedData.skipDmgAndHpsOnPet = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.SkipPetCheckBox)
 	savedData.skipDmgYourselfIn = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.SkipYourselfCheckBox)
 	savedData.startHided = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.StartHidedCheckBox)
+	savedData.сollectTotalTimelapse = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.TotalTimelapseCheckBox)
 	
 	local parsedCombantants = common.GetIntFromWString(DPSMeterGUI.SettingsPanel.MaxCombatantTextEdit:GetText())
 	if not parsedCombantants then
 		parsedCombantants = Settings.MaxCombatants 
 	end
-	local parsedTimeLapsInterval = common.GetIntFromWString(DPSMeterGUI.SettingsPanel.TimeLapsIntervalEdit:GetText())
-	if not parsedTimeLapsInterval then
-		parsedTimeLapsInterval = Settings.TimeLapsInterval 
-	end
 	
-	savedData.timeLapsInterval = parsedTimeLapsInterval
 	savedData.maxCombatants = parsedCombantants
 	
 	userMods.SetGlobalConfigSection( "UniverseMeterSettings", savedData )
 	common.StateUnloadManagedAddon("UserAddon/UniverseMeter")
 	common.StateLoadManagedAddon("UserAddon/UniverseMeter")
 	
-	DPSMeterGUI.SettingsPanel:Hide()
+	DPSMeterGUI.SettingsPanel:DnDHide()
 end
 
 --------------------------------------------------------------------------------
 -- occurred when the player press the close button in the main panel
 --------------------------------------------------------------------------------
 onReaction["CloseMainPanelBtnReaction"] = function(reaction)
-	DPSMeterGUI.MainPanel:Hide()
-	DPSMeterGUI.DetailsPanel:Hide()
+	DPSMeterGUI.MainPanel:DnDHide()
+	DPSMeterGUI.DetailsPanel:DnDHide()
+	DPSMeterGUI:DetailsClosed()
 end
 --------------------------------------------------------------------------------
 -- occurred when the player click a player in the player list
@@ -193,14 +155,9 @@ end
 onReaction["PlayerInfoButtonDown"] = function(reaction) 
 	local playerIndex = GetPlayerPanelIndex(reaction)
 	if playerIndex then
-		local activeFight = DPSMeterGUI:GetActiveFight()
-		local playerInfo = activeFight:GetCombatantInfoByIndex(playerIndex)
-		if playerInfo then
-			DPSMeterGUI:SetSelectedCombatant(playerInfo)
-			DPSMeterGUI.DetailsPanel:Show()
-			DPSMeterGUI:UpdateValues()
-			DPSMeterGUI:CreateTimeLapse()
-		end
+		DPSMeterGUI:PrepareShowDetails(playerIndex)
+		DPSMeterGUI.DetailsPanel:DnDShow()
+		DPSMeterGUI:UpdateValues()
 	end
 end
 
@@ -213,28 +170,51 @@ onReaction["UpdateTimeLapsePressed"] = function(reaction)
 end
 
 onReaction["DpsTimeLapsePressed"] = function(reaction)
-	local wdgName = reaction.widget:GetParent():GetName()
+	local wdgName = reaction.widget:GetName()
 	wdgName = string.gsub(wdgName, "DpsBtn", "")
 	DPSMeterGUI:SwitchToTimeLapseElement(tonumber(wdgName))
+end
+
+onReaction["historyElementClicked"] = function(reaction)
+	local wdgName = reaction.widget:GetName()
+	if string.find(wdgName, "HistoryCurrentBtn") then
+		local wdgNum = string.gsub(wdgName, "HistoryCurrentBtn", "")
+		DPSMeterGUI:HistoryCurrentSelected(tonumber(wdgNum))
+	elseif string.find(wdgName, "HistoryTotalBtn") then
+		local wdgNum = string.gsub(wdgName, "HistoryTotalBtn", "")
+		DPSMeterGUI:HistoryTotalSelected(tonumber(wdgNum))
+	end
+	DPSMeterGUI:UpdateValues()
 end
 
 --------------------------------------------------------------------------------
 -- occurred when the player press the close button of the spell panel
 --------------------------------------------------------------------------------
 onReaction["CloseSpellInfoPanelBtnReaction"] = function(reaction)
-	DPSMeterGUI.DetailsPanel:Hide()
+	DPSMeterGUI.DetailsPanel:DnDHide()
+	DPSMeterGUI:DetailsClosed()
 end
 --------------------------------------------------------------------------------
 -- occurred when the player click on the fight dropdown button in the main panel
 --------------------------------------------------------------------------------
 onReaction["GetFightBtnReaction"] = function(reaction)
-	DPSMeterGUI:SwapFight()
+	local wtParent = reaction.widget:GetParent()
+	if wtParent:IsEqual(DPSMeterGUI.MainPanel.FightBtn.Widget) then
+		DPSMeterGUI:SwapFight()
+	elseif wtParent:IsEqual(DPSMeterGUI.DetailsPanel.FightBtn.Widget) then
+		DPSMeterGUI:SwapFightDetailsPanel()
+	end	
 end
 --------------------------------------------------------------------------------
 -- occurred when the player click on the mode dropdown button in the main panel
 --------------------------------------------------------------------------------
 onReaction["GetModeBtnReaction"] = function(reaction)
-	DPSMeterGUI:SwapMode()
+	local wtParent = reaction.widget:GetParent()
+	if wtParent:IsEqual(DPSMeterGUI.MainPanel.ModeBtn.Widget) then
+		DPSMeterGUI:SwapMode()
+	elseif wtParent:IsEqual(DPSMeterGUI.DetailsPanel.ModeBtn.Widget) then
+		DPSMeterGUI:SwapDetailsMode()
+	end	
 end
 --------------------------------------------------------------------------------
 -- occurred when the player click on the "D" button in order to show or hide the main panel
@@ -242,10 +222,11 @@ end
 onReaction["ShowHideBtnReaction"] = function(reaction)
 	if DnD:IsDragging() then return end
 	if DPSMeterGUI.MainPanel:IsVisible() then
-		DPSMeterGUI.MainPanel:Hide()
-		DPSMeterGUI.DetailsPanel:Hide()
+		DPSMeterGUI.MainPanel:DnDHide()
+		DPSMeterGUI.DetailsPanel:DnDHide()
+		DPSMeterGUI:DetailsClosed()
 	else
-		DPSMeterGUI.MainPanel:Show()
+		DPSMeterGUI.MainPanel:DnDShow()
 		DPSMeterGUI:UpdateValues()
 	end
 end
@@ -253,16 +234,32 @@ end
 --==============================================================================
 --=========================== EVENTS ===========================================
 --==============================================================================
-local mustRegenList = false
-local timerToRefresh = 0
-local timerToResetCache = 0
+
+
+onMyEvent["EVENT_UNITS_CHANGED"] = function(aParams)
+	for _, objID in pairs(aParams.despawned) do
+		if objID then
+			UnsubscribeListeners(objID)
+		end
+	end
+	FabricDestroyUnused()
+	for _, objID in pairs(aParams.spawned) do
+		FabricMakePlayerInfo(objID, m_buffListener)
+	end
+end
+
+onMyEvent["EVENT_OBJECT_BUFFS_ELEMENT_CHANGED"] = function(aParams)
+	BuffsChanged(aParams)
+end
+
 --------------------------------------------------------------------------------
 -- Event: Group & raid / Appeared & Disappeared
 --------------------------------------------------------------------------------
 onMyEvent["EVENT_GROUP_APPEARED"] = function()
-	DPSMeterGUI.DPSMeter:CopyFightFromCurrenToPrev()
 	DPSMeterGUI:Reset()
-	metricReset()
+	ReRegisterEvents()
+	
+	m_mustUpdateGUI = true
 end
 
 onMyEvent["EVENT_RAID_APPEARED"] = onMyEvent["EVENT_GROUP_APPEARED"]
@@ -273,123 +270,93 @@ onMyEvent["EVENT_GROUP_DISAPPEARED"] = onMyEvent["EVENT_GROUP_APPEARED"]
 --------------------------------------------------------------------------------
 onMyEvent["EVENT_GROUP_MEMBER_REMOVED"] = function(params)
 	DPSMeterGUI.DPSMeter:RemoveCombatant(params)
-	if DPSMeterGUI.SelectedCombatantInfo and IsThisStringValue(DPSMeterGUI.SelectedCombatantInfo.name, params.name) then
-		DPSMeterGUI:SetAvatarSelectedCombatant()
-	end
 		
-	DPSMeterGUI:UpdateValues()
-	metricReset()
+	ReRegisterEvents()
+	
+	m_mustUpdateGUI = true
 end
 
 onMyEvent["EVENT_RAID_MEMBER_REMOVED"] = onMyEvent["EVENT_GROUP_MEMBER_REMOVED"]
 --------------------------------------------------------------------------------
 -- Event: Update list
 --------------------------------------------------------------------------------
-onMyEvent["EVENT_GROUP_CHANGED"] = function()
-	mustRegenList = true -- set the order to regen combatant list on next EVENT_SECOND_TIMER (this avoid too much updates in the same second => less lags)
+onMyEvent["EVENT_GROUP_MEMBER_ADDED"] = function()
+	DPSMeterGUI.DPSMeter:RegenCombatantList()
+	ReRegisterEvents()
+	
+	m_mustUpdateGUI = true
 end
 
-onMyEvent["EVENT_RAID_CHANGED"] = onMyEvent["EVENT_GROUP_CHANGED"]
-onMyEvent["EVENT_RAID_MEMBER_ADDED"] = onMyEvent["EVENT_GROUP_CHANGED"]
-onMyEvent["EVENT_GROUP_MEMBER_ADDED"] = onMyEvent["EVENT_GROUP_CHANGED"]
-onMyEvent["EVENT_GROUP_MEMBER_CHANGED"] = onMyEvent["EVENT_GROUP_CHANGED"]
-onMyEvent["EVENT_RAID_MEMBER_CHANGED"] = onMyEvent["EVENT_GROUP_CHANGED"]
+onMyEvent["EVENT_RAID_MEMBER_ADDED"] = onMyEvent["EVENT_GROUP_MEMBER_ADDED"]
+onMyEvent["EVENT_GROUP_MEMBER_CHANGED"] = onMyEvent["EVENT_GROUP_MEMBER_ADDED"]
+onMyEvent["EVENT_RAID_MEMBER_CHANGED"] = onMyEvent["EVENT_GROUP_MEMBER_ADDED"]
 
 --------------------------------------------------------------------------------
 -- Event: EVENT_SECOND_TIMER
 --------------------------------------------------------------------------------
 onMyEvent["EVENT_SECOND_TIMER"] = function(params)
-	if timerToRefresh == 0 then
-		if mustRegenList then
-			DPSMeterGUI.DPSMeter:RegenCombatantList()
-			metricReset()
-		else
-			DPSMeterGUI.DPSMeter:UpdateCombatantPos()
-		end
-	end
-
+	OnEventSecondZatichka()
+	UpdateFabric()
+	
 	DPSMeterGUI.DPSMeter:SecondTick()
+	DPSMeterGUI.DPSMeter:UpdateCombatantPos()
+
 	
 	if DPSMeterGUI.DPSMeter.bCollectData then
-		DPSMeterGUI.DPSMeter:UpdateFightsTime()
 		if DPSMeterGUI.DPSMeter:ShouldCollectData() then
 			DPSMeterGUI.DPSMeter:ResetOffBattleTime()
 		else
 			local offBattleTime = DPSMeterGUI.DPSMeter:UpdateOffBattleTime()
 			local maxOffBattleTime = Settings.MaxOffBattleTime
-			if DPSMeterGUI.DetailsPanel:IsVisible() then 
-				maxOffBattleTime = maxOffBattleTime * 2
-			end
 			if offBattleTime > maxOffBattleTime then
 				DPSMeterGUI.DPSMeter:Stop()
 			end
 		end
-		
 		DPSMeterGUI:UpdateValues()
-	elseif mustRegenList then
+	elseif m_mustUpdateGUI then
 		DPSMeterGUI:UpdateValues()
 	end
-
-	if mustRegenList and timerToRefresh == 0 then
-		mustRegenList = false
-	end
-
-	timerToRefresh = timerToRefresh < 3 and timerToRefresh + 1 or 0 -- so that the regen is done only once per 3 seconds
 	
-	timerToResetCache = timerToResetCache + 1
-	if timerToResetCache > 60 then --раз в 1минуту сбрасываем кеш, чтобы сильно не разрастался
-		ResetCache()
-		timerToResetCache = 0
+	m_mustUpdateGUI = false
+end
+
+function FastUpdate()
+	if DPSMeterGUI.DPSMeter.bCollectData and DPSMeterGUI:GetActiveFight():GetCombatantCount() <= Settings.HeavyMode_MaxCombatant then
+		DPSMeterGUI.DPSMeter:FastTick()
+		DPSMeterGUI:UpdateValues()
 	end
 end
 --------------------------------------------------------------------------------
 -- Event: EVENT_UNIT_DAMAGE_RECEIVED
 --------------------------------------------------------------------------------
-function RetrieveDDEvent(params)
-	if not params then return end
-	if params.isFall then return end
+function DpsEventReceived(aParams)
 	if not Settings.ModeDPS then return end
-	local collectedDps
-	
-	if Settings.ModeDPS then
-		params.DDOut = true
-		collectedDps = DPSMeterGUI.DPSMeter:CollectDamageDealedData(params)
-	end
-	
-	if collectedDps
-		and DPSMeterGUI:GetActiveFight():GetCombatantCount() <= Settings.HeavyMode_MaxCombatant then
-		DPSMeterGUI:UpdateValues()
-	end
+
+	DPSMeterGUI.DPSMeter:CollectDamageDealedData(aParams)
 end
 
-function RetrieveDDEventIN(params)
-	if not params then return end
+function DefEventReceived(aParams)
 	if not Settings.ModeDEF then return end
-	--if params.isFall then return end
-	local collectedDef
 
-	if Settings.ModeDEF then
-		params.DDIn = true
-		collectedDef = DPSMeterGUI.DPSMeter:CollectDamageReceivedData(params)
-		DPSMeterGUI.DPSMeter:AddLastSecondData(params)
-	end
-	
-	
+	DPSMeterGUI.DPSMeter:CollectDamageReceivedData(aParams)
 end
 --------------------------------------------------------------------------------
 -- Event: EVENT_HEALING_RECEIVED
 --------------------------------------------------------------------------------
-function RetrieveHealEvent(params)
-	if not params then return end
+function HpsEventReceived(aParams)
 	if not Settings.ModeHPS then return end
-	DPSMeterGUI.DPSMeter:CollectHealData(params)
+	DPSMeterGUI.DPSMeter:CollectHealData(aParams)
 end 
 
-function RetrieveHealEventIN(params)
-	if not params then return end
+function IHpsEventReceived(aParams)
 	if not Settings.ModeIHPS then return end
-	DPSMeterGUI.DPSMeter:CollectHealDataIN(params)
+	DPSMeterGUI.DPSMeter:CollectHealDataIN(aParams)
 end 
+
+function ReloadPet(aParams)
+	ReRegisterEvents()
+end
+
 --------------------------------------------------------------------------------
 -- Event: EVENT_AVATAR_CREATED
 --------------------------------------------------------------------------------
@@ -398,14 +365,115 @@ onGenEvent["EVENT_AVATAR_CREATED"] = function(params)
 end
 
 
+
+
+
+
+local m_paramsListForDps = {}
+local m_paramsListForDef = {}
+local m_paramsListForHps = {}
+local m_paramsListForIHps = {}
+local m_paramsListForPets = {}
+local m_eventRegistred = false
+
+function ReRegisterEvents()
+	if m_eventRegistred then
+		common.UnRegisterEvent("EVENT_HEALING_RECEIVED")
+		common.UnRegisterEvent("EVENT_UNIT_DAMAGE_RECEIVED")
+		common.UnRegisterEvent("EVENT_UNIT_FOLLOWERS_LIST_CHANGED")
+	end
+
+	local unitList = GetPartyMembers()
+	BuildEventParamsForDef(unitList)
+	BuildEventParamsForIHps(unitList)
+	BuildEventParamsForPetChanged(unitList)
+	--наймы на островах одновременно члены группы и петы
+	local unitListWithPets = GetListWithPets(unitList)
+	BuildEventParamsForDps(unitListWithPets)
+	BuildEventParamsForHps(unitListWithPets)
+
+	RegisterEventHandlersNew("EVENT_HEALING_RECEIVED", HpsEventReceived, m_paramsListForHps)
+	RegisterEventHandlersNew("EVENT_HEALING_RECEIVED", IHpsEventReceived, m_paramsListForIHps)
+	RegisterEventHandlersNew("EVENT_UNIT_DAMAGE_RECEIVED", DpsEventReceived, m_paramsListForDps)
+	RegisterEventHandlersNew("EVENT_UNIT_DAMAGE_RECEIVED", DefEventReceived , m_paramsListForDef)
+	RegisterEventHandlersNew("EVENT_UNIT_FOLLOWERS_LIST_CHANGED", ReloadPet, m_paramsListForPets)
+	
+	m_eventRegistred = true
+end
+
+function GetListWithPets(anUnitList)
+	local unitListWithPets = {}
+	for _, member in pairs(anUnitList) do
+		if member.id then
+			unitListWithPets[member.id] = true
+			local followers = unit.GetFollowers(member.id)
+			if followers then
+				for _, followerID in pairs(followers) do
+					unitListWithPets[followerID] = true
+				end
+			end
+		end
+	end
+	return unitListWithPets
+end
+
+function BuildEventParamsForDps(anUnitList)
+	m_paramsListForDps = {}
+	for unitID, _ in pairs(anUnitList) do	
+		table.insert(m_paramsListForDps, {source = unitID})
+	end
+end
+
+function BuildEventParamsForHps(anUnitList)
+	m_paramsListForHps = {}
+	for unitID, _ in pairs(anUnitList) do	
+		table.insert(m_paramsListForHps, {healerId = unitID})
+	end
+end
+
+function BuildEventParamsForDef(anUnitList)
+	m_paramsListForDef = {}
+	for _, member in pairs(anUnitList) do
+		if member.id then
+			table.insert(m_paramsListForDef, {target = member.id})
+		end
+	end
+end
+
+function BuildEventParamsForIHps(anUnitList)
+	m_paramsListForIHps = {}
+	for _, member in pairs(anUnitList) do
+		if member.id then
+			table.insert(m_paramsListForIHps, {unitId = member.id})
+		end
+	end
+end
+
+function BuildEventParamsForPetChanged(anUnitList)
+	m_paramsListForPets = {}
+	for _, member in pairs(anUnitList) do
+		if member.id then
+			table.insert(m_paramsListForPets, {id = member.id})
+		end
+	end
+end
+
+function RegisterEventHandlersNew(anEvent, aHandler, aParamList)
+	if aParamList then 
+		for _, params in ipairs(aParamList) do 
+			common.RegisterEventHandler(aHandler, anEvent, params)
+		end
+	else 
+		common.RegisterEventHandler(aHandler, anEvent)
+	end
+end
+
+
 function GlobalReset()
-	-- Since AO 2.0.03, localization must be applied here
 	localization = GetGameLocalization()
 	if not common.GetAddonRelatedTextGroup(localization) then
 		localization = "eng"
 	end
-
-	onGenEvent["SCRIPT_ADDON_INFO_REQUEST"]({ target = common.GetAddonName() })
 	
 	local savedData = userMods.GetGlobalConfigSection("UniverseMeterSettings")
 	if savedData then
@@ -413,32 +481,30 @@ function GlobalReset()
 		Settings.ModeHPS  = savedData.hps
 		Settings.ModeDEF  = savedData.def
 		Settings.ModeIHPS = savedData.ihps
-		Settings.CollectDescription = savedData.collectDescription
 		Settings.SkipDmgAndHpsOnPet = savedData.skipDmgAndHpsOnPet
 		Settings.SkipDmgYourselfIn = savedData.skipDmgYourselfIn
 		Settings.StartHided = savedData.startHided
+		Settings.CollectTotalTimelapse = savedData.сollectTotalTimelapse
 		if savedData.maxCombatants then
 			Settings.MaxCombatants = savedData.maxCombatants
 		end
-		if savedData.timeLapsInterval then 
-			Settings.TimeLapsInterval = savedData.timeLapsInterval
-		end
 	end
 
-	StrSettingsDef = GetTextLocalized("SettingsDef")
-	StrSettingsDps = GetTextLocalized("SettingsDps")
-	StrSettingsHps = GetTextLocalized("SettingsHps")
-	StrSettingsIhps = GetTextLocalized("SettingsIhps")
-	StrSave = GetTextLocalized("SettingsSave")
-	StrSettings = GetTextLocalized("StrSettings")
 	StrAllTime = GetTextLocalized("StrAllTime")
-	StrUpdateTimeLapse = GetTextLocalized("StrUpdateTimeLapse")
-	StrSettingsDesc = GetTextLocalized("SettingsDesc")
-	StrSettingsIgnorePet = GetTextLocalized("StrSettingsIgnorePet")
-	StrSettingsStartHided = GetTextLocalized("StrSettingsStartHided")
-	StrSettingsIgnoreYourself = GetTextLocalized("StrSettingsIgnoreYourself")
-	StrCombatantCntText = GetTextLocalized("StrCombatantCntText")
-	StrTimeLapsInterval = GetTextLocalized("StrTimeLapsInterval")
+	
+	
+	FillBuffCheckList()
+	InitBuffConditionMgr()
+	
+	
+	m_buffListener.listenerChangeBuff = PlayerChangeBuff
+	m_buffListener.listenerRemoveBuff = PlayerRemoveBuff
+	
+	local unitList = avatar.GetUnitList()
+	table.insert(unitList, avatar.GetId())
+	for _, unitID in ipairs(unitList) do
+		FabricMakePlayerInfo(unitID, m_buffListener)
+	end
 	
 	-- Create the DPSMeter here
 	DPSMeterGUI = TUMeterGUI:CreateNewObject(TUMeter:CreateNewObject())
@@ -456,50 +522,42 @@ function GlobalReset()
 	StrWeakness = GetTextLocalized("Weakness")
 	StrDefense = GetTextLocalized("Defense")
 	StrVulnerability = GetTextLocalized("Vulnerability")
-	StrPower = GetTextLocalized("Power")
 	StrInsidiousness = GetTextLocalized("Insidiousness")
 	StrValor = GetTextLocalized("Valor")
 	StrMapModifier = GetTextLocalized("MapModifier")
 	StrExploit = GetTextLocalized("Exploit")
-	
-	Weakness = userMods.FromWString(StrWeakness)
-	Defense = userMods.FromWString(StrDefense)
-	Vulnerability = userMods.FromWString(StrVulnerability)
-	Power = userMods.FromWString(StrPower)
-	Insidiousness = userMods.FromWString(StrInsidiousness)
-	Valor = userMods.FromWString(StrValor)
+	StrFall = GetTextLocalized("Fall")
 	
 
 
 	TitleMode[enumMode.Dps] = GetTextLocalized("DPS")
 	TitleMode[enumMode.Hps] = GetTextLocalized("HPS")
-	TitleMode[enumMode.IHps] = "IHPS"--GetTextLocalized("IHPS")
+	TitleMode[enumMode.IHps] = GetTextLocalized("IHPS")
 	TitleMode[enumMode.Def] = GetTextLocalized("DEF")
 	
 	
 
-	TitleFight[enumFight.Previous] = GetTextLocalized("Previous")
 	TitleFight[enumFight.Current] = GetTextLocalized("Current")
 	TitleFight[enumFight.Total] = GetTextLocalized("Overall")
-	TitleFight[enumFight.PrevPrevious] = GetTextLocalized("PrevPrevious")
+	TitleFight[enumFight.History] = GetTextLocalized("History")
+	
 
 	TitleDmgType[enumHit.Normal] = GetTextLocalized("Normal")
 	TitleDmgType[enumHit.Critical] = GetTextLocalized("Critical")
---	TitleDmgType[enumHit.Glancing] = GetTextLocalized("Glancing")
+	TitleDmgType[enumHit.Glancing] = GetTextLocalized("Glancing")
 
-	TitleMissType[enumMiss.Weakness] = GetTextLocalized("Weakness")
-	TitleMissType[enumMiss.Defense] = GetTextLocalized("Defense")
-	TitleMissType[enumMiss.Vulnerability] = GetTextLocalized("Vulnerability")
-	TitleMissType[enumMiss.Power] = GetTextLocalized("Power")
-	TitleMissType[enumMiss.Valor] = GetTextLocalized("Valor")
-	TitleMissType[enumMiss.Insidiousness] = GetTextLocalized("Insidiousness")
+	TitleBuffType[enumBuff.Weakness] = GetTextLocalized("Weakness")
+	TitleBuffType[enumBuff.Defense] = GetTextLocalized("Defense")
+	TitleBuffType[enumBuff.Vulnerability] = GetTextLocalized("Vulnerability")
+	TitleBuffType[enumBuff.Valor] = GetTextLocalized("Valor")
+		
 	TitleMissType[enumMiss.Dodge] = GetTextLocalized("Dodge")
 	TitleMissType[enumMiss.Miss] = GetTextLocalized("Miss")
 
-	--TitleHitBlockType[enumHitBlock.Block] = GetTextLocalized("Blocked")
-	--TitleHitBlockType[enumHitBlock.Parry] = GetTextLocalized("Parry")
+	TitleHitBlockType[enumHitBlock.Block] = GetTextLocalized("Blocked")
+	TitleHitBlockType[enumHitBlock.Parry] = GetTextLocalized("Parry")
 	TitleHitBlockType[enumHitBlock.Barrier] = GetTextLocalized("Barrier")
-	--TitleHitBlockType[enumHitBlock.Resist] = GetTextLocalized("Resisted")
+	TitleHitBlockType[enumHitBlock.Resist] = GetTextLocalized("Resisted")
 	TitleHitBlockType[enumHitBlock.Absorb] = GetTextLocalized("Absorbed")
 	TitleHitBlockType[enumHitBlock.RunesAbsorb] = GetTextLocalized("Rune")
 	TitleHitBlockType[enumHitBlock.MultAbsorb] = GetTextLocalized("Multiplier")
@@ -529,30 +587,10 @@ function GlobalReset()
 	DPSMeterGUI.DetailsPanel.SpellDetailsHeaderStatsText:SetVal("Max", GetTextLocalized("Max"))
 	
 	DPSMeterGUI.DetailsPanel.SpellCurrTimeText:SetVal("Name", GetTextLocalized("Showed"))
-	DPSMeterGUI.DetailsPanel.SpellCurrTimeText:SetVal("Time", GetTextLocalized("StrAllTime"))
+	DPSMeterGUI.DetailsPanel.SpellCurrTimeText:SetVal("Time", StrAllTime)
 	DPSMeterGUI.DetailsPanel.DescText:SetVal("Desc", userMods.ToWString(" "))
 
-	-- If wider main panel, then extend the width...
-	if Settings.MainPanelWidth == enumWidth.Auto and localization == "rus" or Settings.MainPanelWidth == enumWidth.Wide then
-		local newWidth = Settings.MainPanelWideSize
 
-		if newWidth > DPSMeterGUI.MainPanelWidth then
-			local deltaWidth = newWidth - DPSMeterGUI.MainPanelWidth
-			DPSMeterGUI.BarWidth = DPSMeterGUI.BarWidth + deltaWidth
-			local delta13 = math.floor(deltaWidth * 1/3)
-			local delta23 = math.floor(deltaWidth * 2/3)
-
-			DPSMeterGUI.MainPanel:SetWidth(DPSMeterGUI.InitialSize["MainPanelWidth"] + deltaWidth)
-			DPSMeterGUI.MainPanel.FightBtn:SetWidth(DPSMeterGUI.InitialSize["FightBtnWidth"] + delta23)
-			DPSMeterGUI.MainPanel.ModeBtn:SetWidth(DPSMeterGUI.InitialSize["ModeBtnWidth"] + delta13)
-			DPSMeterGUI.MainPanel.FightBtn:SetPosition(DPSMeterGUI.InitialSize["FightBtnPosX"] + delta13, nil)
-			DPSMeterGUI.MainPanel.TotalPanel:SetWidth(DPSMeterGUI.InitialSize["TotalPanelWidth"] + deltaWidth)
-
-			for playerIndex = 1, Settings.MaxCombatants do
-				DPSMeterGUI.MainPanel.PlayerList[playerIndex]:SetWidth(DPSMeterGUI.InitialSize["TotalPanelWidth"] + deltaWidth)
-			end
-		end
-	end
 
 	-- Update the mode in the fight panel (at the top of the player list)
 	DPSMeterGUI.MainPanel.ModeText:SetVal("Name", TitleMode[DPSMeterGUI.ActiveMode])
@@ -565,179 +603,69 @@ function GlobalReset()
 
 	DPSMeterGUI:Reset()
 	
-	-- DPSMeterGUI.DPSMeter.Fight.x indices can change during the execution
-	local title = {
-		[DPSMeterGUI.DPSMeter.Fight.Previous] = TitleFight[enumFight.Previous],
-		[DPSMeterGUI.DPSMeter.Fight.Current] = TitleFight[enumFight.Current],
-		[DPSMeterGUI.DPSMeter.Fight.Total] = TitleFight[enumFight.Total],
-		[DPSMeterGUI.DPSMeter.Fight.PrevPrevious] = TitleFight[enumFight.PrevPrevious],
-	}
-
 	-- Update the fight in the fight panel (at the top of the player list)
-	DPSMeterGUI.MainPanel.FightText:SetVal("Name", title[DPSMeterGUI.ActiveFight])
+	DPSMeterGUI.MainPanel.FightText:SetVal("Name", TitleFight[DPSMeterGUI.ActiveFightMode])
 
 	-- Update the fight in the title of the spell panel
-	DPSMeterGUI.DetailsPanel.PlayerNameText:SetVal("Fight", title[DPSMeterGUI.ActiveFight])
+	DPSMeterGUI.DetailsPanel.PlayerNameText:SetVal("Fight", TitleFight[DPSMeterGUI.ActiveFightMode])
 
-	if AoPanelDetected then DPSMeterGUI.ShowHideBtn:Hide() end
+	if AoPanelDetected then DPSMeterGUI.ShowHideBtn:DnDHide() end
 	
 	if Settings.StartHided then
-		DPSMeterGUI.MainPanel:Hide()
+		DPSMeterGUI.MainPanel:DnDHide()
 	end
 
 	-- Register now the other events & reactions
-	metricReset()
+	ReRegisterEvents()
 	RegisterEventHandlers(onMyEvent)
 	RegisterReactionHandlers(onReaction)
+
+	
+	
+	StartTimer(FastUpdate, Settings.FastUpdateInterval)
 end
 
+function PlayerChangeBuff(aBuffInfo, aPlayerID, aFindedObj)
+	CurrentBuffsState[aFindedObj.ind][aPlayerID] = aFindedObj
+end
 
-local paramsBlockDD = {}
-local paramsBlockDDIN = {}
-local paramsBlockHeal = {}
-local paramsBlockHealIN = {}
-local paramsBlockID = {}
-local eventRegistredDDAndHealUnits = {}
+function PlayerRemoveBuff(aBuffInfo, aPlayerID, aFindedObj)
+	CurrentBuffsState[aFindedObj.ind][aPlayerID] = nil
+end
 
-function metricReset()
-	if #paramsBlockDD > 0 then
-		common.UnRegisterEvent("EVENT_HEALING_RECEIVED")
-		common.UnRegisterEvent("EVENT_UNIT_DAMAGE_RECEIVED")
-		common.UnRegisterEvent("EVENT_UNIT_FOLLOWERS_LIST_CHANGED")
-		eventRegistredDDAndHealUnits = {}
+function FillBuffCheckList()
+	local index = 1
+	for i = 1, 1 do
+		table.insert(BuffCheckList, {name = GetTextLocalized("IHpsBuff"..i), ind = index, forTarget = true, forHps = true})
+		index = index + 1
 	end
-	paramsBlockDD = {}
-	paramsBlockHeal = {}
-	paramsBlockDDIN = {}
-	paramsBlockHealIN = {}
-	paramsBlockID = {}
-	
-	if isRaid() then 
-		local members = raid.GetMembers()
-		if members then
-			for index, groupBlock in pairs(members) do
-				for index2, groupInfo in pairs(groupBlock) do 
-					addToHandlerR(groupInfo.id)
-				end
-			end
-		end
-	elseif isGroup() then
-		local members = group.GetMembers()
-		if members then
-			for index, groupInfo in pairs(members) do
-				addToHandlerR(groupInfo.id)
-			end
-		end
-	else
-		addToHandlerR(avatar.GetId() )
+	for i = 1, 3 do
+		table.insert(BuffCheckList, {name = GetTextLocalized("HpsBuff"..i), ind = index, forSrc = true, forHps = true})
+		index = index + 1
+	end
+	for i = 1, 3 do
+		table.insert(BuffCheckList, {name = GetTextLocalized("DpsHpsBuff"..i), ind = index, forSrc = true, forHps = true, forDps = true})
+		index = index + 1
+	end
+	for i = 1, 1 do
+		table.insert(BuffCheckList, {name = GetTextLocalized("DpsBuff"..i), ind = index, forSrc = true, forDps = true})
+		index = index + 1
+	end
+	DPSHPSTYPES = 8
+	DEFTYPES = 24
+	for i = 1, DEFTYPES do
+		table.insert(BuffCheckList, {name = GetTextLocalized("DefBuff"..i), ind = index, forTarget = true, forDps = true})
+		index = index + 1
 	end
 	
-
-	RegisterEventHandlersNew("EVENT_HEALING_RECEIVED", RetrieveHealEvent , paramsBlockHeal)
-	RegisterEventHandlersNew("EVENT_HEALING_RECEIVED", RetrieveHealEventIN , paramsBlockHealIN)
-	RegisterEventHandlersNew("EVENT_UNIT_DAMAGE_RECEIVED", RetrieveDDEvent , paramsBlockDD)
-	RegisterEventHandlersNew("EVENT_UNIT_DAMAGE_RECEIVED", RetrieveDDEventIN , paramsBlockDDIN)
-	RegisterEventHandlersNew("EVENT_UNIT_FOLLOWERS_LIST_CHANGED", ReloadPet, paramsBlockID)
-end
-
-function ReloadPet(params)
-	if not params then return end
-	metricReset()
-end
-
-function addToHandlerR(_unitId)
-	if not _unitId then return end
-	paramsBlockID[#paramsBlockID + 1] = {id = _unitId}
-	paramsBlockDDIN[#paramsBlockDDIN+1] =  {target = _unitId}
-	paramsBlockHealIN[#paramsBlockHealIN+1] =  {unitId = _unitId}
-
-	addToHandler(_unitId)
+	for i = 1, DPSHPSTYPES do
+		TitleCustomDpsBuffType[i] = BuffCheckList[i].name
+	end
+	for i = 1, DEFTYPES do
+		TitleCustomDefBuffType[i] = BuffCheckList[DPSHPSTYPES + i].name
+	end
 	
-	local followers = unit.GetFollowers( _unitId )
-	if not followers then return end
-	for _, followerId in pairs( followers ) do
-		addToHandler(followerId)
+	for i = 1, index-1 do
+		CurrentBuffsState[i] = {}
 	end
-
-end
-
-function addToHandler(_unitId)
-	if eventRegistredDDAndHealUnits[_unitId] then return end
-	--наймы на островах одновременно члены группы и петы
-	eventRegistredDDAndHealUnits[_unitId] = true
-
-	paramsBlockDD[#paramsBlockDD+1] =  {source = _unitId}
-	paramsBlockHeal[#paramsBlockHeal+1] =  {healerId = _unitId}	
-end
-
-function RegisterEventHandlersNew(event, handler, params )
-	if params then 
-		for i,params1 in ipairs(params) do 
-			common.RegisterEventHandler(handler, event, params1)
-		end
-	else 
-		common.RegisterEventHandler(handler, event)
-	end
-end
-
-
-function isRaid()
-	if raid.IsExist and avatar.IsExist then
-		if avatar.IsExist() then return raid.IsExist() end
-	end
-	return false
-end
-
-function isGroup()
-	if group.IsCreatureInGroup and avatar.IsExist and avatar.GetId then
-		if avatar.IsExist() then return group.IsCreatureInGroup(avatar.GetId()) end
-	end
-	if group.IsExist then return group.IsExist() end
-	return false
-end
-
-function message(text, color, fontSize)
-	local chat=stateMainForm:GetChildUnchecked("ChatLog", false)
-	if not chat then
-		chat=stateMainForm:GetChildUnchecked("Chat", true)
-	else
-		chat=chat:GetChildUnchecked("Container", true)
-	end
-	if not chat then return end
-
-	text=common.GetAddonName()..": "..(toString(text) or "nil")
-	chat:PushFrontValuedText(toValuedText(text, nil, nil, 16, nil, nil, "AllodsSystem"))
-end
-
-function toString(text)
-	if not text then return nil end
-	if common.IsWString(text) then
-		text=userMods.FromWString(text)
-	end
-	return tostring(text)
-end
-
-function toValuedText(text, color, align, fontSize, shadow, outline, fontName)
-	local valuedText=common.CreateValuedText()
-	text=toWString(text)
-	if not valuedText or not text then return nil end
-	valuedText:SetFormat(toWString(formatText(text, align, fontSize, shadow, outline, fontName)))
-	if color then
-		valuedText:SetClassVal( "color", color )
-	else
-		valuedText:SetClassVal( "color", "LogColorYellow" )
-	end
-	return valuedText
-end
-
-function toWString(text)
-	if not text then return nil end
-	if not common.IsWString(text) then
-		text=userMods.ToWString(tostring(text))
-	end
-	return text
-end
-
-function formatText(text, align, fontSize, shadow, outline, fontName)
-	return "<body fontname='"..(toString(fontName) or "AllodsSystem").."' alignx = '"..(toString(align) or "left").."' fontsize='"..(toString(fontSize) or "14").."' shadow='"..(toString(shadow) or "1").."' outline='"..(toString(outline) or "0").."'><rs class='color'>"..(toString(text) or "").."</rs></body>"
 end

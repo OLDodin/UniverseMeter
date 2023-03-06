@@ -6,12 +6,12 @@
 		<X>
 			<Align>WIDGET_ALIGN_LOW</Align>
 			<Pos>18</Pos>
-			<Size>379</Size>
+			<Size>750</Size>
 		</X>
 		<Y>
 			<Align>WIDGET_ALIGN_HIGH</Align>
 			<HighPos>20</HighPos>
-			<Size>136</Size>
+			<Size>64</Size>
 		</Y>
 	</Placement>
 	<TransparentInput>true</TransparentInput>

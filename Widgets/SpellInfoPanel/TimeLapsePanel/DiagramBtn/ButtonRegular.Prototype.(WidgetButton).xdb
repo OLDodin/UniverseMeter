@@ -32,6 +32,48 @@
 			</StateDisabled>
 			<ReactionOnUp>true</ReactionOnUp>
 		</Item>
+		<Item>			
+			<LayerHighlight href="../DiagramBtn/ButtonRegularHighlighted.(WidgetLayerTiledTexture).xdb" />
+			<PushedOffset x="-2" y="2" />
+			<StateNormal>
+				<LayerMain href="../DiagramBtn/ButtonRegularNormal2.(WidgetLayerTiledTexture).xdb" />
+			</StateNormal>
+			<StatePushed>
+				<LayerMain href="../DiagramBtn/ButtonRegularPressed2.(WidgetLayerTiledTexture).xdb" />
+			</StatePushed>
+			<StateDisabled>
+				<LayerMain href="ButtonRegularDisabled.(WidgetLayerTiledTexture).xdb" />
+			</StateDisabled>
+			<ReactionOnUp>true</ReactionOnUp>
+		</Item>
+		<Item>			
+			<LayerHighlight href="../DiagramBtn/ButtonRegularHighlighted.(WidgetLayerTiledTexture).xdb" />
+			<PushedOffset x="-2" y="2" />
+			<StateNormal>
+				<LayerMain href="../DiagramBtn/ButtonRegularNormal3.(WidgetLayerTiledTexture).xdb" />
+			</StateNormal>
+			<StatePushed>
+				<LayerMain href="../DiagramBtn/ButtonRegularPressed3.(WidgetLayerTiledTexture).xdb" />
+			</StatePushed>
+			<StateDisabled>
+				<LayerMain href="ButtonRegularDisabled.(WidgetLayerTiledTexture).xdb" />
+			</StateDisabled>
+			<ReactionOnUp>true</ReactionOnUp>
+		</Item>
+		<Item>			
+			<LayerHighlight href="../DiagramBtn/ButtonRegularHighlighted.(WidgetLayerTiledTexture).xdb" />
+			<PushedOffset x="-2" y="2" />
+			<StateNormal>
+				<LayerMain href="../DiagramBtn/ButtonRegularNormal4.(WidgetLayerTiledTexture).xdb" />
+			</StateNormal>
+			<StatePushed>
+				<LayerMain href="../DiagramBtn/ButtonRegularPressed4.(WidgetLayerTiledTexture).xdb" />
+			</StatePushed>
+			<StateDisabled>
+				<LayerMain href="ButtonRegularDisabled.(WidgetLayerTiledTexture).xdb" />
+			</StateDisabled>
+			<ReactionOnUp>true</ReactionOnUp>
+		</Item>
 	</Variants>
 	
 </WidgetButton>
