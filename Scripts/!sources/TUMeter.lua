@@ -119,7 +119,12 @@ end
 
 function TUMeter:GetFightCombatant(anID)
 	if not anID then return end
-	return self:GetLastFightPeriod():GetCombatant(anID)
+	local combatant = self:GetLastFightPeriod():GetCombatant(anID)
+	if not combatant then
+		local masterID = unit.GetFollowerMaster(anID)
+		combatant = self:GetLastFightPeriod():GetCombatant(masterID)
+	end
+	return combatant
 end
 
 function TUMeter:GetInfoFromCache(anID, aCache, aGetInfoFunc)
@@ -297,7 +302,6 @@ function TUMeter:CollectDamageDealedData(aParams)
 	
 	-- look for the type of the source
 	local currFightCombatant = self:GetFightCombatant(aParams.source)
-
 	-- If the source is not part of the group or the target is an ally
 	if not currFightCombatant then return end
 
@@ -307,7 +311,7 @@ function TUMeter:CollectDamageDealedData(aParams)
 	if not self.bCollectData and currFightCombatant:IsClose() and (self:ShouldCollectData() or aParams.lethal) then
 		self:Start()
 	end
-	
+
 	-- if collecting dps data
 	return self:CollectData(enumMode.Dps, currFightCombatant, aParams)
 end

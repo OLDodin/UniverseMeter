@@ -93,8 +93,8 @@ onReaction["OnConfigPressed"] = function(reaction)
 end
 
 onReaction["OnHistoryPressed"] = function(reaction)
-	collectgarbage()
-	LogMemoryUsage()
+	--collectgarbage()
+	--LogMemoryUsage()
 	
 	if DPSMeterGUI.HistoryPanel:IsVisible() then
 		DPSMeterGUI.HistoryPanel:DnDHide()
