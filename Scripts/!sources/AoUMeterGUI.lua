@@ -553,6 +553,11 @@ end
 function TUMeterGUI:UpdateValues()
 	self:UpdatePlayerList()
 	self:UpdateSpellList()
+	
+	if not self.DetailsPanel:IsVisible() and not self.HistoryPanel:IsVisible() then
+		--free memory
+		self:CloseHistory()
+	end
 end
 
 --==============================================================================
@@ -729,11 +734,10 @@ end
 -- Swap to the next fight
 --------------------------------------------------------------------------------
 function TUMeterGUI:SwapFight()
-	self.ActiveFightMode = math.mod(self.ActiveFightMode + 1, 2)
+	self.ActiveFightMode = math.fmod(self.ActiveFightMode + 1, 2)
 
 	self.MainPanel.FightText:SetVal("Name", TitleFight[self.ActiveFightMode])
 
-	--self:CloseHistory()
 	self:UpdateValues()
 end
 
@@ -741,7 +745,7 @@ function TUMeterGUI:SwapFightDetailsPanel()
 	if self.ActiveFightDetailMode == enumFight.History then
 		return
 	end
-	self.ActiveFightDetailMode = math.mod(self.ActiveFightDetailMode + 1, 2)
+	self.ActiveFightDetailMode = math.fmod(self.ActiveFightDetailMode + 1, 2)
 	self:ResetSelectedCombatant()
 	self:UpdateSelectedCombatant()
 	
@@ -806,7 +810,7 @@ function TUMeterGUI:FillHistoryScroll(aList, aBtnSysName, aBtnShowName, aScrollL
 	for historyElement in aList:iterate() do
 		local wtName = aBtnSysName..tostring(cnt)
 		local btnWdg = TWidget:CreateNewObjectByDesc(wtName, self.HistoryPanel.HistoryBtnDesc, self.HistoryPanel)
-		local nameStr = cachedFromWString(aBtnShowName).."-"..tostring(cnt)
+		local nameStr = cachedFromWString(aBtnShowName).." -"..tostring(cnt)
 		btnWdg:SetVal("button_label", cachedToWString(nameStr))
 		btnWdg:Show()
 		aScrollList.Widget:PushBack(btnWdg.Widget)
