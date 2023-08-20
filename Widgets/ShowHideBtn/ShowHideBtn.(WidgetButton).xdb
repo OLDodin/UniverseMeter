@@ -15,18 +15,26 @@
 		</Y>
 	</Placement>
 	<IgnoreDblClick>true</IgnoreDblClick>
+	<TextTag>button_label</TextTag>
+	<TextStyle>
+		<Align>ALIGNY_MIDDLE</Align>
+	</TextStyle>
+	
 	<Variants>
 		<Item>
 			<LayerHighlight href="ShowHideBtnHighlighted.(WidgetLayerSimpleTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
 			<PushedOffset x="-2" y="2" />
 			<StateNormal>
 				<LayerMain href="ShowHideBtnNormal.(WidgetLayerSimpleTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
+				<FormatFileRef href="ButtonFormatNormal.txt" />
 			</StateNormal>
 			<StatePushed>
 				<LayerMain href="ShowHideBtnPressed.(WidgetLayerSimpleTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
 			</StatePushed>
+
 			<ReactionOnUp>true</ReactionOnUp>
 			<Reaction>ShowHideBtnReaction</Reaction>
 		</Item>
 	</Variants>
+	
 </WidgetButton>

@@ -40,6 +40,9 @@ Global("Settings", {
 		SkipDmgYourselfIn = false,
 		StartHided = false,
 		CollectTotalTimelapse = false,		-- memory consumption optimization
+		ShowPositionOnBtn = false,			-- show active mode position on btn
+		ScaleFonts = false,
+		UseAlternativeRage = false,			-- update player rage value every FastUpdateInterval
 	})
 --------------------------------------------------------------------------------
 -- Localization
@@ -58,6 +61,8 @@ Global( "StrUnknown", userMods.ToWString("?") )
 Global( "StrMapModifier", "" )
 Global( "StrExploit", "" )
 Global( "StrFall", "" )
+Global ( "StrMainBtn", userMods.ToWString("D") )
+Global ( "StrSpace", userMods.ToWString(" ") )
 
 
 
@@ -149,3 +154,5 @@ Global("DPSMeterGUI", {})
 
 Global( "BuffCheckList", {})
 Global( "CurrentBuffsState", {})
+
+Global( "CurrentScoreOnMainBtn", 0)

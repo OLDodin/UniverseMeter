@@ -1,13 +1,13 @@
 --------------------------------------------------------------------------------
 -- LibDnD.lua // "Drag&Drop Library" by SLA, version 2011-05-28
---                                   updated version 2014-10-29 by hal.dll
+--                                   updated version 2023-07-11 by oldodin
 -- Help, support and updates: 
 -- https://alloder.pro/topic/260-how-to-libdndlua-biblioteka-dragdrop/
 --------------------------------------------------------------------------------
 Global( "DnD", {} )
 
 -- PUBLIC FUNCTIONS --
-DnD.Init = function( wtMovable, wtReacting, fUseCfg, fLockedToParentArea, Padding, KbFlag, Cursor, oldParam1, oldParam2 )
+function DnD.Init( wtMovable, wtReacting, fUseCfg, fLockedToParentArea, Padding, KbFlag, Cursor, oldParam1, oldParam2 )
 	if wtMovable == DnD then
 		wtMovable, wtReacting, fUseCfg, fLockedToParentArea, Padding, KbFlag, Cursor, oldParam1 =
 		           wtReacting, fUseCfg, fLockedToParentArea, Padding, KbFlag, Cursor, oldParam1, oldParam2
@@ -63,7 +63,7 @@ DnD.Init = function( wtMovable, wtReacting, fUseCfg, fLockedToParentArea, Paddin
 		end
 	end
 	DnD.Widgets[ ID ].Initial = { X = InitialPlace.posX, Y = InitialPlace.posY, HX = InitialPlace.highPosX, HY = InitialPlace.highPosY }
-	
+
 	DnD.Register( wtReacting, true )
 end
 function DnD.Remove( wtWidget, oldParam1 )
@@ -301,6 +301,7 @@ function DnD.OnResolutionChanged()
 		end
 	end
 end
+
 DnD.SwapWdg = function(aWdg)
 	if aWdg:IsVisible() then
 		DnD.HideWdg(aWdg)

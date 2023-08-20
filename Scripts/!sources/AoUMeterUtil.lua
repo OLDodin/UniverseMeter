@@ -60,7 +60,7 @@ function GetPercentageAt( Value, ValueAt )
 end
 --------------------------------------------------------------------------------
 function CompareWStr(aValue1, aValue2)
-	return common.CompareWString(aValue1, aValue2) == 0
+	return aValue1 == aValue2
 end
 --------------------------------------------------------------------------------
 -- Compare the name of 2 spells in order to sort them
@@ -215,60 +215,11 @@ end
 ------------------------------------------------------------------
 ------ Loging To Chat
 ------------------------------------------------------------------
-local wtChat = nil
-local chatRows = 0 --- for clear buffer after show messages
-local valuedText = common.CreateValuedText()
-local formatVT = "<html fontname='AllodsSystem' shadow='1'><rs class='color'><r name='addon'/><r name='text'/></rs></html>"
-valuedText:SetFormat(userMods.ToWString(formatVT))
 
-wtGetNumParents = function(w, parents)
-	if parents > 0 and w.GetParent then
-		local pr = w:GetParent()
-		if pr then
-			return wtGetNumParents(pr, parents-1)
-		end
-	end
-	return w
-end
-
-function GetSysChatContainer()
-	local parents = 2
-	local w = stateMainForm:GetChildUnchecked("Chat", false)
-	if not w then
-		w = stateMainForm:GetChildUnchecked("Chat", true)
-	else
-		w = w:GetChildUnchecked("Chat", true)
-	end
-	if not w then ---- 2.0.06.13 [26.05.2011] 
-		w = stateMainForm:GetChildUnchecked("ChatLog", false)
-		w = w:GetChildUnchecked("Container", true)
-		if w then parents = 3 end
-	end
-	
-	return w, wtGetNumParents(w, parents)
-end
-
-function LogToChatVT(valuedText, name, toWW)
-	name = name or common.GetAddonName()
-
-
-	if not wtChat then wtChat = GetSysChatContainer() end
-	if wtChat and wtChat.PushFrontValuedText then
-		chatRows =  chatRows + 1
-		valuedText:SetVal( "addon", userMods.ToWString(name..": ") )
-		wtChat:PushFrontValuedText( valuedText )
-	end
-end
-
-function LogToChat(message, color, toWW)
-	valuedText = common.CreateValuedText()
-	valuedText:SetFormat(userMods.ToWString(formatVT))
-	valuedText:ClearValues() 
-	valuedText:SetClassVal( "color", color or "LogColorYellow" )
-	if not common.IsWString( message ) then	message = userMods.ToWString(message) end
-	valuedText:SetVal( "text", message )
-	LogToChatVT(valuedText, common.GetAddonName(), toWW)
-
+function LogToChat(aMessage)
+	if not common.IsWString( aMessage ) then	aMessage = userMods.ToWString(aMessage) end
+	valuedText:SetVal( "text", aMessage )
+	userMods.SendSelfChatMessage(aMessage, "notice")
 end
 
 --------------------------------------------------------------------------------
@@ -287,7 +238,7 @@ function OnTimer(aParams)
 		return
 	end
 
-	m_timer.widget:PlayFadeEffect( 1.0, 1.0, m_timer.speed*1000, EA_MONOTONOUS_INCREASE )
+	m_timer.widget:PlayFadeEffect( 1.0, 1.0, m_timer.speed*1000, EA_MONOTONOUS_INCREASE, true )
 	m_timer.callback()
 end
 
@@ -305,6 +256,6 @@ function StartTimer(aCallback, aSpeed)
 	m_timer.speed = tonumber(aSpeed) or 1
 
 	common.RegisterEventHandler(OnTimer, "EVENT_EFFECT_FINISHED")
-    timerWidget:PlayFadeEffect(1.0, 1.0, m_timer.speed*1000, EA_MONOTONOUS_INCREASE)
+    timerWidget:PlayFadeEffect(1.0, 1.0, m_timer.speed*1000, EA_MONOTONOUS_INCREASE, true )
 	return true
 end

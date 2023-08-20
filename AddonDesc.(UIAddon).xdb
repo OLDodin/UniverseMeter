@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <UIAddon>
   <AutoStart>true</AutoStart>
-  <Forms>
-    <Item>
-      <Form href="Widgets/MainForm.(WidgetForm).xdb#xpointer(/WidgetForm)"/>
-      <Id>Main</Id>
-    </Item>
-  </Forms>
-  <MainFormId>Main</MainFormId>
+  <Form href="Widgets/MainForm.(WidgetForm).xdb#xpointer(/WidgetForm)"/>
   <Name>UniverseMeter</Name>
   <ScriptFileRefs>
     <Item href="Scripts/LibDnD.lua"/>

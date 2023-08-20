@@ -175,7 +175,7 @@ end
 --------------------------------------------------------------------------------
 local function CompareSpells(A, B)
 	if A.Amount == B.Amount then
-		return common.CompareWString(A.Name, B.Name) == -1 end
+		return A.Name < B.Name end
 	return A.Amount > B.Amount
 end
 --------------------------------------------------------------------------------

@@ -95,6 +95,9 @@ function TSettingsPanelGUI:CreateNewObject(name)
 			SkipYourselfCheckBoxText = widget:GetChildByName("SkipYourselfCheckBoxText").Widget,
 			CombatantCntText = widget:GetChildByName("CombatantCntText").Widget,
 			TotalTimelapseCheckBoxText = widget:GetChildByName("TotalTimelapseCheckBoxText").Widget,
+			ShowScoreCheckBoxText = widget:GetChildByName("ShowScoreCheckBoxText").Widget,
+			ScaleFontsCheckBoxText = widget:GetChildByName("ScaleFontsCheckBoxText").Widget,
+			UseAlternativeRageCheckBoxText = widget:GetChildByName("UseAlternativeRageCheckBoxText").Widget,
 			
 			DefCheckBox = widget:GetChildByName("DefCheckBox").Widget,
 			DpsCheckBox = widget:GetChildByName("DpsCheckBox").Widget,
@@ -105,6 +108,9 @@ function TSettingsPanelGUI:CreateNewObject(name)
 			SkipYourselfCheckBox = widget:GetChildByName("SkipYourselfCheckBox").Widget,
 			MaxCombatantTextEdit = widget:GetChildByName("SettingsMaxCombatant").Widget,
 			TotalTimelapseCheckBox = widget:GetChildByName("TotalTimelapseCheckBox").Widget,
+			ShowScoreCheckBox = widget:GetChildByName("ShowScoreCheckBox").Widget,
+			ScaleFontsCheckBox = widget:GetChildByName("ScaleFontsCheckBox").Widget,
+			UseAlternativeRageCheckBox = widget:GetChildByName("UseAlternativeRageCheckBox").Widget,
 			
 			HeaderText = widget:GetChildByName("HeaderText").Widget,
 			
@@ -376,6 +382,29 @@ function TUMeterGUI:UpdatePlayerList()
 	self:HideAllPlayerPanel(combatantCount+1)
 end
 
+function TUMeterGUI:UpdateScoreOnMainBtn()
+	local currentFight = self:GetActiveFight()
+	if not Settings.ShowPositionOnBtn or not currentFight then return end
+	currentFight:RecalculateCombatantsData(self.ActiveMode)
+
+	local combatantCount = math.min(currentFight:GetCombatantCount(), Settings.MaxCombatants)
+	
+	for playerIndex = 1, combatantCount do
+		local combatant = currentFight:GetCombatantByIndex(playerIndex)
+		local myID = avatar.GetId()
+		if combatant and combatant.ID == myID then
+			if CurrentScoreOnMainBtn ~= playerIndex then
+				if AoPanelDetected then
+					local SetVal = { val = StrMainBtn..StrSpace..cachedFormatInt(playerIndex , "%d") }
+					userMods.SendEvent( "AOPANEL_UPDATE_ADDON", { sysName = "UniverseMeter", header = SetVal } )
+				end
+				self.ShowHideBtn:SetVal( 'button_label', cachedFormatInt(playerIndex , "%d") )
+				CurrentScoreOnMainBtn = playerIndex
+			end
+		end
+	end
+end
+
 --==============================================================================
 --================= SPELL PANEL - Spell list ===================================
 --==============================================================================
@@ -634,7 +663,7 @@ function TUMeterGUI:UpdateSpellDetailsList(spellIndex)
 	if spellData then
 		if spellData.Desc then
 			if not spellData.CachedDesc then
-				spellData.CachedDesc = common.ExtractWStringFromValuedText(spellData.Desc)
+				spellData.CachedDesc = spellData.Desc:ToWString()
 			end
 			self.DetailsPanel.DescText:SetVal("Desc", spellData.CachedDesc)
 		else
@@ -848,6 +877,15 @@ function TUMeterGUI:HistoryCurrentSelected(anIndex)
 	self:HistorySelected(self.ActiveHistoryCurrentList, anIndex)
 end
 
+function ScaleFontSpellDetailsPanelGUI(aSpellDetailsPanel)
+	if Settings.ScaleFonts then
+		aSpellDetailsPanel.Name:SetFormat("<header alignx = 'left' fontsize='14' outline='1'><rs class='class'><Neutral><r name='Name'/>:</Neutral></rs></header>")
+		aSpellDetailsPanel.Count:SetFormat("<header alignx = 'left' fontsize='14' outline='1'><rs class='class'><Neutral><r name='Count'/></Neutral></rs></header>")
+		aSpellDetailsPanel.Percent:SetFormat("<header alignx = 'left' fontsize='14' outline='1'><rs class='class'><tip_white><r name='Percentage'/>%</tip_white></rs></header>")
+		aSpellDetailsPanel.Damage:SetFormat("<header alignx = 'left' fontsize='14' outline='1'><rs class='class'><tip_blue><r name='Min'/></tip_blue><Neutral><r name='Separator1'/> | </Neutral><tip_green><r name='Avg'/></tip_green><Neutral><r name='Separator2'/> | </Neutral><tip_red><r name='Max'/></tip_red></rs></header>")
+	end
+end
+
 --==============================================================================
 --================= INIT =======================================================
 --==============================================================================
@@ -872,13 +910,16 @@ function TUMeterGUI:Init()
 	self.SettingsPanel.HpsCheckBoxText:SetVal("Name", GetTextLocalized("SettingsHps"))
 	self.SettingsPanel.IhpsCheckBoxText:SetVal("Name", GetTextLocalized("SettingsIhps"))
 	self.SettingsPanel.TotalTimelapseCheckBoxText:SetVal("Name", GetTextLocalized("TotalTimelapseCheckBoxText"))
+	self.SettingsPanel.ShowScoreCheckBoxText:SetVal("Name", GetTextLocalized("ShowScoreCheckBoxText"))
+	self.SettingsPanel.ScaleFontsCheckBoxText:SetVal("Name", GetTextLocalized("ScaleFontsCheckBoxText"))
+	self.SettingsPanel.UseAlternativeRageCheckBoxText:SetVal("Name", GetTextLocalized("UseAlternativeRageCheckBoxText"))
+	
 	self.SettingsPanel.SkipPetCheckBoxText:SetVal("Name", GetTextLocalized("StrSettingsIgnorePet"))
 	self.SettingsPanel.StartHidedCheckBoxText:SetVal("Name", GetTextLocalized("StrSettingsStartHided"))
 	self.SettingsPanel.SkipYourselfCheckBoxText:SetVal("Name", GetTextLocalized("StrSettingsIgnoreYourself"))
 	self.SettingsPanel.CombatantCntText:SetVal("Name", GetTextLocalized("StrCombatantCntText"))
 	self.SettingsPanel.SaveBtn:SetVal("button_label", GetTextLocalized("SettingsSave"))
 	self.SettingsPanel.HeaderText:SetVal("Name", GetTextLocalized("StrSettings"))
-	
 	self.SettingsPanel.MaxCombatantTextEdit:SetText(cachedFormatInt(Settings.MaxCombatants, "%d"))
 	
 	SetCheckedForCheckBox(self.SettingsPanel.DpsCheckBox, Settings.ModeDPS)
@@ -889,6 +930,10 @@ function TUMeterGUI:Init()
 	SetCheckedForCheckBox(self.SettingsPanel.SkipYourselfCheckBox, Settings.SkipDmgYourselfIn)
 	SetCheckedForCheckBox(self.SettingsPanel.StartHidedCheckBox, Settings.StartHided)
 	SetCheckedForCheckBox(self.SettingsPanel.TotalTimelapseCheckBox, Settings.CollectTotalTimelapse)
+	SetCheckedForCheckBox(self.SettingsPanel.ShowScoreCheckBox, Settings.ShowPositionOnBtn)
+	SetCheckedForCheckBox(self.SettingsPanel.ScaleFontsCheckBox, Settings.ScaleFonts)
+	SetCheckedForCheckBox(self.SettingsPanel.UseAlternativeRageCheckBox, Settings.UseAlternativeRage)
+	
 	
 	self.HistoryPanel = THistoryPanelGUI:CreateNewObject("HistoryPanel")
 	self.HistoryPanel:DragNDrop(true, true)
@@ -922,7 +967,10 @@ function TUMeterGUI:Init()
 	self.MainPanel.TotalPanel:SetPosition(20, 47)
 	self.MainPanel.TotalPanel:Show()
 	self.MainPanel.TotalPanel.Bar:SetWidth(self.BarWidth)
-	
+	if Settings.ScaleFonts then
+		self.MainPanel.TotalPanel.Name:SetFormat("<header alignx = 'left' fontsize='16' outline='1'><rs class='class'><Neutral>Total (<r name='Minute'/>:<r name='Second'/>)</Neutral></rs></header>")
+		self.MainPanel.TotalPanel.Value:SetFormat("<header alignx = 'left' fontsize='16' outline='1'><rs class='class'><tip_red><r name='DamageDone'/> ( <r name='DPS'/> )</tip_red></rs></header>")
+	end
 
 	-- Player list
 	self.MainPanel:GetChildByName("PlayerInfoPanel"):Destroy()
@@ -930,8 +978,15 @@ function TUMeterGUI:Init()
 		local wtName = "PlayerPanel" .. playerIndex
 		self.MainPanel.PlayerList[playerIndex] = TPlayerPanelGUI:CreateNewObjectByDesc(wtName, playerPanelDesc, self.MainPanel)
 		self.MainPanel.PlayerList[playerIndex]:SetPosition(20, 47 + playerIndex * 24)
+		if Settings.ScaleFonts then
+			self.MainPanel.PlayerList[playerIndex].Name:SetFormat("<header alignx = 'left' fontsize='16' outline='1'><rs class='class'><Neutral><r name='Index'/>. <r name='Name'/></Neutral></rs></header>")
+			self.MainPanel.PlayerList[playerIndex].Percent:SetFormat("<header alignx = 'left' fontsize='16' outline='1'><rs class='class'><tip_white><r name='Percentage'/>%</tip_white></rs></header>")
+			self.MainPanel.PlayerList[playerIndex].Value:SetFormat("<header alignx = 'left' fontsize='16' outline='1'><rs class='class'><tip_red><r name='DamageDone'/> ( <r name='DPS'/> )</tip_red></rs></header>")
+		end
 	end
 
+	
+	
 	-------------------------------------------------------------------------------
 	-- Spell Panel
 	-------------------------------------------------------------------------------
@@ -962,6 +1017,7 @@ function TUMeterGUI:Init()
 		local wtName = "GlobalInfoPanel" .. extraIndex
 		self.DetailsPanel.GlobalInfoList[extraIndex] = TSpellDetailsPanelGUI:CreateNewObjectByDesc(wtName, spellInfoPanelDesc, self.DetailsPanel)
 		self.DetailsPanel.GlobalInfoList[extraIndex]:SetPosition(spellOffsetX, GlobalInfoOffset + (extraIndex-1) * 18)
+		ScaleFontSpellDetailsPanelGUI(self.DetailsPanel.GlobalInfoList[extraIndex])
 	end
 
 	-- SpellHeader
@@ -990,6 +1046,12 @@ function TUMeterGUI:Init()
 		self.DetailsPanel.SpellList[spellIndex]:SetPosition(0, spellListOffset + (spellIndex-1) * 18)
 		self.DetailsPanel.SpellList[spellIndex]:SetWidth(self.DetailsPanel.SpellBarWidth)
 		self.DetailsPanel.SpellScrollList:PushBack(self.DetailsPanel.SpellList[spellIndex].Widget)
+		
+		if Settings.ScaleFonts then
+			self.DetailsPanel.SpellList[spellIndex].Name:SetFormat("<header alignx = 'left' fontsize='14' outline='1'><rs class='class'><Neutral><r name='Index'/>. <r name='Prefix'/><r name='PetName'/> <r name='Name'/> <r name='Suffix'/></Neutral></rs></header>")
+			self.DetailsPanel.SpellList[spellIndex].Damage:SetFormat("<header alignx = 'right' fontsize='14' outline='1'><rs class='class'><tip_red><r name='DamageDone'/> (<r name='DPS'/>) <r name='CPS'/>  <r name='DamageBlock'/>%</tip_red></rs></header>")
+			self.DetailsPanel.SpellList[spellIndex].Percent:SetFormat("<header alignx = 'left' fontsize='14' outline='1'><rs class='class'><tip_white><r name='Percentage'/>%</tip_white></rs></header>")
+		end
 	end
 
 	-- SpellDetailsHeader
@@ -1006,6 +1068,7 @@ function TUMeterGUI:Init()
 		local wtName = "SpellInfoPanel" .. infoIndex
 		self.DetailsPanel.SpellInfoList[infoIndex] = TSpellDetailsPanelGUI:CreateNewObjectByDesc(wtName, spellInfoPanelDesc, self.DetailsPanel)
 		self.DetailsPanel.SpellInfoList[infoIndex]:SetPosition(spellDetailsOffsetX, damageOffset + (infoIndex-1) * spellDetailBarHeight)
+		ScaleFontSpellDetailsPanelGUI(self.DetailsPanel.SpellInfoList[infoIndex])
 	end
 
 	-- Spell miss
@@ -1014,6 +1077,7 @@ function TUMeterGUI:Init()
 		local wtName = "SpellMissPanel" .. missIndex
 		self.DetailsPanel.SpellMissList[missIndex] = TSpellDetailsPanelGUI:CreateNewObjectByDesc(wtName, spellInfoPanelDesc, self.DetailsPanel)
 		self.DetailsPanel.SpellMissList[missIndex]:SetPosition(spellDetailsOffsetX, missOffset + (missIndex-1) * spellDetailBarHeight)
+		ScaleFontSpellDetailsPanelGUI(self.DetailsPanel.SpellMissList[missIndex])
 	end
 	
 	-- Spell block
@@ -1022,6 +1086,7 @@ function TUMeterGUI:Init()
 		local wtName = "SpellBlckPanel" .. blockIndex
 		self.DetailsPanel.SpellBlockList[blockIndex] = TSpellDetailsPanelGUI:CreateNewObjectByDesc(wtName, spellInfoPanelDesc, self.DetailsPanel)
 		self.DetailsPanel.SpellBlockList[blockIndex]:SetPosition(spellDetailsOffsetX, blockDamageOffset + (blockIndex-1) * spellDetailBarHeight)
+		ScaleFontSpellDetailsPanelGUI(self.DetailsPanel.SpellBlockList[blockIndex])
 	end
 	
 	--Spell buff
@@ -1030,10 +1095,12 @@ function TUMeterGUI:Init()
 		local wtName = "SpellDpsBuffPanel" .. buffIndex
 		self.DetailsPanel.SpellDpsBuffList[buffIndex] = TSpellDetailsPanelGUI:CreateNewObjectByDesc(wtName, spellInfoPanelDesc, self.DetailsPanel)
 		self.DetailsPanel.SpellDpsBuffList[buffIndex]:SetPosition(spellDetailsOffsetX, buffOffset + (buffIndex-1) * spellDetailBarHeight)
+		ScaleFontSpellDetailsPanelGUI(self.DetailsPanel.SpellDpsBuffList[buffIndex])
 	end
 	local wtName = "SpellDefBuffPanel1"
 	self.DetailsPanel.SpellDefBuffList[1] = TSpellDetailsPanelGUI:CreateNewObjectByDesc(wtName, spellInfoPanelDesc, self.DetailsPanel)
 	self.DetailsPanel.SpellDefBuffList[1]:SetPosition(spellDetailsOffsetX, buffOffset + (BUFFTYPES-1) * spellDetailBarHeight)
+	ScaleFontSpellDetailsPanelGUI(self.DetailsPanel.SpellDefBuffList[1])
 	
 	--Spell custom buff
 	local customBuffOffset = buffOffset + BUFFTYPES * spellDetailBarHeight + 5
@@ -1041,12 +1108,14 @@ function TUMeterGUI:Init()
 		local wtName = "SpellCustomDpsBuffPanel" .. buffIndex
 		self.DetailsPanel.SpellCustomDpsBuffList[buffIndex] = TSpellDetailsPanelGUI:CreateNewObjectByDesc(wtName, spellInfoPanelDesc, self.DetailsPanel)
 		self.DetailsPanel.SpellCustomDpsBuffList[buffIndex]:SetPosition(spellDetailsOffsetX, customBuffOffset + (buffIndex-1) * spellDetailBarHeight)
+		ScaleFontSpellDetailsPanelGUI(self.DetailsPanel.SpellCustomDpsBuffList[buffIndex])
 	end
 	customBuffOffset = buffOffset + DPSHPSTYPES * spellDetailBarHeight + 5
 	for buffIndex = 1, DEFTYPES do
 		local wtName = "SpellCustomDefBuffPanel" .. buffIndex
 		self.DetailsPanel.SpellCustomDefBuffList[buffIndex] = TSpellDetailsPanelGUI:CreateNewObjectByDesc(wtName, spellInfoPanelDesc, self.DetailsPanel)
 		self.DetailsPanel.SpellCustomDefBuffList[buffIndex]:SetPosition(spellDetailsOffsetX, customBuffOffset + (buffIndex-1) * spellDetailBarHeight)
+		ScaleFontSpellDetailsPanelGUI(self.DetailsPanel.SpellCustomDefBuffList[buffIndex])
 	end
 
 	

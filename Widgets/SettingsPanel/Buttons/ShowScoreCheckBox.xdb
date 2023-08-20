@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <WidgetButton>
 	<Header>
-		<Prototype href="../CheckBoxTemp/CheckBoxStone.Prototype.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Prototype href="CheckBoxTemp/CheckBoxStone.Prototype.(WidgetButton).xdb#xpointer(/WidgetButton)" />
 	</Header>
 
-  <Name>StartHidedCheckBox</Name>
+  <Name>ShowScoreCheckBox</Name>
   <Priority>1</Priority>
   <Placement>
     <X>
@@ -14,7 +14,7 @@
     </X>
     <Y>
       <Align>WIDGET_ALIGN_LOW</Align>
-      <Pos>234</Pos>
+      <Pos>261</Pos>
       <Size>25</Size>
     </Y>
   </Placement>

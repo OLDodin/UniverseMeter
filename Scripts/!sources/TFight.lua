@@ -311,7 +311,7 @@ end
 --------------------------------------------------------------------------------
 local function CompareCombatantsBySortValue2(A, B)
 	if A.SortValue == B.SortValue then
-		return common.CompareWString(A.Name, B.Name) == -1 end
+		return A.Name < B.Name end
 	return A.SortValue > B.SortValue
 end
 --------------------------------------------------------------------------------

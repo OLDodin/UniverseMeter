@@ -11,8 +11,8 @@
       <Size>200</Size>
     </X>
     <Y>
-      <Align>WIDGET_ALIGN_LOW</Align>
-      <Pos>322</Pos>
+      <Align>WIDGET_ALIGN_HIGH</Align>
+      <HighPos>25</HighPos>
       <Size>25</Size>
     </Y>
   </Placement>

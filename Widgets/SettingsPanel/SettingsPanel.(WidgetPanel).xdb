@@ -20,6 +20,12 @@
 		<Item href="Buttons/StartHidedCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
 		<Item href="Buttons/TotalTimelapseCheckBox/CheckBox.(WidgetButton).xdb#xpointer(/WidgetButton)" />
 		<Item href="Buttons/TotalTimelapseCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="Buttons/ShowScoreCheckBox.xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/ShowScoreTextView.xdb#xpointer(/WidgetTextView)" />
+		<Item href="Buttons/ScaleFontsCheckBox.xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/ScaleFontsTextView.xdb#xpointer(/WidgetTextView)" />
+		<Item href="Buttons/UseAlternativeRageCheckBox.xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/UseAlternativeRageTextView.xdb#xpointer(/WidgetTextView)" />
 		
 		<Item href="Buttons/SaveBtn/Button.(WidgetButton).xdb#xpointer(/WidgetButton)" />
 		<Item href="Buttons/HeaderText/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />		
@@ -31,12 +37,12 @@
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Size>350</Size>
+			<Size>370</Size>
 			<Pos>333</Pos>
 		</X>
 		<Y>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Size>380</Size>
+			<Size>450</Size>
 			<Pos>230</Pos>
 		</Y>
 	</Placement>

@@ -15,6 +15,7 @@ function TUMeter:CreateNewObject()
 			GlobalFightPeriodsCnt = 1,
 			HistoryTotalFights = TList(),
 			HistoryCurrentFights = TList(),
+			LastTickPlayersDetermination = {},
 			
 			BuffInfoCache = {},
 			SpellDescCache = {},
@@ -117,6 +118,21 @@ function TUMeter:SecondTick()
 	self.bHasChangesOnTick = false
 end
 
+function TUMeter:CollectPlayersRage()
+	if not Settings.UseAlternativeRage then
+		return
+	end
+	self.LastTickPlayersDetermination = {}
+	
+	local unitList = avatar.GetUnitList()
+	table.insert(unitList, avatar.GetId())
+	for _, objID in ipairs(unitList) do
+		 if object.IsExist(objID) and object.IsUnit(objID) and unit.IsPlayer(objID) then
+			self.LastTickPlayersDetermination[objID] = unit.GetRage(objID)
+		 end
+	end
+end
+
 function TUMeter:GetFightCombatant(anID)
 	if not anID then return end
 	local combatant = self:GetLastFightPeriod():GetCombatant(anID)
@@ -167,10 +183,10 @@ function TUMeter:GetSpellInfoFromParams(aParams)
 	end
 	if spellInfo.Name == nil then
 		spellInfo.Name =
-		aParams.ability and not common.IsEmptyWString(aParams.ability) and aParams.ability
+		aParams.ability and not aParams.ability:IsEmpty() and aParams.ability
 		or aParams.isExploit and StrExploit
 		or aParams.isFall and StrFall
-		or aParams.sourceName and not common.IsEmptyWString(aParams.sourceName) and aParams.sourceName
+		or aParams.sourceName and not aParams.sourceName:IsEmpty() and aParams.sourceName
 		or StrUnknown
 		spellInfo.NameStr = userMods.FromWString(spellInfo.Name)
 	end		
@@ -191,7 +207,11 @@ function TUMeter:GetSpellInfoFromParams(aParams)
 	local sourceId = aParams.source or aParams.healerId or nil
 	if IsExistUnit(sourceId) then
 		spellInfo.IsPet =  unit.IsPet(sourceId)
-		spellInfo.Determination = unit.GetRage(sourceId)
+		if Settings.UseAlternativeRage then
+			spellInfo.Determination = self.LastTickPlayersDetermination[sourceId] or unit.GetRage(sourceId)
+		else
+			spellInfo.Determination = unit.GetRage(sourceId)
+		end
 		if spellInfo.IsPet then
 			spellInfo.PetName = object.GetName(sourceId)
 		end
@@ -238,7 +258,6 @@ function TUMeter:GetSpellInfoFromParams(aParams)
 	if aParams.targetTags then 
 		for i, combatTag in pairs( aParams.targetTags ) do
 			local info = combatTag:GetInfo()
-			local infoName = userMods.FromWString(info.name)
 			if info.isHelpful then 
 				if CompareWStr(info.name, StrDefense) then
 					spellInfo.Defense = true
@@ -253,7 +272,6 @@ function TUMeter:GetSpellInfoFromParams(aParams)
 	if aParams.sourceTags then 
 		for i, combatTag in pairs( aParams.sourceTags ) do
 			local info = combatTag:GetInfo()
-			local infoName = userMods.FromWString(info.name)
 			if info.isHelpful then
 				if CompareWStr(info.name, StrValor) then
 					spellInfo.Valor = true

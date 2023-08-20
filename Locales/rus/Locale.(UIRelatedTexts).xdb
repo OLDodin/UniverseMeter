@@ -389,6 +389,18 @@
       <name>DefBuff24</name>
       <resource href="DefBuff24.txt" />
     </Item>
+	<Item>
+      <name>ShowScoreCheckBoxText</name>
+      <resource href="ShowScoreCheckBoxText.txt" />
+    </Item>
+	<Item>
+      <name>ScaleFontsCheckBoxText</name>
+      <resource href="ScaleFontsCheckBoxText.txt" />
+    </Item>
+	<Item>
+      <name>UseAlternativeRageCheckBoxText</name>
+      <resource href="UseAlternativeRageCheckBoxText.txt" />
+    </Item>
   </items>
 </UIRelatedTexts>
 

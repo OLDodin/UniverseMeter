@@ -1,23 +1,61 @@
 local m_mustUpdateGUI = true
 local m_buffListener = {}
-
+local m_isBtnInAOPanelNow = false
+local m_mainPanelWasVisible = false
+local m_detailPanelWasVisible = false
 --==============================================================================
 --================== AoPanelMod Compatibility ==================================
 --==============================================================================
 
 --------------------------------------------------------------------------------
--- Register AoUMeter
+-- Register UniverseMeter
 --------------------------------------------------------------------------------
 onGenEvent["AOPANEL_START"] = function(params)
-	local SetVal = { val =  userMods.ToWString("D") } 
-	local params = { header =  SetVal , ptype =  "button" , size = 30 } 
+	local SetVal = { val = StrMainBtn } 
+	local params = { header =  SetVal , ptype =  "button" , size =  Settings.ShowPositionOnBtn and 50 or 30 } 
 	userMods.SendEvent("AOPANEL_SEND_ADDON", { name = "UniverseMeter" , sysName = "UniverseMeter" , param = params } )
 	AoPanelDetected = true
-	if DPSMeterGUI then DPSMeterGUI.ShowHideBtn:DnDHide() end
+	m_isBtnInAOPanelNow = true
+	DPSMeterGUI.ShowHideBtn:DnDHide()
+	CurrentScoreOnMainBtn = 0
+end
+
+onGenEvent["EVENT_ADDON_LOAD_STATE_CHANGED"] = function(params)
+	if params.unloading and string.find(params.name, "AOPanel") then
+		DPSMeterGUI.ShowHideBtn:DnDShow()
+		m_isBtnInAOPanelNow = false
+	end
+end
+
+onGenEvent["EVENT_INTERFACE_TOGGLE"] = function(params)
+	if params.toggleTarget == ENUM_InterfaceToggle_Target_All then
+		if not m_isBtnInAOPanelNow then
+			if params.hide then
+				DPSMeterGUI.ShowHideBtn:DnDHide()
+			else
+				DPSMeterGUI.ShowHideBtn:DnDShow()
+			end
+		end
+		if params.hide then
+			m_mainPanelWasVisible = DPSMeterGUI.MainPanel:IsVisible()
+			m_detailPanelWasVisible = DPSMeterGUI.DetailsPanel:IsVisible()
+		end
+		if params.hide then			
+			DPSMeterGUI.MainPanel:DnDHide()
+			DPSMeterGUI.DetailsPanel:DnDHide()
+		else
+			if m_mainPanelWasVisible then
+				DPSMeterGUI.MainPanel:DnDShow()
+			end
+			if m_detailPanelWasVisible then
+				DPSMeterGUI.DetailsPanel:DnDShow()
+			end
+		end
+	end
 end
 
 onMyEvent["AOPANEL_BUTTON_LEFT_CLICK"] = function(params)
-	if params.sender == "UniverseMeter" then
+	if params.sender == common.GetAddonName() then
 		onReaction["ShowHideBtnReaction"]()
 	end
 end
@@ -112,7 +150,7 @@ onReaction["CloseSettingsPanelBtnReaction"] = function(reaction)
 	DPSMeterGUI.SettingsPanel:DnDHide()
 end
 
-onReaction["DefCheckBoxPressed"] = function(reaction)
+onReaction["SettingsCheckBoxPressed"] = function(reaction)
 	CheckBoxSwitch(reaction)
 end
 
@@ -126,8 +164,11 @@ onReaction["SavePressed"] = function(reaction)
 	savedData.skipDmgYourselfIn = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.SkipYourselfCheckBox)
 	savedData.startHided = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.StartHidedCheckBox)
 	savedData.сollectTotalTimelapse = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.TotalTimelapseCheckBox)
+	savedData.showPositionOnBtn = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.ShowScoreCheckBox)
+	savedData.scaleFonts = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.ScaleFontsCheckBox)
+	savedData.useAlternativeRage = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.UseAlternativeRageCheckBox)
 	
-	local parsedCombantants = common.GetIntFromWString(DPSMeterGUI.SettingsPanel.MaxCombatantTextEdit:GetText())
+	local parsedCombantants = DPSMeterGUI.SettingsPanel.MaxCombatantTextEdit:GetText():ToInt()
 	if not parsedCombantants then
 		parsedCombantants = Settings.MaxCombatants 
 	end
@@ -235,7 +276,6 @@ end
 --=========================== EVENTS ===========================================
 --==============================================================================
 
-
 onMyEvent["EVENT_UNITS_CHANGED"] = function(aParams)
 	for _, objID in pairs(aParams.despawned) do
 		if objID then
@@ -301,6 +341,7 @@ onMyEvent["EVENT_SECOND_TIMER"] = function(params)
 	DPSMeterGUI.DPSMeter:SecondTick()
 	DPSMeterGUI.DPSMeter:UpdateCombatantPos()
 
+	DPSMeterGUI:UpdateScoreOnMainBtn()
 	
 	if DPSMeterGUI.DPSMeter.bCollectData then
 		if DPSMeterGUI.DPSMeter:ShouldCollectData() then
@@ -325,6 +366,7 @@ function FastUpdate()
 		DPSMeterGUI.DPSMeter:FastTick()
 		DPSMeterGUI:UpdateValues()
 	end
+	DPSMeterGUI.DPSMeter:CollectPlayersRage()
 end
 --------------------------------------------------------------------------------
 -- Event: EVENT_UNIT_DAMAGE_RECEIVED
@@ -374,12 +416,15 @@ local m_paramsListForDef = {}
 local m_paramsListForHps = {}
 local m_paramsListForIHps = {}
 local m_paramsListForPets = {}
-local m_eventRegistred = false
 
 function ReRegisterEvents()
-	if m_eventRegistred then
+	if GetTableSize(m_paramsListForHps) > 0 or GetTableSize(m_paramsListForIHps) > 0 then
 		common.UnRegisterEvent("EVENT_HEALING_RECEIVED")
+	end
+	if GetTableSize(m_paramsListForDps) > 0 or GetTableSize(m_paramsListForDef) > 0 then
 		common.UnRegisterEvent("EVENT_UNIT_DAMAGE_RECEIVED")
+	end
+	if GetTableSize(m_paramsListForPets) > 0 then
 		common.UnRegisterEvent("EVENT_UNIT_FOLLOWERS_LIST_CHANGED")
 	end
 
@@ -397,8 +442,6 @@ function ReRegisterEvents()
 	RegisterEventHandlersNew("EVENT_UNIT_DAMAGE_RECEIVED", DpsEventReceived, m_paramsListForDps)
 	RegisterEventHandlersNew("EVENT_UNIT_DAMAGE_RECEIVED", DefEventReceived , m_paramsListForDef)
 	RegisterEventHandlersNew("EVENT_UNIT_FOLLOWERS_LIST_CHANGED", ReloadPet, m_paramsListForPets)
-	
-	m_eventRegistred = true
 end
 
 function GetListWithPets(anUnitList)
@@ -471,7 +514,7 @@ end
 
 function GlobalReset()
 	localization = GetGameLocalization()
-	if not common.GetAddonRelatedTextGroup(localization) then
+	if not common.GetAddonRelatedTextGroup(localization, true) then
 		localization = "eng"
 	end
 	
@@ -485,6 +528,9 @@ function GlobalReset()
 		Settings.SkipDmgYourselfIn = savedData.skipDmgYourselfIn
 		Settings.StartHided = savedData.startHided
 		Settings.CollectTotalTimelapse = savedData.сollectTotalTimelapse
+		Settings.ShowPositionOnBtn = savedData.showPositionOnBtn
+		Settings.ScaleFonts = savedData.scaleFonts
+		Settings.UseAlternativeRage = savedData.useAlternativeRage
 		if savedData.maxCombatants then
 			Settings.MaxCombatants = savedData.maxCombatants
 		end
