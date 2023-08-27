@@ -583,7 +583,8 @@ function TUMeterGUI:UpdateValues()
 	self:UpdatePlayerList()
 	self:UpdateSpellList()
 	
-	if not self.DetailsPanel:IsVisible() and not self.HistoryPanel:IsVisible() then
+	
+	if not self.DetailsPanel:IsVisible() and not self.HistoryPanel:IsVisible() and self.ActiveFightMode ~= enumFight.History then
 		--free memory
 		self:CloseHistory()
 	end
