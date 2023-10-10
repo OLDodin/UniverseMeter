@@ -6,6 +6,7 @@
 		<Item href="DpsTemplateBtn/TimeTxt.(WidgetTextView).xdb" />
 		<Item href="DpsTemplateBtn/Button.(WidgetButton).xdb#xpointer(/WidgetButton)" />
 		<Item href="DpsTemplateBtn/LinePanel.(WidgetPanel).xdb" />
+		<Item href="BarrierTemplateBtn/Button.(WidgetButton).xdb#xpointer(/WidgetButton)" />
 	</Children>
 	<Placement>
 		<X>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetButton>
+<Name>BarrierTemplateBtn</Name>
+	<Header>
+		<Prototype href="../DiagramBtn/ButtonRegular.Prototype.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+	</Header>
+	<Priority>2</Priority>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>0</Pos>
+			<Size>10</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>24</HighPos>
+			<Size>74</Size>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+	<Enabled>false</Enabled>
+	<fade>0.6</fade>
+</WidgetButton>

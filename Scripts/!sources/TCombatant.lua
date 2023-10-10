@@ -83,6 +83,20 @@ function TCombatant:GetAmount(aMode)
 	return self.Data[aMode].Amount
 end
 
+--calculation fast because used only for one second timelapse
+function TCombatant:GetBarrierAmount()
+	if not self.Data[enumMode.Def] then 
+		return 0
+	end
+	local barrierAmount = 0
+	for i, spellData in pairs( self.Data[enumMode.Def].SpellsList ) do
+		if spellData.ResistDetailsList and spellData.ResistDetailsList[enumHitBlock.Barrier] then
+			barrierAmount = barrierAmount + spellData.ResistDetailsList[enumHitBlock.Barrier].Amount
+		end
+	end
+	return barrierAmount
+end
+
 --------------------------------------------------------------------------------
 -- Update Global Info
 --------------------------------------------------------------------------------

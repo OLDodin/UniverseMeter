@@ -4,6 +4,7 @@
 	<Header>
 		<Prototype href="../DiagramBtn/ButtonRegular.Prototype.(WidgetButton).xdb#xpointer(/WidgetButton)" />
 	</Header>
+	<Priority>3</Priority>
   <Placement>
     <X>
       <Align>WIDGET_ALIGN_LOW</Align>

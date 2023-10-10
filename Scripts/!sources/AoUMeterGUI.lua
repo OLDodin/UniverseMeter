@@ -63,7 +63,7 @@ function TDetailsPanelGUI:CreateNewObject(name)
 			SpellScrollList = widget.Widget:GetChildChecked("ScrollableContainerV", true),
 			TimeLapsePanel = widget:GetChildByName("ScrollDPSPanel"),
 			TimeLapseScroll = widget:GetChildByName("ScrollDPSPanel"):GetChildByName("ScrollableContainerH"),
-			--DpsTemplateBtnDesc = widget:GetChildByName("ScrollDPSPanel"):GetChildByName("ElementPanel"):GetDesc(),
+			BarrierTemplateBtn = widget:GetChildByName("ScrollDPSPanel"):GetChildByName("ElementPanel"):GetChildByName("BarrierTemplateBtn"):GetDesc(),
 			DpsTemplateBtnDesc = widget:GetChildByName("ScrollDPSPanel"):GetChildByName("ElementPanel"):GetChildByName("DpsTemplateBtn"):GetDesc(),
 			DpsTemplateTxtDesc = widget:GetChildByName("ScrollDPSPanel"):GetChildByName("ElementPanel"):GetChildByName("TimeTextView"):GetDesc(),		
 			DpsTemplateLineDesc = widget:GetChildByName("ScrollDPSPanel"):GetChildByName("ElementPanel"):GetChildByName("LinePanel"):GetDesc(),		
@@ -518,6 +518,9 @@ function TUMeterGUI:CreateTimeLapse()
 	self.DetailsPanel.BigPanel:SetWidth(btnWidth*fightTime+50)
 	self.DetailsPanel.BigPanel:Show()
 	
+	local maxBtnHeight = 235
+	local minBtnHeight = 6
+	
 	for i = 1, fightTime do 
 		local wtName = "DpsBtn" .. i
 		local dpsBtn = TWidget:CreateNewObjectByDesc(wtName, self.DetailsPanel.DpsTemplateBtnDesc, self.DetailsPanel.BigPanel)	
@@ -536,8 +539,20 @@ function TUMeterGUI:CreateTimeLapse()
 			elseif wasDead then
 				dpsBtn.Widget:SetVariant(1)
 			end
+			if self.ActiveDetailMode == enumMode.Def then
+				local barrierAmount = timeLapseCombatant:GetBarrierAmount()
+				if barrierAmount > 0 then
+					local wtBarrierName = "BarrierBtn" .. i
+					local barrierBtn = TWidget:CreateNewObjectByDesc(wtBarrierName, self.DetailsPanel.BarrierTemplateBtn, self.DetailsPanel.BigPanel)	
+					barrierBtn:SetPosition(btnWidth*(i-1))
+					barrierBtn:SetHeight(math.max(math.min(barrierAmount/maxAmount, 1.0)*maxBtnHeight, minBtnHeight+6))
+				end
+			end
 		end
-		local btnHeight = math.max((amount / maxAmount)*235, 6)
+		local btnHeight = math.max((amount / maxAmount)*maxBtnHeight, minBtnHeight)
+		if amount > 0 and btnHeight == minBtnHeight then
+			btnHeight = btnHeight + 3
+		end
 		dpsBtn:SetHeight(btnHeight)
 		
 		--Settings.TimeLapsInterval
