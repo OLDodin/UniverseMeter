@@ -611,7 +611,7 @@ function GlobalReset()
 	
 
 	TitleHealResistType[enumHealResist.Resisted] = GetTextLocalized("Resisted")
-	TitleHealResistType[enumHealResist.RuneResisted] = GetTextLocalized("Rune")
+	TitleHealResistType[enumHealResist.RuneResisted] = GetTextLocalized("HealRuneResisted")
 	TitleHealResistType[enumHealResist.Absorbed] = GetTextLocalized("Absorbed")
 	TitleHealResistType[enumHealResist.Overload] = GetTextLocalized("Overload")
 

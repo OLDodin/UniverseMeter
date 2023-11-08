@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <WidgetButton>
+	<Header>
+		<Prototype href="../CheckBoxTemp/CheckBoxStone.Prototype.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+	</Header>
+
   <Name>TotalTimelapseCheckBox</Name>
   <Priority>1</Priority>
   <Placement>
@@ -14,26 +18,4 @@
       <Size>25</Size>
     </Y>
   </Placement>
-  <IgnoreDblClick>true</IgnoreDblClick>
-  <Variants>
-    <Item>
-      <LayerHighlight href="../CheckBoxTemp/CheckBoxStoneHighlight.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
-      <StateNormal>
-        <LayerMain href="../CheckBoxTemp/CheckBoxStone.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
-      </StateNormal>
-      <StatePushed>
-        <LayerMain href="../CheckBoxTemp/CheckBoxStoneChecked.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
-      </StatePushed>
-      <ReactionOnUp>true</ReactionOnUp>
-      <Reaction>DefCheckBoxPressed</Reaction>
-    </Item>
-    <Item>
-      <LayerHighlight href="../CheckBoxTemp/CheckBoxStoneHighlight.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
-      <StateNormal>
-        <LayerMain href="../CheckBoxTemp/CheckBoxStoneChecked.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
-      </StateNormal>
-      <ReactionOnUp>true</ReactionOnUp>
-      <Reaction>DefCheckBoxPressed</Reaction>
-    </Item>
-  </Variants>
 </WidgetButton>

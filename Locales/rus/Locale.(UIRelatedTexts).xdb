@@ -401,6 +401,10 @@
       <name>UseAlternativeRageCheckBoxText</name>
       <resource href="UseAlternativeRageCheckBoxText.txt" />
     </Item>
+	<Item>
+      <name>HealRuneResisted</name>
+      <resource href="HealRuneResisted.txt" />
+    </Item>
   </items>
 </UIRelatedTexts>
 
