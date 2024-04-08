@@ -156,7 +156,6 @@ function TUMeter:GetInfoFromCache(anID, aCache, aGetInfoFunc)
 	local info = aGetInfoFunc(anID)
 	if info then
 		info.meterInfoID = anID
-		info.nameStr = userMods.FromWString(info.name)
 		table.insert(aCache, info)
 	end
 	return info
@@ -177,9 +176,8 @@ function TUMeter:GetSpellInfoFromParams(aParams)
 	local spellInfo = {}
 	spellInfo.Name = nil
 	local someInfo = self:GetInfoFromParams(aParams)
-	if someInfo and someInfo.nameStr ~= "" then
+	if someInfo and not someInfo.name:IsEmpty() then
 		spellInfo.Name = someInfo.name
-		spellInfo.NameStr = someInfo.nameStr
 	end
 	if spellInfo.Name == nil then
 		spellInfo.Name =
@@ -188,9 +186,8 @@ function TUMeter:GetSpellInfoFromParams(aParams)
 		or aParams.isFall and StrFall
 		or aParams.sourceName and not aParams.sourceName:IsEmpty() and aParams.sourceName
 		or StrUnknown
-		spellInfo.NameStr = userMods.FromWString(spellInfo.Name)
 	end		
-	
+
 	spellInfo.Desc = someInfo and someInfo.description or nil
 
 	local typeElemForId = ""
@@ -221,7 +218,7 @@ function TUMeter:GetSpellInfoFromParams(aParams)
 	end
 
 	spellInfo.sysSubElement = aParams.sysSubElement
-	spellInfo.Identifier = (spellInfo.IsPet and "1" or "0") .. typeElemForId .. spellInfo.NameStr
+	spellInfo.strIdentifier = (spellInfo.IsPet and "1" or "0") .. typeElemForId
 
 	
 	--dd event
@@ -405,7 +402,7 @@ function TUMeter:UpdateFightData(aMode, aCombatant, aSpellInfo)
 		aCombatant:UpdateGlobalInfo(aSpellInfo.Determination, aMode)
 	end
 	
-	local spellData = aCombatant:GetSpellByIdentifier(aSpellInfo.Identifier, aMode, aSpellInfo.sysSubElement)
+	local spellData = aCombatant:GetSpellByIdentifier(aMode, aSpellInfo.strIdentifier, aSpellInfo.sysSubElement, aSpellInfo.Name)
 	if not spellData then
 		spellData = aCombatant:AddNewSpell(aSpellInfo, aMode)
 	end
@@ -413,6 +410,23 @@ function TUMeter:UpdateFightData(aMode, aCombatant, aSpellInfo)
 	aCombatant:UpdateSpellDataByInfo(aSpellInfo, spellData, aMode)
 	
 	self.bHasChangesOnTick = true
+end
+--------------------------------------------------------------------------------
+-- Update the data in the given mode
+--------------------------------------------------------------------------------
+function TUMeter:CollectMissedDataOnStartFight(anObjID)
+	local currFightCombatant = self:GetFightCombatant(anObjID)
+	if not currFightCombatant then return end
+	
+	if not self.bCollectData and currFightCombatant:IsClose() and self:ShouldCollectData() then
+		local periodsArrSize = self.GlobalFightPeriodsArr.length
+		if periodsArrSize > 1 then
+			local prevPeriod = TList:unpackFromList(self.GlobalFightPeriodsArr:prev(self.GlobalFightPeriodsArr.last))
+			if prevPeriod:HasData() then
+				self:Start()
+			end
+		end
+	end
 end
 --------------------------------------------------------------------------------
 -- Start combat
@@ -431,10 +445,8 @@ function TUMeter:Start()
 	self:ResetOffBattleTime()
 		
 	--for catch kill or dmg before start fight event
-	--local periodsArrSize = table.getn(self.GlobalFightPeriodsArr)
 	local periodsArrSize = self.GlobalFightPeriodsArr.length
 	if periodsArrSize > 1 then
-		--local prevPeriod = self.GlobalFightPeriodsArr[periodsArrSize-1]
 		local prevPeriod = TList:unpackFromList(self.GlobalFightPeriodsArr:prev(self.GlobalFightPeriodsArr.last))
 		if prevPeriod:HasData() then
 			self.Fight.Current:AddFightPeriodAndApply(prevPeriod)

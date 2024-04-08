@@ -46,12 +46,12 @@ end
 --------------------------------------------------------------------------------
 -- Get spell by identifier 
 --------------------------------------------------------------------------------
-function TCombatant:GetSpellByIdentifier(anIdentifier, aMode, aSysSubElement)
+function TCombatant:GetSpellByIdentifier(aMode, anIdentifier, aSysSubElement, aName)
 	if not self.Data[aMode] then 
 		return
 	end
 	for i, spellData in pairs( self.Data[aMode].SpellsList ) do
-		if spellData.Identifier == anIdentifier and spellData.Element == aSysSubElement then
+		if spellData.AdditionalID == anIdentifier and spellData.Element == aSysSubElement and spellData.Name == aName then
 			return spellData
 		end
 	end
@@ -143,7 +143,7 @@ function TCombatant:AddNewSpell(aSpellInfo, aMode)
 			SpellData.Name = aSpellInfo.Name
 			SpellData.Suffix = aSpellInfo.Suffix and aSpellInfo.Suffix or nil
 			SpellData.Element = aSpellInfo.sysSubElement
-			SpellData.Identifier = aSpellInfo.Identifier
+			SpellData.AdditionalID = aSpellInfo.strIdentifier
 			SpellData.Desc = aSpellInfo.Desc
 
 			self:CreateCombatantData(aMode)

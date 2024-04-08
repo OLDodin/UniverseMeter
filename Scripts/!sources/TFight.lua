@@ -263,7 +263,7 @@ function TFight:CalculateSpellData(aCombatant, aCombatantFromPeriod, aFightPerio
 			aCombatant:MergeGlobalInfo(mode, aCombatantFromPeriod)
 			if aCombatantFromPeriod.Data[mode] then
 				for _, spellDataFromPeriod in pairs(aCombatantFromPeriod.Data[mode].SpellsList) do
-					local spellData = aCombatant:GetSpellByIdentifier(spellDataFromPeriod.Identifier, mode, spellDataFromPeriod.Element)
+					local spellData = aCombatant:GetSpellByIdentifier(mode, spellDataFromPeriod.AdditionalID, spellDataFromPeriod.Element, spellDataFromPeriod.Name)
 					if not spellData then
 						spellData = aCombatant:AddCopySpell(mode, spellDataFromPeriod, aFightPeriodID)
 					else

@@ -331,6 +331,12 @@ onMyEvent["EVENT_RAID_MEMBER_ADDED"] = onMyEvent["EVENT_GROUP_MEMBER_ADDED"]
 onMyEvent["EVENT_GROUP_MEMBER_CHANGED"] = onMyEvent["EVENT_GROUP_MEMBER_ADDED"]
 onMyEvent["EVENT_RAID_MEMBER_CHANGED"] = onMyEvent["EVENT_GROUP_MEMBER_ADDED"]
 
+onMyEvent["EVENT_OBJECT_COMBAT_STATUS_CHANGED"] = function(params)
+	if params.inCombat and not DPSMeterGUI.DPSMeter.bCollectData then
+		DPSMeterGUI.DPSMeter:CollectMissedDataOnStartFight(params.objectId)
+	end
+end
+
 --------------------------------------------------------------------------------
 -- Event: EVENT_SECOND_TIMER
 --------------------------------------------------------------------------------
