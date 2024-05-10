@@ -13,7 +13,7 @@ function PlayerBuffs:Init(anID)
 	self.addEventFunc = self:GetAddEventFunc()
 	self.changeEventFunc = self:GetChangedEventFunc()
 
-	self.base = CloneTable(PlayerBase)
+	self.base = table.sclone(PlayerBase)
 	self.base:Init()
 
 	self:RegisterEvent(anID)

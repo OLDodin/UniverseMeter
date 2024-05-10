@@ -5,9 +5,9 @@
   <Name>UniverseMeter</Name>
   <ScriptFileRefs>
     <Item href="Scripts/LibDnD.lua"/>
-	<Item href="Scripts/LinkedList.lua"/>
 	<Item href="Scripts/AVL/avl_WStr.lua"/>
     <Item href="Scripts/AOClassLibrary.lua"/>
+	<Item href="Scripts/LinkedList.lua"/>
     <Item href="Scripts/AoUMeterDecl.lua"/>
 	<Item href="Scripts/AoUMeterUtil.lua"/>
 	<Item href="Scripts/TSpellData.lua"/>

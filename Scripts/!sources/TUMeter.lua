@@ -16,6 +16,9 @@ function TUMeter:CreateNewObject()
 			HistoryTotalFights = TList(),
 			HistoryCurrentFights = TList(),
 			LastTickPlayersDetermination = {},
+			CheckMemoryCnt = 0,
+			ClearCacheCnt = 0,
+			bHistoryIncresed = false,
 			
 			BuffInfoCache = {},
 			SpellDescCache = {},
@@ -116,6 +119,9 @@ function TUMeter:SecondTick()
 	newFightPeriod:CleanCopyCombantants(lastPeriod)
 	
 	self.bHasChangesOnTick = false
+	
+	self:CheckClearCache()
+	self:CheckMemoryPanic()
 end
 
 function TUMeter:CollectPlayersRage()
@@ -147,7 +153,7 @@ function TUMeter:GetInfoFromCache(anID, aCache, aGetInfoFunc)
 	if anID == nil then
 		return nil
 	end
-	for _, info in pairs(aCache) do
+	for _, info in ipairs(aCache) do
 		if info.meterInfoID:IsEqual(anID) then
 			return info
 		end
@@ -174,31 +180,27 @@ end
 --------------------------------------------------------------------------------
 function TUMeter:GetSpellInfoFromParams(aParams)
 	local spellInfo = {}
-	spellInfo.Name = nil
-	local someInfo = self:GetInfoFromParams(aParams)
-	if someInfo and not someInfo.name:IsEmpty() then
-		spellInfo.Name = someInfo.name
-	end
-	if spellInfo.Name == nil then
-		spellInfo.Name =
-		aParams.ability and not aParams.ability:IsEmpty() and aParams.ability
-		or aParams.isExploit and StrExploit
-		or aParams.isFall and StrFall
-		or aParams.sourceName and not aParams.sourceName:IsEmpty() and aParams.sourceName
-		or StrUnknown
-	end		
 
-	spellInfo.Desc = someInfo and someInfo.description or nil
-
-	local typeElemForId = ""
 	if aParams.damageSource == "DamageSource_DAMAGEPOOL" then
-		spellInfo.Suffix = StrDamagePool
-		typeElemForId = "p"
+		spellInfo.Name = StrDamagePool
 	elseif aParams.damageSource == "DamageSource_BARRIER" then
-		spellInfo.Suffix = StrFromBarrier
-		typeElemForId = "b"
+		spellInfo.Name = StrFromBarrier
 	else
-		spellInfo.Suffix = nil
+		spellInfo.Name = nil
+		local someInfo = self:GetInfoFromParams(aParams)
+		if someInfo and not someInfo.name:IsEmpty() then
+			spellInfo.Name = someInfo.name
+		end
+		if spellInfo.Name == nil then
+			spellInfo.Name =
+			aParams.ability and not aParams.ability:IsEmpty() and aParams.ability
+			or aParams.isExploit and StrExploit
+			or aParams.isFall and StrFall
+			or aParams.sourceName and not aParams.sourceName:IsEmpty() and aParams.sourceName
+			or StrUnknown
+		end		
+
+		spellInfo.Desc = someInfo and someInfo.description or nil
 	end
 	
 	local sourceId = aParams.source or aParams.healerId or nil
@@ -218,8 +220,6 @@ function TUMeter:GetSpellInfoFromParams(aParams)
 	end
 
 	spellInfo.sysSubElement = aParams.sysSubElement
-	spellInfo.strIdentifier = (spellInfo.IsPet and "1" or "0") .. typeElemForId
-
 	
 	--dd event
 	spellInfo.amount = aParams.amount or aParams.heal
@@ -256,11 +256,11 @@ function TUMeter:GetSpellInfoFromParams(aParams)
 		for i, combatTag in pairs( aParams.targetTags ) do
 			local info = combatTag:GetInfo()
 			if info.isHelpful then 
-				if CompareWStr(info.name, StrDefense) then
+				if info.name == StrDefense then
 					spellInfo.Defense = true
 				end
 			else
-				if CompareWStr(info.name, StrVulnerability) then
+				if info.name == StrVulnerability then
 					spellInfo.Vulnerability = true
 				end
 			end
@@ -270,11 +270,11 @@ function TUMeter:GetSpellInfoFromParams(aParams)
 		for i, combatTag in pairs( aParams.sourceTags ) do
 			local info = combatTag:GetInfo()
 			if info.isHelpful then
-				if CompareWStr(info.name, StrValor) then
+				if info.name == StrValor then
 					spellInfo.Valor = true
 				end
 			else
-				if CompareWStr(info.name, StrWeakness) then
+				if info.name == StrWeakness then
 					spellInfo.Weakness = true
 				end
 			end
@@ -402,7 +402,7 @@ function TUMeter:UpdateFightData(aMode, aCombatant, aSpellInfo)
 		aCombatant:UpdateGlobalInfo(aSpellInfo.Determination, aMode)
 	end
 	
-	local spellData = aCombatant:GetSpellByIdentifier(aMode, aSpellInfo.strIdentifier, aSpellInfo.sysSubElement, aSpellInfo.Name)
+	local spellData = aCombatant:GetSpellByIdentifier(aMode, aSpellInfo.IsPet, aSpellInfo.sysSubElement, aSpellInfo.Name)
 	if not spellData then
 		spellData = aCombatant:AddNewSpell(aSpellInfo, aMode)
 	end
@@ -489,14 +489,16 @@ end
 
 function TUMeter:PushFightFromTotalToHistory()
 	self:PushFightToHistory(self.Fight.Total, self.HistoryTotalFights)
-	ResizeListByMaxSize(self.HistoryTotalFights, 3, false)
+	ResizeListByMaxSize(self.HistoryTotalFights, Settings.HistoryTotalLimit, false)
 	self.Fight.Total = nil
+	self.bHistoryIncresed = true
 end
 
 function TUMeter:PushFightFromCurrentToHistory()
 	self:PushFightToHistory(self.Fight.Current, self.HistoryCurrentFights)
-	ResizeListByMaxSize(self.HistoryCurrentFights, 10, false)
+	ResizeListByMaxSize(self.HistoryCurrentFights, Settings.HistoryCurrentLimit, false)
 	self.Fight.Current = nil
+	self.bHistoryIncresed = true
 end
 
 function TUMeter:PushFightToHistory(aFight, aHistory)
@@ -506,5 +508,39 @@ function TUMeter:PushFightToHistory(aFight, aHistory)
 
 	if aFight:HasData() then
 		aHistory:insert_first(aFight)
+	end
+end
+
+function TUMeter:CheckClearCache()
+	self.ClearCacheCnt = self.ClearCacheCnt + 1
+	if self.ClearCacheCnt < 600 then
+		return
+	end
+	self.ClearCacheCnt = 0
+	
+	if gcinfo() > Settings.MemoryUsageLimit then
+		self.BuffInfoCache = {}
+		self.SpellDescCache = {}
+		self.AbilityInfoCache = {}
+		self.MapModifierInfoCache = {}
+	end
+end
+
+function TUMeter:CheckMemoryPanic()
+	self.CheckMemoryCnt = self.CheckMemoryCnt + 1
+	if self.CheckMemoryCnt < 180 then
+		return
+	end
+	self.CheckMemoryCnt = 0
+	if self.bHistoryIncresed and gcinfo() > Settings.MemoryUsageLimit then
+		--LogInfo("clear on CheckMemoryPanic ", tostring(gcinfo()).."kb", " time = ", GetTimestamp())
+		--при превышении лимита по памяти стираем из каждой истории, но хотя бы 1 оставляем
+		local newHistorySize = math.max(self.HistoryCurrentFights.length - 2, 1)
+		ResizeListByMaxSize(self.HistoryCurrentFights, newHistorySize, false)
+		newHistorySize = math.max(self.HistoryTotalFights.length - 1, 1)
+		ResizeListByMaxSize(self.HistoryTotalFights, newHistorySize, false)
+		--collectgarbage()
+		self.bHistoryIncresed = false
+		--LogInfo("after clear memory usage ", tostring(gcinfo()).."kb", " time = ", GetTimestamp())
 	end
 end

@@ -14,7 +14,7 @@ end
 --------------------------------------------------------------------------------
 -- Make a deep copy of an object (http://oentend.blogspot.com/2009/08/lua.html)
 function DeepCopyObject( object )
-	local lookup_table = {}
+	--[[local lookup_table = {}
 
 	local function _copy( object )
 		if type( object ) ~= "table" then
@@ -33,12 +33,14 @@ function DeepCopyObject( object )
 	end
 
 	return _copy( object )
+	]]
+	return table.clone(object)
 end
 
-function CloneTable( t )
+function SimpleRecursiveCloneTable( t )
 	if type( t ) ~= "table" then return t end
 	local c = {}
-	for i, v in pairs( t ) do c[ i ] = CloneTable( v ) end
+	for i, v in pairs( t ) do c[ i ] = SimpleRecursiveCloneTable( v ) end
 	return c
 end
 
@@ -59,9 +61,7 @@ function GetPercentageAt( Value, ValueAt )
 	return math.floor( ( ValueAt ~= 0 and Value / ValueAt or 0 ) * 100 )
 end
 --------------------------------------------------------------------------------
-function CompareWStr(aValue1, aValue2)
-	return aValue1 == aValue2
-end
+
 --------------------------------------------------------------------------------
 -- Compare the name of 2 spells in order to sort them
 --------------------------------------------------------------------------------
@@ -205,11 +205,11 @@ function ResizeListByMaxSize(aList, aSize, aFromFirst)
 end
 
 function GetTimestamp()
-	return common.GetMsFromDateTime(common.GetLocalDateTime())
+	return common.GetLocalDateTimeMs()
 end
 
 function LogMemoryUsage()
-	LogToChat("memory usage "..tostring(gcinfo()).."kb" )
+	LogToChat("1 memory usage "..tostring(gcinfo()).."kb" )
 end
 
 ------------------------------------------------------------------
@@ -218,7 +218,6 @@ end
 
 function LogToChat(aMessage)
 	if not common.IsWString( aMessage ) then	aMessage = userMods.ToWString(aMessage) end
-	valuedText:SetVal( "text", aMessage )
 	userMods.SendSelfChatMessage(aMessage, "notice")
 end
 

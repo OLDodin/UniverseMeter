@@ -19,7 +19,7 @@ end
 local m_buffCondition = nil
 
 function InitBuffConditionMgr()
-	m_buffCondition = CloneTable(BuffCondition)
+	m_buffCondition = table.sclone(BuffCondition)
 	m_buffCondition:Init(BuffCheckList)
 end
 

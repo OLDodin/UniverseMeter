@@ -8,11 +8,10 @@ local m_rangeMask = 65280 --1111 1111 0000 0000 b
 Global("TCombatantData", {})
 --------------------------------------------------------------------------------
 function TCombatantData:CreateNewObject()
-	return setmetatable({
-			Amount = 0,						-- Total amount
-			SpellsList = {},				-- List of spells used
-			--Determination = nil, -- Determination level
-		}, { __index = self })
+	return 
+	{
+		Amount = 0						-- Total amount
+	}
 end
 
 --------------------------------------------------------------------------------
@@ -25,7 +24,7 @@ function TCombatant:CreateNewObject(anID, aName, aClassName, anIsNear)
 			Name = aName,			-- Name of the combatant
 			Data = {					-- Data (Dps, Hps, Def)
 			},
-			BitPackedValue = 0,
+			BitPackedValue = 0
 		}, { __index = self })
 		
 	obj:SetIsNear(anIsNear)
@@ -46,12 +45,12 @@ end
 --------------------------------------------------------------------------------
 -- Get spell by identifier 
 --------------------------------------------------------------------------------
-function TCombatant:GetSpellByIdentifier(aMode, anIdentifier, aSysSubElement, aName)
+function TCombatant:GetSpellByIdentifier(aMode, anIsPet, aSysSubElement, aName)
 	if not self.Data[aMode] then 
 		return
 	end
-	for i, spellData in pairs( self.Data[aMode].SpellsList ) do
-		if spellData.AdditionalID == anIdentifier and spellData.Element == aSysSubElement and spellData.Name == aName then
+	for _, spellData in ipairs( self.Data[aMode] ) do
+		if IsPetData(spellData) == anIsPet and spellData.Element == aSysSubElement and spellData.Name == aName then
 			return spellData
 		end
 	end
@@ -73,7 +72,7 @@ function TCombatant:GetSpellByIndex(anIndex, aMode)
 	if not self.Data[aMode] then 
 		return
 	end
-	return self.Data[aMode].SpellsList[anIndex]
+	return self.Data[aMode][anIndex]
 end
 
 function TCombatant:GetAmount(aMode)
@@ -89,9 +88,10 @@ function TCombatant:GetBarrierAmount()
 		return 0
 	end
 	local barrierAmount = 0
-	for i, spellData in pairs( self.Data[enumMode.Def].SpellsList ) do
-		if spellData.ResistDetailsList and spellData.ResistDetailsList[enumHitBlock.Barrier] then
-			barrierAmount = barrierAmount + spellData.ResistDetailsList[enumHitBlock.Barrier].Amount
+	for _, spellData in ipairs( self.Data[enumMode.Def] ) do
+		local resistList = ResistDetailsList(spellData)
+		if resistList[enumHitBlock.Barrier] then
+			barrierAmount = barrierAmount + resistList[enumHitBlock.Barrier].Amount
 		end
 	end
 	return barrierAmount
@@ -109,8 +109,8 @@ end
 
 function TCombatant:UpdateGlobalInfo(aDetermination, aMode)
 	self:CreateGlobalInfo(aMode)
-	self.Data[aMode].Determination:RecalcDetails(aDetermination)
-	self.Data[aMode].Determination.Percentage = self.Data[aMode].Determination:GetAvg()
+	TValueDetails.RecalcDetails(self.Data[aMode].Determination, aDetermination)
+	self.Data[aMode].Determination.Percentage = TValueDetails.GetAvg(self.Data[aMode].Determination)
 end
 
 function TCombatant:MergeGlobalInfo(aMode, aCombatantData)
@@ -118,8 +118,8 @@ function TCombatant:MergeGlobalInfo(aMode, aCombatantData)
 		return
 	end
 	self:CreateGlobalInfo(aMode)
-	self.Data[aMode].Determination:MergeDetails(aCombatantData.Data[aMode].Determination)
-	self.Data[aMode].Determination.Percentage = self.Data[aMode].Determination:GetAvg()
+	TValueDetails.MergeDetails(self.Data[aMode].Determination, aCombatantData.Data[aMode].Determination)
+	self.Data[aMode].Determination.Percentage = TValueDetails.GetAvg(self.Data[aMode].Determination)
 end
 --------------------------------------------------------------------------------
 -- Add a new spell to the list
@@ -138,27 +138,28 @@ function TCombatant:AddNewSpell(aSpellInfo, aMode)
 			SpellData = THealSpellData:CreateNewObject()
 		end
 		if SpellData then
-			SpellData.Prefix = aSpellInfo.IsPet and StrPet or nil
-			SpellData.PetName = aSpellInfo.IsPet and aSpellInfo.PetName or nil
+			SpellData.PetName = aSpellInfo.IsPet and (aSpellInfo.PetName and StrPet..aSpellInfo.PetName or StrPet) or nil
 			SpellData.Name = aSpellInfo.Name
-			SpellData.Suffix = aSpellInfo.Suffix and aSpellInfo.Suffix or nil
-			SpellData.Element = aSpellInfo.sysSubElement
-			SpellData.AdditionalID = aSpellInfo.strIdentifier
+			--SpellData.Element = aSpellInfo.sysSubElement
+			SpellData.Element = ENUM_SubElement_Strings[aSpellInfo.sysSubElement]
 			SpellData.Desc = aSpellInfo.Desc
 
 			self:CreateCombatantData(aMode)
-			table.insert(self.Data[aMode].SpellsList, SpellData)
+			table.insert(self.Data[aMode], SpellData)
+			if SpellData.PetName then
+				SpellData.PetName = SpellData.PetName:Truncate(15)
+			end
 			return SpellData
 		end
 	end
 end
 
 function TCombatant:AddCopySpell(aMode, aSpellData, aHitTime)
-	local spellData = DeepCopyObject(aSpellData)
+	local spellData = SimpleRecursiveCloneTable(aSpellData)
 	spellData.FirstHitTime = aHitTime
 	spellData.LastHitTime = aHitTime
 	self:CreateCombatantData(aMode)
-	table.insert(self.Data[aMode].SpellsList, spellData)
+	table.insert(self.Data[aMode], spellData)
 	return spellData
 end
 
@@ -168,19 +169,21 @@ function TCombatant:UpdateSpellDataByInfo(aSpellInfo, aSpellData, aMode)
 	elseif aSpellInfo.lethal and aMode == enumMode.Def then
 		self:SetWasDead(true)
 	end
-	aSpellData:ReceiveValuesFromParams(aSpellInfo)
+	FillSpellDataFromParams(aSpellData, aSpellInfo)
 end
 
 --------------------------------------------------------------------------------
 -- Clear the spell list and data
 --------------------------------------------------------------------------------
 function TCombatant:ClearData()
-	for i, data in pairs( self.Data ) do
+	for _, data in pairs( self.Data ) do
 		data.Amount = 0
 		data.AmountPerSec = nil
 		data.Percentage = nil
 		data.LeaderPercentage = nil
-		data.SpellsList = {}
+		for i, _ in ipairs( data ) do
+			data[i] = nil
+		end
 		data.Determination = nil
 	end
 end
@@ -188,6 +191,9 @@ end
 -- Compare spell by amount
 --------------------------------------------------------------------------------
 local function CompareSpells(A, B)
+	if not A.Name or not B.Name then
+		return false
+	end
 	if A.Amount == B.Amount then
 		return A.Name < B.Name end
 	return A.Amount > B.Amount
@@ -196,7 +202,7 @@ end
 -- Sort the spell list by damage amount
 --------------------------------------------------------------------------------
 function TCombatant:SortSpellByAmount(aMode)
-	table.sort(self.Data[aMode].SpellsList, CompareSpells)
+	table.sort(self.Data[aMode], CompareSpells)
 end
 --------------------------------------------------------------------------------
 -- Calculate the damage, DPS, HPS, according to the fight time
@@ -206,11 +212,11 @@ function TCombatant:CalculateSpell(aFightTime, aMode)
 	if not self.Data[aMode] then
 		return
 	end
-	for i, spellData in pairs( self.Data[aMode].SpellsList ) do
-		local spellResistAmount = spellData:GetResistAmount()
+	for _, spellData in ipairs( self.Data[aMode] ) do
+		local spellResistAmount = GetResistAmount(spellData)
 		spellData.AmountPerSec = spellData.Amount / aFightTime
 		spellData.Percentage = GetPercentageAt(spellData.Amount, self.Data[aMode].Amount)
-		spellData:CalculateSpellDetailsPercentage()
+		CalculateSpellDetailsPercentage(spellData)
 		spellData.ResistPercentage = GetPercentageAt(spellResistAmount, (spellData.Amount + spellResistAmount))
 		if aMode == enumMode.Dps or aMode == enumMode.Def then
 			spellData.ResistPercentage = spellData.ResistPercentage ~= 0 and -1 * spellData.ResistPercentage or spellData.ResistPercentage

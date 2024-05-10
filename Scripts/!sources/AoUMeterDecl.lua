@@ -43,6 +43,9 @@ Global("Settings", {
 		ShowPositionOnBtn = false,			-- show active mode position on btn
 		ScaleFonts = false,
 		UseAlternativeRage = false,			-- update player rage value every FastUpdateInterval
+		MemoryUsageLimit = 50*1024,			-- 50 MB
+		HistoryTotalLimit = 3,
+		HistoryCurrentLimit = 10,
 	})
 --------------------------------------------------------------------------------
 -- Localization
@@ -156,3 +159,19 @@ Global( "BuffCheckList", {})
 Global( "CurrentBuffsState", {})
 
 Global( "CurrentScoreOnMainBtn", 0)
+
+Global( "ENUM_SubElement_Strings", {
+		["ENUM_SubElement_PHYSICAL"]	= "ENUM_SubElement_PHYSICAL",
+		
+		["ENUM_SubElement_FIRE"]		= "ENUM_SubElement_FIRE",
+		["ENUM_SubElement_COLD"]		= "ENUM_SubElement_COLD",
+		["ENUM_SubElement_LIGHTNING"]	= "ENUM_SubElement_LIGHTNING",
+		
+		["ENUM_SubElement_HOLY"]		= "ENUM_SubElement_HOLY",
+		["ENUM_SubElement_SHADOW"]		= "ENUM_SubElement_SHADOW",
+		["ENUM_SubElement_ASTRAL"]		= "ENUM_SubElement_ASTRAL",
+		
+		["ENUM_SubElement_POISON"]		= "ENUM_SubElement_POISON",
+		["ENUM_SubElement_DISEASE"]	    = "ENUM_SubElement_DISEASE",
+		["ENUM_SubElement_ACID"]		= "ENUM_SubElement_ACID",
+	})

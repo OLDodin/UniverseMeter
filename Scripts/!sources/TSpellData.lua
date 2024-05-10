@@ -2,12 +2,13 @@
 Global("TValueDetails", {})
 --------------------------------------------------------------------------------
 function TValueDetails:CreateNewObject()
-	return setmetatable({
-			Count = 0,			-- Count how many input
-			Amount = 0,			-- Total amount cumulated
-			Min = -1,			-- Minimum input
-			Max = -1,			-- Maximum input
-		}, { __index = self })
+	return 
+	{
+		Count = 0,			-- Count how many input
+		Amount = 0,			-- Total amount cumulated
+		Min = -1,			-- Minimum input
+		Max = -1			-- Maximum input
+	}
 end
 --------------------------------------------------------------------------------
 -- Recalc min, max, avg by adding a new value
@@ -43,46 +44,122 @@ function TValueDetails:GetAvg()
 	end
 	return math.ceil(self.Amount / self.Count)
 end
---------------------------------------------------------------------------------
--- Reset
---------------------------------------------------------------------------------
-function TValueDetails:Reset()
-	self.Count = 0
-	self.Percentage = nil
-	self.Amount = 0
-	self.Min = -1
-	self.Max = -1
-end
 
-local function CreateAndRecalcDetails(anObj, aListFunc, anIndex, anAmount)
-	local list = aListFunc(anObj)
-	if not list[anIndex] then
-		list[anIndex] = TValueDetails:CreateNewObject()
+
+local m_enumMissMult = 1
+local m_enumHitMult = 10
+local m_enumHealResist = 100
+local m_enumHitBlockMult = 100
+local m_enumBuffMult = 1000
+local m_customBuffMult = 10000
+
+
+local function CreateAndRecalcDetails(anObj, aList, anIndex, anAmount)
+	if not aList[anIndex] then
+		aList[anIndex] = TValueDetails.CreateNewObject()
 	end
-	list[anIndex]:RecalcDetails(anAmount)
+	TValueDetails.RecalcDetails(aList[anIndex], anAmount)
 end
 
-local function CreateAndMergeDetails(anObj, aListToFunc, aListFrom, anIndex)
+local function CreateAndMergeDetails(anObj, aListTo, aListFrom, anIndex)
 	if not aListFrom or not aListFrom[anIndex] then
 		return
 	end
-	local listTo = aListToFunc(anObj)
-	if not listTo[anIndex] then
-		listTo[anIndex] = TValueDetails:CreateNewObject()
+	if not aListTo[anIndex] then
+		aListTo[anIndex] = TValueDetails:CreateNewObject()
 	end
 	
-	listTo[anIndex]:MergeDetails(aListFrom[anIndex])
+	TValueDetails.MergeDetails(aListTo[anIndex], aListFrom[anIndex])
 end
+
+local function GetFunctionOwnerForSpellData(aSpellData)
+	if aSpellData.Hits ~= nil then
+		return TDamageSpellData
+	else
+		return THealSpellData
+	end
+end
+
+function FillSpellDataFromParams(aSpellData, aParams)
+	return GetFunctionOwnerForSpellData(aSpellData).ReceiveValuesFromParams(aSpellData, aParams)
+end
+
+function AddValuesFromSpellData(aSpellDataTo, aSpellDataFrom, aLastHitTime)
+	return GetFunctionOwnerForSpellData(aSpellDataTo).AddValuesFromSpellData(aSpellDataTo, aSpellDataFrom, aLastHitTime)
+end
+
+function GetAverageCntPerSecond(aSpellData)
+	if aSpellData.LastHitTime == nil or aSpellData.FirstHitTime == nil then 
+		return aSpellData.Count
+	end
+	if aSpellData.LastHitTime - aSpellData.FirstHitTime == 0 then 
+		return aSpellData.Count
+	end
+	return aSpellData.Count / (aSpellData.LastHitTime - aSpellData.FirstHitTime)
+end
+
+function GetResistAmount(aSpellData)
+	return GetFunctionOwnerForSpellData(aSpellData).GetResistAmount(aSpellData)
+end
+
+
+function CalculateSpellDetailsPercentage(aSpellData)
+	return GetFunctionOwnerForSpellData(aSpellData).CalculateSpellDetailsPercentage(aSpellData)
+end
+
+local function MakeList(aList, anEnum, aMult)
+	local res = {}
+	for _, i in pairs(anEnum) do
+		res[i] = aList[i*aMult]
+	end
+	return res
+end
+
+function CustomBuffList(aSpellData)
+	local res = {}
+	for i, _ in ipairs(CurrentBuffsState) do
+		res[i] = aSpellData[i*m_customBuffMult]
+	end
+	return res
+end
+
+function BuffList(aSpellData)
+	return MakeList(aSpellData, enumBuff, m_enumBuffMult)
+end
+
+function MissList(aSpellData)
+	return MakeList(aSpellData, enumMiss, m_enumMissMult)
+end
+
+function DetailsList(aSpellData)
+	return MakeList(aSpellData, enumHit, m_enumHitMult)
+end
+
+function ResistDetailsList(aSpellData)
+	if aSpellData.Hits ~= nil then
+		return MakeList(aSpellData, enumHitBlock, m_enumHitBlockMult)
+	else
+		return MakeList(aSpellData, enumHealResist, m_enumHealResist)
+	end
+end
+
+function IsPetData(aSpellData)
+	return aSpellData.PetName ~= nil
+end
+	
+
+
+
 --------------------------------------------------------------------------------
 -- Type TDamageSpellData
 Global("TDamageSpellData", {})
 --------------------------------------------------------------------------------
 function TDamageSpellData:CreateNewObject()
-	return setmetatable({
+	return {
 			Count = 0,					-- Count how many spell input
 			Hits = 0,					-- Count how many efficient spell input
-			Amount = 0,					-- Total damage amount
-		}, { __index = self })
+			Amount = 0					-- Total damage amount
+		}
 end
 --------------------------------------------------------------------------------
 -- Update the data by adding a new value
@@ -92,58 +169,58 @@ function TDamageSpellData:ReceiveValuesFromParams(aParams)
 	self.Amount = self.Amount + aParams.amount;
 
 
-	if aParams.isMiss then CreateAndRecalcDetails(self, self.GetMissList, enumMiss.Miss, aParams.amount) end
+	if aParams.isMiss then CreateAndRecalcDetails(self, self, enumMiss.Miss*m_enumMissMult, aParams.amount) end
 
-	if aParams.isDodge then CreateAndRecalcDetails(self, self.GetMissList, enumMiss.Dodge, aParams.amount) end
+	if aParams.isDodge then CreateAndRecalcDetails(self, self, enumMiss.Dodge*m_enumMissMult, aParams.amount) end
 
 	if not aParams.isMiss and not aParams.isDodge then
 		self.Hits = self.Hits + 1;
 
-		if aParams.isCritical then CreateAndRecalcDetails(self, self.GetDetailsList, enumHit.Critical, aParams.amount) end
+		if aParams.isCritical then CreateAndRecalcDetails(self, self, enumHit.Critical*m_enumHitMult, aParams.amount) end
 
-		if aParams.isGlancing then CreateAndRecalcDetails(self, self.GetDetailsList, enumHit.Glancing, aParams.amount) end
+		if aParams.isGlancing then CreateAndRecalcDetails(self, self, enumHit.Glancing*m_enumHitMult, aParams.amount) end
 
-		if not aParams.isCritical and not aParams.isGlancing then CreateAndRecalcDetails(self, self.GetDetailsList, enumHit.Normal, aParams.amount) end
+		if not aParams.isCritical and not aParams.isGlancing then CreateAndRecalcDetails(self, self, enumHit.Normal*m_enumHitMult, aParams.amount) end
 	end
 	
 	
-	if aParams.shieldBlock > 0 then CreateAndRecalcDetails(self, self.GetResistDetailsList, enumHitBlock.Block, aParams.shieldBlock) end
+	if aParams.shieldBlock > 0 then CreateAndRecalcDetails(self, self, enumHitBlock.Block*m_enumHitBlockMult, aParams.shieldBlock) end
 
-	if aParams.parry > 0 then CreateAndRecalcDetails(self, self.GetResistDetailsList, enumHitBlock.Parry, aParams.parry) end
+	if aParams.parry > 0 then CreateAndRecalcDetails(self, self, enumHitBlock.Parry*m_enumHitBlockMult, aParams.parry) end
 
-	if aParams.barrier > 0 then CreateAndRecalcDetails(self, self.GetResistDetailsList, enumHitBlock.Barrier, aParams.barrier) end
+	if aParams.barrier > 0 then CreateAndRecalcDetails(self, self, enumHitBlock.Barrier*m_enumHitBlockMult, aParams.barrier) end
 
-	if aParams.resist > 0 then CreateAndRecalcDetails(self, self.GetResistDetailsList, enumHitBlock.Resist, aParams.resist) end
+	if aParams.resist > 0 then CreateAndRecalcDetails(self, self, enumHitBlock.Resist*m_enumHitBlockMult, aParams.resist) end
 
-	if aParams.absorb > 0 then CreateAndRecalcDetails(self, self.GetResistDetailsList, enumHitBlock.Absorb, aParams.absorb) end
+	if aParams.absorb > 0 then CreateAndRecalcDetails(self, self, enumHitBlock.Absorb*m_enumHitBlockMult, aParams.absorb) end
 
-	if aParams.runesAbsorb and aParams.runesAbsorb > 0 then CreateAndRecalcDetails(self, self.GetResistDetailsList, enumHitBlock.RunesAbsorb, aParams.runesAbsorb) end
+	if aParams.runesAbsorb and aParams.runesAbsorb > 0 then CreateAndRecalcDetails(self, self, enumHitBlock.RunesAbsorb*m_enumHitBlockMult, aParams.runesAbsorb) end
 
-	if aParams.toMount > 0 then CreateAndRecalcDetails(self, self.GetResistDetailsList, enumHitBlock.Mount, aParams.toMount) end
+	if aParams.toMount > 0 then CreateAndRecalcDetails(self, self, enumHitBlock.Mount*m_enumHitBlockMult, aParams.toMount) end
 
-	if aParams.multipliersAbsorb ~= 0 then CreateAndRecalcDetails(self, self.GetResistDetailsList, enumHitBlock.MultAbsorb, aParams.multipliersAbsorb) end
+	if aParams.multipliersAbsorb ~= 0 then CreateAndRecalcDetails(self, self, enumHitBlock.MultAbsorb*m_enumHitBlockMult, aParams.multipliersAbsorb) end
 	
 	if aParams.Vulnerability then 
-		CreateAndRecalcDetails(self, self.GetBuffList, enumBuff.Vulnerability, aParams.amount)
+		CreateAndRecalcDetails(self, self, enumBuff.Vulnerability*m_enumBuffMult, aParams.amount)
 	end
 	if aParams.Weakness then 
-		CreateAndRecalcDetails(self, self.GetBuffList, enumBuff.Weakness, aParams.amount)
+		CreateAndRecalcDetails(self, self, enumBuff.Weakness*m_enumBuffMult, aParams.amount)
 	end
 	if aParams.Defense then 
-		CreateAndRecalcDetails(self, self.GetBuffList, enumBuff.Defense, aParams.amount)
+		CreateAndRecalcDetails(self, self, enumBuff.Defense*m_enumBuffMult, aParams.amount)
 	end
 	if aParams.Valor then 
-		CreateAndRecalcDetails(self, self.GetBuffList, enumBuff.Valor, aParams.amount)
+		CreateAndRecalcDetails(self, self, enumBuff.Valor*m_enumBuffMult, aParams.amount)
 	end
 	
 	for i, value in ipairs(CurrentBuffsState) do
 		local srcBuff = value[aParams.sourceID]
 		local targetBuff = value[aParams.targetID]
 		if srcBuff and srcBuff.forDps and srcBuff.forSrc then
-			CreateAndRecalcDetails(self, self.GetCustomBuffList, srcBuff.ind, aParams.amount)
+			CreateAndRecalcDetails(self, self, srcBuff.ind*m_customBuffMult, aParams.amount)
 		end
 		if targetBuff and targetBuff.forDps and targetBuff.forTarget then
-			CreateAndRecalcDetails(self, self.GetCustomBuffList, targetBuff.ind, aParams.amount)
+			CreateAndRecalcDetails(self, self, targetBuff.ind*m_customBuffMult, aParams.amount)
 		end
 	end
 end
@@ -153,89 +230,44 @@ function TDamageSpellData:AddValuesFromSpellData(aSpellData, aLastHitTime)
 	self.Amount = self.Amount + aSpellData.Amount;
 	self.Hits = self.Hits + aSpellData.Hits;
 
-	CreateAndMergeDetails(self, self.GetMissList, aSpellData.MissList, enumMiss.Miss)
-	CreateAndMergeDetails(self, self.GetMissList, aSpellData.MissList, enumMiss.Dodge)
+	CreateAndMergeDetails(self, self, aSpellData, enumMiss.Miss*m_enumMissMult)
+	CreateAndMergeDetails(self, self, aSpellData, enumMiss.Dodge*m_enumMissMult)
 	
-	CreateAndMergeDetails(self, self.GetBuffList, aSpellData.BuffList, enumBuff.Vulnerability)
-	CreateAndMergeDetails(self, self.GetBuffList, aSpellData.BuffList, enumBuff.Weakness)
-	CreateAndMergeDetails(self, self.GetBuffList, aSpellData.BuffList, enumBuff.Defense)
-	CreateAndMergeDetails(self, self.GetBuffList, aSpellData.BuffList, enumBuff.Valor)
+	CreateAndMergeDetails(self, self, aSpellData, enumBuff.Vulnerability*m_enumBuffMult)
+	CreateAndMergeDetails(self, self, aSpellData, enumBuff.Weakness*m_enumBuffMult)
+	CreateAndMergeDetails(self, self, aSpellData, enumBuff.Defense*m_enumBuffMult)
+	CreateAndMergeDetails(self, self, aSpellData, enumBuff.Valor*m_enumBuffMult)
 
-	CreateAndMergeDetails(self, self.GetDetailsList, aSpellData.DetailsList, enumHit.Critical)
-	CreateAndMergeDetails(self, self.GetDetailsList, aSpellData.DetailsList, enumHit.Glancing)
-	CreateAndMergeDetails(self, self.GetDetailsList, aSpellData.DetailsList, enumHit.Normal)
+	CreateAndMergeDetails(self, self, aSpellData, enumHit.Critical*m_enumHitMult)
+	CreateAndMergeDetails(self, self, aSpellData, enumHit.Glancing*m_enumHitMult)
+	CreateAndMergeDetails(self, self, aSpellData, enumHit.Normal*m_enumHitMult)
 	
-	CreateAndMergeDetails(self, self.GetResistDetailsList, aSpellData.ResistDetailsList, enumHitBlock.Block)
-	CreateAndMergeDetails(self, self.GetResistDetailsList, aSpellData.ResistDetailsList, enumHitBlock.Parry)
-	CreateAndMergeDetails(self, self.GetResistDetailsList, aSpellData.ResistDetailsList, enumHitBlock.Barrier)
-	CreateAndMergeDetails(self, self.GetResistDetailsList, aSpellData.ResistDetailsList, enumHitBlock.Resist)
-	CreateAndMergeDetails(self, self.GetResistDetailsList, aSpellData.ResistDetailsList, enumHitBlock.Absorb)
-	CreateAndMergeDetails(self, self.GetResistDetailsList, aSpellData.ResistDetailsList, enumHitBlock.RunesAbsorb)
-	CreateAndMergeDetails(self, self.GetResistDetailsList, aSpellData.ResistDetailsList, enumHitBlock.Mount)
-	CreateAndMergeDetails(self, self.GetResistDetailsList, aSpellData.ResistDetailsList, enumHitBlock.MultAbsorb)
+	CreateAndMergeDetails(self, self, aSpellData, enumHitBlock.Block*m_enumHitBlockMult)
+	CreateAndMergeDetails(self, self, aSpellData, enumHitBlock.Parry*m_enumHitBlockMult)
+	CreateAndMergeDetails(self, self, aSpellData, enumHitBlock.Barrier*m_enumHitBlockMult)
+	CreateAndMergeDetails(self, self, aSpellData, enumHitBlock.Resist*m_enumHitBlockMult)
+	CreateAndMergeDetails(self, self, aSpellData, enumHitBlock.Absorb*m_enumHitBlockMult)
+	CreateAndMergeDetails(self, self, aSpellData, enumHitBlock.RunesAbsorb*m_enumHitBlockMult)
+	CreateAndMergeDetails(self, self, aSpellData, enumHitBlock.Mount*m_enumHitBlockMult)
+	CreateAndMergeDetails(self, self, aSpellData, enumHitBlock.MultAbsorb*m_enumHitBlockMult)
 	
-	for i, value in ipairs(CurrentBuffsState) do
-		CreateAndMergeDetails(self, self.GetCustomBuffList, aSpellData.CustomBuffList, i)
+	for i, _ in ipairs(CurrentBuffsState) do
+		CreateAndMergeDetails(self, self, aSpellData, i*m_customBuffMult)
 	end
 
 	self.LastHitTime = aLastHitTime
+	
 end
 
-function TDamageSpellData:GetCustomBuffList()
-	if not self.CustomBuffList then
-		self.CustomBuffList = {}
-	end
-	return self.CustomBuffList
-end
-
-function TDamageSpellData:GetBuffList()
-	if not self.BuffList then
-		self.BuffList = {}
-	end
-	return self.BuffList
-end
-
-function TDamageSpellData:GetMissList()
-	if not self.MissList then
-		self.MissList = {}
-	end
-	return self.MissList
-end
-
-function TDamageSpellData:GetDetailsList()
-	if not self.DetailsList then
-		self.DetailsList = {}
-	end
-	return self.DetailsList
-end
-
-function TDamageSpellData:GetResistDetailsList()
-	if not self.ResistDetailsList then
-		self.ResistDetailsList = {}
-	end
-	return self.ResistDetailsList
-end
-
-function TDamageSpellData:GetAverageCntPerSecond()
-	if self.LastHitTime == nil or self.FirstHitTime == nil then 
-		return self.Count
-	end
-	if self.LastHitTime - self.FirstHitTime == 0 then 
-		return self.Count
-	end
-	return self.Count / (self.LastHitTime - self.FirstHitTime)
-end
 --------------------------------------------------------------------------------
 -- Get the total blocked damage acount
 --------------------------------------------------------------------------------
 function TDamageSpellData:GetResistAmount()
 	local res = 0
-	if self.ResistDetailsList then
-		for _, blockDmgDetail in pairs( self.ResistDetailsList ) do
-			if blockDmgDetail.Amount > 0 then
-				res = res + blockDmgDetail.Amount
-			end 
-		end
+	for _, blockDmgDetail in pairs( ResistDetailsList(self) ) do
+		if blockDmgDetail.Amount > 0 then
+			res = res + blockDmgDetail.Amount
+		end 
 	end
 	return res
 end
@@ -243,35 +275,28 @@ end
 -- Recalculate the pourcentage for each type of damage
 --------------------------------------------------------------------------------
 function TDamageSpellData:CalculateSpellDetailsPercentage()
-	if self.DetailsList then
-		for _, damageDetail in pairs( self.DetailsList ) do
-			damageDetail.Percentage = GetPercentageAt(damageDetail.Count, self.Hits)
-		end
+	for _, damageDetail in pairs( DetailsList(self) ) do
+		damageDetail.Percentage = GetPercentageAt(damageDetail.Count, self.Hits)
 	end
 
-	if self.MissList then
-		for _, missDetail in pairs( self.MissList ) do
-			missDetail.Percentage = GetPercentageAt(missDetail.Count, self.Count)
-		end
-	end
-	
-	if self.BuffList then
-		for _, buffDetail in pairs( self.BuffList ) do
-			buffDetail.Percentage = GetPercentageAt(buffDetail.Count, self.Count)
-		end
+	for _, missDetail in pairs( MissList(self) ) do
+		missDetail.Percentage = GetPercentageAt(missDetail.Count, self.Count)
 	end
 
-	if self.CustomBuffList then
-		for _, buffDetail in pairs( self.CustomBuffList ) do
-			buffDetail.Percentage = GetPercentageAt(buffDetail.Count, self.Count)
-		end
+
+	for _, buffDetail in pairs( BuffList(self) ) do
+		buffDetail.Percentage = GetPercentageAt(buffDetail.Count, self.Count)
 	end
-	
-	if self.ResistDetailsList then
-		local allDamage = self.Amount + self:GetResistAmount()
-		for _, blockDmgDetail in pairs( self.ResistDetailsList ) do
-			blockDmgDetail.Percentage = GetPercentageAt(blockDmgDetail.Amount, allDamage)
-		end
+
+
+	for _, buffDetail in pairs( CustomBuffList(self) ) do
+		buffDetail.Percentage = GetPercentageAt(buffDetail.Count, self.Count)
+	end
+
+
+	local allDamage = self.Amount + TDamageSpellData.GetResistAmount(self)
+	for _, blockDmgDetail in pairs( ResistDetailsList(self) ) do
+		blockDmgDetail.Percentage = GetPercentageAt(blockDmgDetail.Amount, allDamage)
 	end
 end
 --------------------------------------------------------------------------------
@@ -279,10 +304,10 @@ end
 Global("THealSpellData", {})
 --------------------------------------------------------------------------------
 function THealSpellData:CreateNewObject()
-	return setmetatable({
+	return {
 			Count = 0,					-- Count how many spell inpu			
-			Amount = 0,					-- Total heal amount
-		}, { __index = self })
+			Amount = 0					-- Total heal amount
+		}
 end
 --------------------------------------------------------------------------------
 -- Update the data by adding a new value
@@ -292,20 +317,20 @@ function THealSpellData:ReceiveValuesFromParams(aParams)
 	self.Amount = self.Amount + aParams.heal;
 
 
-	if aParams.isCritical then CreateAndRecalcDetails(self, self.GetDetailsList, enumHit.Critical, aParams.heal) end
+	if aParams.isCritical then CreateAndRecalcDetails(self, self, enumHit.Critical*m_enumHitMult, aParams.heal) end
 
-	if aParams.isGlancing then CreateAndRecalcDetails(self, self.GetDetailsList, enumHit.Glancing, aParams.heal) end
+	if aParams.isGlancing then CreateAndRecalcDetails(self, self, enumHit.Glancing*m_enumHitMult, aParams.heal) end
 
-	if not aParams.isCritical and not aParams.isGlancing then CreateAndRecalcDetails(self, self.GetDetailsList, enumHit.Normal, aParams.heal) end
+	if not aParams.isCritical and not aParams.isGlancing then CreateAndRecalcDetails(self, self, enumHit.Normal*m_enumHitMult, aParams.heal) end
 
 
-	if aParams.resisted > 0 then CreateAndRecalcDetails(self, self.GetResistDetailsList, enumHealResist.Resisted, aParams.resisted) end
+	if aParams.resisted > 0 then CreateAndRecalcDetails(self, self, enumHealResist.Resisted*m_enumHealResist, aParams.resisted) end
 
-	if aParams.runeResisted and aParams.runeResisted > 0 then CreateAndRecalcDetails(self, self.GetResistDetailsList, enumHealResist.RuneResisted, aParams.runeResisted) end
+	if aParams.runeResisted and aParams.runeResisted > 0 then CreateAndRecalcDetails(self, self, enumHealResist.RuneResisted*m_enumHealResist, aParams.runeResisted) end
 
-	if aParams.absorbed > 0 then CreateAndRecalcDetails(self, self.GetResistDetailsList, enumHealResist.Absorbed, aParams.absorbed) end
+	if aParams.absorbed > 0 then CreateAndRecalcDetails(self, self, enumHealResist.Absorbed*m_enumHealResist, aParams.absorbed) end
 
-	if aParams.overload and aParams.overload > 0 then CreateAndRecalcDetails(self, self.GetResistDetailsList, enumHealResist.Overload, aParams.overload) end
+	if aParams.overload and aParams.overload > 0 then CreateAndRecalcDetails(self, self, enumHealResist.Overload*m_enumHealResist, aParams.overload) end
 	
 	-- The amount of the wounds
 	--if aParams.lethality > 0 then CreateAndRecalcDetails(self.GlobalInfoList, enumGlobalInfo.Lethality, aParams.lethality) end
@@ -314,10 +339,10 @@ function THealSpellData:ReceiveValuesFromParams(aParams)
 		local srcBuff = value[aParams.sourceID]
 		local targetBuff = value[aParams.targetID]
 		if srcBuff and srcBuff.forHps and srcBuff.forSrc then
-			CreateAndRecalcDetails(self, self.GetCustomBuffList, srcBuff.ind, aParams.heal)
+			CreateAndRecalcDetails(self, self, srcBuff.ind*m_customBuffMult, aParams.heal)
 		end
 		if targetBuff and targetBuff.forHps and targetBuff.forTarget then
-			CreateAndRecalcDetails(self, self.GetCustomBuffList, targetBuff.ind, aParams.heal)
+			CreateAndRecalcDetails(self, self, targetBuff.ind*m_customBuffMult, aParams.heal)
 		end
 	end
 end
@@ -326,62 +351,29 @@ function THealSpellData:AddValuesFromSpellData(aSpellData, aLastHitTime)
 	self.Count = self.Count + aSpellData.Count;
 	self.Amount = self.Amount + aSpellData.Amount;
 
-	CreateAndMergeDetails(self, self.GetDetailsList, aSpellData.DetailsList, enumHit.Critical)
-	CreateAndMergeDetails(self, self.GetDetailsList, aSpellData.DetailsList, enumHit.Glancing)
-	CreateAndMergeDetails(self, self.GetDetailsList, aSpellData.DetailsList, enumHit.Normal)
+	CreateAndMergeDetails(self, self, aSpellData, enumHit.Critical*m_enumHitMult)
+	CreateAndMergeDetails(self, self, aSpellData, enumHit.Glancing*m_enumHitMult)
+	CreateAndMergeDetails(self, self, aSpellData, enumHit.Normal*m_enumHitMult)
 	
-	CreateAndMergeDetails(self, self.GetResistDetailsList, aSpellData.ResistDetailsList, enumHealResist.Resisted)
-	CreateAndMergeDetails(self, self.GetResistDetailsList, aSpellData.ResistDetailsList, enumHealResist.RuneResisted)
-	CreateAndMergeDetails(self, self.GetResistDetailsList, aSpellData.ResistDetailsList, enumHealResist.Absorbed)
-	CreateAndMergeDetails(self, self.GetResistDetailsList, aSpellData.ResistDetailsList, enumHealResist.Overload)
+	CreateAndMergeDetails(self, self, aSpellData, enumHealResist.Resisted*m_enumHealResist)
+	CreateAndMergeDetails(self, self, aSpellData, enumHealResist.RuneResisted*m_enumHealResist)
+	CreateAndMergeDetails(self, self, aSpellData, enumHealResist.Absorbed*m_enumHealResist)
+	CreateAndMergeDetails(self, self, aSpellData, enumHealResist.Overload*m_enumHealResist)
 	
 	for i, value in ipairs(CurrentBuffsState) do
-		CreateAndMergeDetails(self, self.GetCustomBuffList, aSpellData.CustomBuffList, i)
+		CreateAndMergeDetails(self, self, aSpellData, i*m_customBuffMult)
 	end
 
 	self.LastHitTime = aLastHitTime
 end
 
-function THealSpellData:GetDetailsList()
-	if not self.DetailsList then
-		self.DetailsList = {}
-	end
-	return self.DetailsList
-end
-
-function THealSpellData:GetResistDetailsList()
-	if not self.ResistDetailsList then
-		self.ResistDetailsList = {}
-	end
-	return self.ResistDetailsList
-end
-
-function THealSpellData:GetCustomBuffList()
-	if not self.CustomBuffList then
-		self.CustomBuffList = {}
-	end
-	return self.CustomBuffList
-end
-
-
-function THealSpellData:GetAverageCntPerSecond()
-	if self.LastHitTime == nil or self.FirstHitTime == nil then 
-		return self.Count
-	end
-	if self.LastHitTime - self.FirstHitTime == 0 then 
-		return self.Count
-	end
-	return (self.LastHitTime - self.FirstHitTime) / self.Count
-end
 --------------------------------------------------------------------------------
 -- Get the total resisted heal acount
 --------------------------------------------------------------------------------
 function THealSpellData:GetResistAmount()
 	local res = 0
-	if self.ResistDetailsList then
-		for _, resistHealDetail in pairs( self.ResistDetailsList ) do
-			res = res + resistHealDetail.Amount
-		end
+	for _, resistHealDetail in pairs( ResistDetailsList(self) ) do
+		res = res + resistHealDetail.Amount
 	end
 	return res
 end
@@ -389,20 +381,16 @@ end
 -- Recalculate the pourcentage for each type of heal
 --------------------------------------------------------------------------------
 function THealSpellData:CalculateSpellDetailsPercentage()
-	if self.DetailsList then
-		for _, healDetail in pairs( self.DetailsList ) do
-			healDetail.Percentage = GetPercentageAt(healDetail.Count, self.Count)
-		end
+	for _, healDetail in pairs( DetailsList(self) ) do
+		healDetail.Percentage = GetPercentageAt(healDetail.Count, self.Count)
 	end
-	if self.ResistDetailsList then
-		local allHeal = self.Amount + self:GetResistAmount();
-		for _, resistHealDetail in pairs( self.ResistDetailsList ) do
-			resistHealDetail.Percentage = GetPercentageAt(resistHealDetail.Amount, allHeal)
-		end
+
+	local allHeal = self.Amount + THealSpellData.GetResistAmount(self)
+	for _, resistHealDetail in pairs( ResistDetailsList(self) ) do
+		resistHealDetail.Percentage = GetPercentageAt(resistHealDetail.Amount, allHeal)
 	end
-	if self.CustomBuffList then
-		for _, buffDetail in pairs( self.CustomBuffList ) do
-			buffDetail.Percentage = GetPercentageAt(buffDetail.Count, self.Count)
-		end
+
+	for _, buffDetail in pairs( CustomBuffList(self) ) do
+		buffDetail.Percentage = GetPercentageAt(buffDetail.Count, self.Count)
 	end
 end

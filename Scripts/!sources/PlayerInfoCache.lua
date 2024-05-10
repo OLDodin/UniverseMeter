@@ -1,7 +1,7 @@
 local m_players = {}
 
 local function CreatePlayerSubInfo(anID, aSubClass)
-	local playerSubClassInfo = CloneTable(aSubClass)
+	local playerSubClassInfo = table.sclone(aSubClass)
 	playerSubClassInfo:Init(anID)
 
 	return playerSubClassInfo

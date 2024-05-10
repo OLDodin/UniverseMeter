@@ -16,8 +16,7 @@ function TList:unpackFromList(t)
 	return t.value
 end
 
-function TList:insert_last(t)
-  t=self:packForList(t)
+function TList:insert_last_internal(t)
   if self.last then
     self.last._next = t
     t._prev = self.last
@@ -31,8 +30,11 @@ function TList:insert_last(t)
   self.length = self.length + 1
 end
 
-function TList:insert_first(t)
-  t=self:packForList(t)
+function TList:insert_last(t)
+  self:insert_last_internal(self:packForList(t))
+end
+
+function TList:insert_first_internal(t)
   if self.first then
     self.first._prev = t
     t._next = self.first
@@ -43,6 +45,10 @@ function TList:insert_first(t)
   end
   
   self.length = self.length + 1
+end
+
+function TList:insert_first(t)
+  self:insert_first_internal(self:packForList(t))
 end
 
 function TList:pop()
@@ -126,7 +132,7 @@ end
 function TList:copy()
 	local list = TList()
 	for item in self:iterate() do
-		list:insert_last(self:unpackFromList(item))
+		list:insert_last_internal(item)
 	end
 	return list
 end

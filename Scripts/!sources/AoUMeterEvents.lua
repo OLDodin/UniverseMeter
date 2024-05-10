@@ -57,6 +57,8 @@ end
 onMyEvent["AOPANEL_BUTTON_LEFT_CLICK"] = function(params)
 	if params.sender == common.GetAddonName() then
 		onReaction["ShowHideBtnReaction"]()
+		--collectgarbage()
+		--LogMemoryUsage()
 	end
 end
 
@@ -131,9 +133,6 @@ onReaction["OnConfigPressed"] = function(reaction)
 end
 
 onReaction["OnHistoryPressed"] = function(reaction)
-	--collectgarbage()
-	--LogMemoryUsage()
-	
 	if DPSMeterGUI.HistoryPanel:IsVisible() then
 		DPSMeterGUI.HistoryPanel:DnDHide()
 	else
@@ -379,7 +378,6 @@ end
 --------------------------------------------------------------------------------
 function DpsEventReceived(aParams)
 	if not Settings.ModeDPS then return end
-
 	DPSMeterGUI.DPSMeter:CollectDamageDealedData(aParams)
 end
 
@@ -567,8 +565,6 @@ function GlobalReset()
 	StrDamagePool = userMods.FromWString(GetTextLocalized("DamagePool"))
 	StrFromBarrier = userMods.FromWString(GetTextLocalized("FromBarrier"))
 	
-	StrDamagePool = userMods.ToWString(" (" .. StrDamagePool .. ")")
-	StrFromBarrier = userMods.ToWString(" (" .. StrFromBarrier .. ")")
 	StrNone = userMods.ToWString("")
 	StrPet = userMods.ToWString(StrPet .. "-")
 	StrWeakness = GetTextLocalized("Weakness")

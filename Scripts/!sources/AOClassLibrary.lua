@@ -5,11 +5,7 @@ function GetTableSize( t )
 	if not t then
 		return 0
 	end
-	local count = 0
-	for k, v in pairs( t ) do
-		count = count + 1
-	end
-	return count
+	return table.nkeys(t)
 end
 --------------------------------------------------------------------------------
 
@@ -49,12 +45,6 @@ function LogTable( t, tabstep )
 	if isEmpty then
 		LogInfo( TabString, "{} (empty table)" )
 	end
-end
---------------------------------------------------------------------------------
-function GetExecutionSpeedMs( TimeS, TimeF )
-	local S = TimeS.h * 3600000 + TimeS.m * 60000 + TimeS.s * 1000 + ( TimeS.ms or 0 )
-	local F = TimeF.h * 3600000 + TimeF.m * 60000 + TimeF.s * 1000 + ( TimeF.ms or 0 )
-	return ( F >= S ) and ( F - S ) or ( 86400000 + F - S )
 end
 --------------------------------------------------------------------------------
 function RegisterEventHandlers( handlers)
@@ -103,11 +93,17 @@ function TWidget:CreateNewObject( WidgetName )
 end
 --------------------------------------------------------------------------------
 function TWidget:CreateNewObjectByDesc( WidgetName, Desc, Parent )
-	local Widget = mainForm:CreateWidgetByDesc( Desc )
+	if not Parent then
+		LogInfo("ERROR - no parent for create wdg")
+	end
+	local Widget = Parent.Widget:CreateChildByDesc( Desc )
+	Widget:SetName( WidgetName )
+
+	--[[local Widget = mainForm:CreateWidgetByDesc( Desc )
 	Widget:SetName( WidgetName )
 	if Parent then
 		Parent.Widget:AddChild( Widget )
-	end
+	end]]
 	return setmetatable( { Widget = Widget, LastTagValues = {}, bDraggable = false }, { __index = self } )
 end
 --------------------------------------------------------------------------------

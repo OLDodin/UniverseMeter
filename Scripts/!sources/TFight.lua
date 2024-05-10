@@ -54,10 +54,11 @@ end
 Global("TFightData", {})
 --------------------------------------------------------------------------------
 function TFightData:CreateNewObject()
-	return setmetatable({
-			Amount = 0,			-- Total amount in the fight
-			AmountPerSec = 0	-- Amount per second
-		}, { __index = self })
+	return 
+	{
+		Amount = 0,			-- Total amount in the fight
+		AmountPerSec = 0	-- Amount per second
+	}
 end
 --------------------------------------------------------------------------------
 -- Type TFightPeriod
@@ -66,7 +67,7 @@ Global("TFightPeriod", {})
 function TFightPeriod:CreateNewObject(ID)
 	return setmetatable({
 			ID = ID,							-- ID of the fight
-			CombatantsList = {},	-- List of combatants
+			CombatantsList = {}					-- List of combatants
 		}, { __index = self })
 end
 
@@ -130,7 +131,7 @@ function TFightPeriod:GetCombatant(anID, aName)
 	--если перезаходил и унего сменился id ищем по имени
 	if aName then
 		for i, combatant in pairs( self.CombatantsList ) do
-			if CompareWStr(combatant.Name, aName) then
+			if combatant.Name == aName then
 				return combatant, i
 			end
 		end
@@ -262,12 +263,12 @@ function TFight:CalculateSpellData(aCombatant, aCombatantFromPeriod, aFightPerio
 		for _, mode in pairs(enumMode) do 					
 			aCombatant:MergeGlobalInfo(mode, aCombatantFromPeriod)
 			if aCombatantFromPeriod.Data[mode] then
-				for _, spellDataFromPeriod in pairs(aCombatantFromPeriod.Data[mode].SpellsList) do
-					local spellData = aCombatant:GetSpellByIdentifier(mode, spellDataFromPeriod.AdditionalID, spellDataFromPeriod.Element, spellDataFromPeriod.Name)
+				for _, spellDataFromPeriod in ipairs(aCombatantFromPeriod.Data[mode]) do
+					local spellData = aCombatant:GetSpellByIdentifier(mode, IsPetData(spellDataFromPeriod), spellDataFromPeriod.Element, spellDataFromPeriod.Name)
 					if not spellData then
 						spellData = aCombatant:AddCopySpell(mode, spellDataFromPeriod, aFightPeriodID)
 					else
-						spellData:AddValuesFromSpellData(spellDataFromPeriod, aFightPeriodID)
+						AddValuesFromSpellData(spellData, spellDataFromPeriod, aFightPeriodID)
 					end
 				end
 			end

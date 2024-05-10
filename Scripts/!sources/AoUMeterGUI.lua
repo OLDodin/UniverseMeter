@@ -429,7 +429,7 @@ function TUMeterGUI:DisplayGlobalInfo(aGlobalInfoIndex)
 		globalInfoPanel.Name:SetVal("Name", TitleGlobalInfoType[aGlobalInfoIndex])
 		globalInfoPanel.Count:SetVal("Count", cachedFormatInt(globalInfoData.Count , "%d"))
 		globalInfoPanel.Damage:SetVal("Min", cachedFormatFloat(globalInfoData.Min , "%f3K5"))
-		globalInfoPanel.Damage:SetVal("Avg", cachedFormatFloat(globalInfoData:GetAvg() , "%f3K5"))
+		globalInfoPanel.Damage:SetVal("Avg", cachedFormatFloat(TValueDetails.GetAvg(globalInfoData) , "%f3K5"))
 		globalInfoPanel.Damage:SetVal("Max", cachedFormatFloat(globalInfoData.Max , "%f3K5"))
 		globalInfoPanel.Percent:SetVal("Percentage", cachedFormatInt(globalInfoData.Percentage , "%d"))
 	else
@@ -446,28 +446,24 @@ function TUMeterGUI:DisplaySpell(aSpellIndex)
 		spellData = selectedCombatant:GetSpellByIndex(aSpellIndex, self.ActiveDetailMode)
 	end
 	local spellPanel = self.DetailsPanel.SpellList[aSpellIndex]
-	--if spellPanel then
-		if spellData then
-			spellPanel:Show()
-			
-			spellPanel.Bar:SetColor(DamageTypeColors[spellData.Element] or { r = 1.0; g = 1.0; b = 1.0; a = 1 } )
-			spellPanel.Bar:SetWidth(math.max(self.DetailsPanel.SpellBarWidth * (spellData.Percentage / 100), 1))
+	if spellData then
+		spellPanel:Show()
+		
+		spellPanel.Bar:SetColor(DamageTypeColors[spellData.Element] or { r = 1.0; g = 1.0; b = 1.0; a = 1 } )
+		spellPanel.Bar:SetWidth(math.max(self.DetailsPanel.SpellBarWidth * (spellData.Percentage / 100), 1))
 
-			spellPanel.Name:SetVal("Index", cachedFormatInt(aSpellIndex , "%d"))
-			spellPanel.Name:SetVal("Prefix", spellData.Prefix and spellData.Prefix or StrNone)
-			spellPanel.Name:SetVal("PetName", spellData.PetName and spellData.PetName or StrNone)
-			spellPanel.Name:SetVal("Name", spellData.Name)
-			spellPanel.Name:SetVal("Suffix", spellData.Suffix and spellData.Suffix or StrNone)
-			
-			spellPanel.Damage:SetVal("DamageDone", cachedFormatFloat(spellData.Amount , "%f3K5"))
-			spellPanel.Damage:SetVal("DPS", cachedFormatFloat(spellData.AmountPerSec , "%f3K5"))
-			spellPanel.Damage:SetVal("CPS", cachedFormatFloat(spellData:GetAverageCntPerSecond() , "%.1f"))
-			spellPanel.Damage:SetVal("DamageBlock", cachedFormatFloat(spellData.ResistPercentage , "%g"))
-			spellPanel.Percent:SetVal("Percentage", cachedFormatInt(spellData.Percentage , "%d"))
-		else
-			spellPanel:Hide()
-		end
-	--end
+		spellPanel.Name:SetVal("Index", cachedFormatInt(aSpellIndex , "%d"))
+		spellPanel.Name:SetVal("PetName", spellData.PetName and spellData.PetName or StrNone)
+		spellPanel.Name:SetVal("Name", spellData.Name)
+		
+		spellPanel.Damage:SetVal("DamageDone", cachedFormatFloat(spellData.Amount , "%f3K5"))
+		spellPanel.Damage:SetVal("DPS", cachedFormatFloat(spellData.AmountPerSec , "%f3K5"))
+		spellPanel.Damage:SetVal("CPS", cachedFormatFloat(GetAverageCntPerSecond(spellData) , "%.1f"))
+		spellPanel.Damage:SetVal("DamageBlock", cachedFormatFloat(spellData.ResistPercentage , "%g"))
+		spellPanel.Percent:SetVal("Percentage", cachedFormatInt(spellData.Percentage , "%d"))
+	else
+		spellPanel:Hide()
+	end
 end
 --------------------------------------------------------------------------------
 -- Fill the spell panel
@@ -623,7 +619,7 @@ function TUMeterGUI:DisplaySpellDetails(anIndex, aSpellInfoData, aSpellInfoPanel
 		aSpellInfoPanel.Count:SetVal("Count", cachedFormatInt(aSpellInfoData.Count , "%d"))
 
 		aSpellInfoPanel.Damage:SetVal("Min", cachedFormatFloat(aSpellInfoData.Min , "%f3K5"))
-		aSpellInfoPanel.Damage:SetVal("Avg", cachedFormatFloat(aSpellInfoData:GetAvg() , "%f3K5"))
+		aSpellInfoPanel.Damage:SetVal("Avg", cachedFormatFloat(TValueDetails.GetAvg(aSpellInfoData) , "%f3K5"))
 		aSpellInfoPanel.Damage:SetVal("Max", cachedFormatFloat(aSpellInfoData.Max , "%f3K5"))
 		aSpellInfoPanel.Percent:SetVal("Percentage", cachedFormatInt(aSpellInfoData.Percentage , "%d"))
 	else
@@ -690,53 +686,47 @@ function TUMeterGUI:UpdateSpellDetailsList(spellIndex)
 		local spellDetailBarHeight = 16
 		local showedPanelsCnt = 1
 			
-		showedPanelsCnt = showedPanelsCnt + self:DisplayGroupDetails(spellData.DetailsList, DMGTYPES, self.DetailsPanel.SpellInfoList, TitleDmgType, spellDetailsOffsetY)
+		showedPanelsCnt = showedPanelsCnt + self:DisplayGroupDetails(DetailsList(spellData), DMGTYPES, self.DetailsPanel.SpellInfoList, TitleDmgType, spellDetailsOffsetY)
 		
 		spellDetailsOffsetY = spellDetailsOffsetY + 5
-		showedPanelsCnt = showedPanelsCnt + self:DisplayGroupDetails(spellData.MissList, MISSTYPES, self.DetailsPanel.SpellMissList, TitleMissType, spellDetailsOffsetY + showedPanelsCnt*spellDetailBarHeight)
+		showedPanelsCnt = showedPanelsCnt + self:DisplayGroupDetails(MissList(spellData), MISSTYPES, self.DetailsPanel.SpellMissList, TitleMissType, spellDetailsOffsetY + showedPanelsCnt*spellDetailBarHeight)
 		
 		spellDetailsOffsetY = spellDetailsOffsetY + 5
 		local resistTitle = (self.ActiveDetailMode == enumMode.Hps or self.ActiveDetailMode == enumMode.IHps) and TitleHealResistType or TitleHitBlockType
-		showedPanelsCnt = showedPanelsCnt + self:DisplayGroupDetails(spellData.ResistDetailsList, BLOCKDMGTYPES, self.DetailsPanel.SpellBlockList, resistTitle, spellDetailsOffsetY + showedPanelsCnt*spellDetailBarHeight)
+		showedPanelsCnt = showedPanelsCnt + self:DisplayGroupDetails(ResistDetailsList(spellData), BLOCKDMGTYPES, self.DetailsPanel.SpellBlockList, resistTitle, spellDetailsOffsetY + showedPanelsCnt*spellDetailBarHeight)
 		
 		spellDetailsOffsetY = spellDetailsOffsetY + 5
-		local dpsBuffList = nil
-		if spellData.BuffList then
-			dpsBuffList = {}
-			for i = 1, BUFFTYPES-1 do
-				dpsBuffList[i] = spellData.BuffList[i]
-			end
+		local dpsBuffList = {}
+		--without defence
+		local list = BuffList(spellData)
+		for i = 1, BUFFTYPES-1 do
+			dpsBuffList[i] = list[i]
 		end
+
 		showedPanelsCnt = showedPanelsCnt + self:DisplayGroupDetails(dpsBuffList, BUFFTYPES-1, self.DetailsPanel.SpellDpsBuffList, TitleBuffType, spellDetailsOffsetY + showedPanelsCnt*spellDetailBarHeight)
 		
 		spellDetailsOffsetY = spellDetailsOffsetY + 5
-		local customDpsBuffList = nil
-		if spellData.CustomBuffList then
-			customDpsBuffList = {}
-			for i = 1, DPSHPSTYPES do
-				customDpsBuffList[i] = spellData.CustomBuffList[i]
-			end
+		local customDpsBuffList = {}
+		local list = CustomBuffList(spellData)
+		for i = 1, DPSHPSTYPES do
+			customDpsBuffList[i] = list[i]
 		end
 		showedPanelsCnt = showedPanelsCnt + self:DisplayGroupDetails(customDpsBuffList, DPSHPSTYPES, self.DetailsPanel.SpellCustomDpsBuffList, TitleCustomDpsBuffType, spellDetailsOffsetY + showedPanelsCnt*spellDetailBarHeight)
 		
 		
 		spellDetailsOffsetY = spellDetailsOffsetY + 5
-		local defBuffList = nil
-		if spellData.BuffList then
-			defBuffList = {}
-			defBuffList[1] = spellData.BuffList[enumBuff.Defense]
-		end
+		--defence
+		local defBuffList = {}
+		defBuffList[1] = BuffList(spellData)[enumBuff.Defense]
 		local TitleDefBuffType = {}
 		TitleDefBuffType[1] = TitleBuffType[enumBuff.Defense]
 		showedPanelsCnt = showedPanelsCnt + self:DisplayGroupDetails(defBuffList, 1, self.DetailsPanel.SpellDefBuffList, TitleDefBuffType, spellDetailsOffsetY + showedPanelsCnt*spellDetailBarHeight)
 		
 		spellDetailsOffsetY = spellDetailsOffsetY + 5
-		local customDefBuffList = nil
-		if spellData.CustomBuffList then
-			customDefBuffList = {}
-			for i = 1, DEFTYPES do
-				customDefBuffList[i] = spellData.CustomBuffList[DPSHPSTYPES + i]
-			end
+		local customDefBuffList = {}
+		local list = CustomBuffList(spellData)
+		for i = 1, DEFTYPES do
+			customDefBuffList[i] = list[DPSHPSTYPES + i]
 		end
 		showedPanelsCnt = showedPanelsCnt + self:DisplayGroupDetails(customDefBuffList, DEFTYPES, self.DetailsPanel.SpellCustomDefBuffList, TitleCustomDefBuffType, spellDetailsOffsetY + showedPanelsCnt*spellDetailBarHeight)
 		
