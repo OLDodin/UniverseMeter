@@ -3,6 +3,11 @@
 -- Desc: some useful functions, constants and enums
 --------------------------------------------------------------------------------
 
+local cachedIsExist = object.IsExist
+local cachedIsUnit = object.IsUnit
+local cachedIsPet = unit.IsPet
+local cachedIsPlayer = unit.IsPlayer
+
 --------------------------------------------------------------------------------
 -- Functions
 --------------------------------------------------------------------------------
@@ -44,16 +49,16 @@ function SimpleRecursiveCloneTable( t )
 	return c
 end
 
-function IsExistUnit(id)
-    return id and object.IsExist(id) and object.IsUnit(id)
+function IsExistUnit(anObjID)
+    return anObjID and cachedIsExist(anObjID) and cachedIsUnit(anObjID)
 end
 
-function IsExistPet(id)
-    return id and object.IsExist(id) and unit.IsPet(id)
+function IsExistPet(anObjID)
+    return anObjID and cachedIsExist(anObjID) and cachedIsPet(anObjID)
 end
 
-function IsPlayerOrPet(id)
-    return id and object.IsExist(id) and (unit.IsPlayer(id) or unit.IsPet(id))
+function IsExistPlayer(anObjID)
+	return anObjID and cachedIsExist(anObjID) and cachedIsUnit(anObjID) and cachedIsPlayer(anObjID)
 end
 --------------------------------------------------------------------------------
 -- Get pourcentage from ratio Value / ValueAt

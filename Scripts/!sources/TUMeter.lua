@@ -1,3 +1,11 @@
+local cachedGetBuffInfo = object.GetBuffInfo
+local cachedGetDescription = spellLib.GetDescription
+local cachedGetAbilityInfo = avatar.GetAbilityInfo
+local cachedGetMapModifierInfo = cartographer.GetMapModifierInfo
+local cachedIsPet = unit.IsPet
+local cachedGetRage = unit.GetRage
+local cachedGetName = object.GetName
+
 --------------------------------------------------------------------------------
 -- Type TUMeter
 Global("TUMeter", {})
@@ -36,14 +44,12 @@ function TUMeter:AddNewFightPeriod()
 	self.GlobalFightPeriodsCnt = self.GlobalFightPeriodsCnt + 1
 	local newFightPeriod = TFightPeriod:CreateNewObject(self.GlobalFightPeriodsCnt)
 	self.GlobalFightPeriodsArr:insert_last(newFightPeriod)
-	--table.insert(self.GlobalFightPeriodsArr, newFightPeriod)
 	
 	ResizeListByMaxSize(self.GlobalFightPeriodsArr, 3, true)
 	return newFightPeriod
 end
 
 function TUMeter:GetLastFightPeriod()
-	--return self.GlobalFightPeriodsArr[table.getn(self.GlobalFightPeriodsArr)]
 	return TList:unpackFromList(self.GlobalFightPeriodsArr.last)
 end
 
@@ -133,8 +139,8 @@ function TUMeter:CollectPlayersRage()
 	local unitList = avatar.GetUnitList()
 	table.insert(unitList, avatar.GetId())
 	for _, objID in ipairs(unitList) do
-		 if object.IsExist(objID) and object.IsUnit(objID) and unit.IsPlayer(objID) then
-			self.LastTickPlayersDetermination[objID] = unit.GetRage(objID)
+		 if IsExistPlayer(objID) then
+			self.LastTickPlayersDetermination[objID] = cachedGetRage(objID)
 		 end
 	end
 end
@@ -160,18 +166,21 @@ function TUMeter:GetInfoFromCache(anID, aCache, aGetInfoFunc)
 	end
 
 	local info = aGetInfoFunc(anID)
+	local storeInfo = {}
 	if info then
-		info.meterInfoID = anID
-		table.insert(aCache, info)
+		storeInfo.meterInfoID = anID
+		storeInfo.name = info.name
+		storeInfo.description = info.description
+		table.insert(aCache, storeInfo)
 	end
-	return info
+	return storeInfo
 end
 
 function TUMeter:GetInfoFromParams(aParams)
-	return self:GetInfoFromCache(aParams.buffId, self.BuffInfoCache, object.GetBuffInfo)
-	or self:GetInfoFromCache(aParams.spellId, self.SpellDescCache, spellLib.GetDescription)
-	or self:GetInfoFromCache(aParams.abilityId, self.AbilityInfoCache, avatar.GetAbilityInfo)
-	or self:GetInfoFromCache(aParams.mapModifierId, self.MapModifierInfoCache, cartographer.GetMapModifierInfo)
+	return self:GetInfoFromCache(aParams.buffId, self.BuffInfoCache, cachedGetBuffInfo)
+	or self:GetInfoFromCache(aParams.spellId, self.SpellDescCache, cachedGetDescription)
+	or self:GetInfoFromCache(aParams.abilityId, self.AbilityInfoCache, cachedGetAbilityInfo)
+	or self:GetInfoFromCache(aParams.mapModifierId, self.MapModifierInfoCache, cachedGetMapModifierInfo)
 	or nil
 end
 
@@ -205,14 +214,14 @@ function TUMeter:GetSpellInfoFromParams(aParams)
 	
 	local sourceId = aParams.source or aParams.healerId or nil
 	if IsExistUnit(sourceId) then
-		spellInfo.IsPet =  unit.IsPet(sourceId)
+		spellInfo.IsPet =  cachedIsPet(sourceId)
 		if Settings.UseAlternativeRage then
-			spellInfo.Determination = self.LastTickPlayersDetermination[sourceId] or unit.GetRage(sourceId)
+			spellInfo.Determination = self.LastTickPlayersDetermination[sourceId] or cachedGetRage(sourceId)
 		else
-			spellInfo.Determination = unit.GetRage(sourceId)
+			spellInfo.Determination = cachedGetRage(sourceId)
 		end
 		if spellInfo.IsPet then
-			spellInfo.PetName = object.GetName(sourceId)
+			spellInfo.PetName = cachedGetName(sourceId)
 		end
 	else
 		spellInfo.IsPet = false
@@ -513,7 +522,7 @@ end
 
 function TUMeter:CheckClearCache()
 	self.ClearCacheCnt = self.ClearCacheCnt + 1
-	if self.ClearCacheCnt < 600 then
+	if self.ClearCacheCnt < 300 then
 		return
 	end
 	self.ClearCacheCnt = 0
