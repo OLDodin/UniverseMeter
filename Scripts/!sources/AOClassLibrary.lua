@@ -292,6 +292,21 @@ function TWidget:SetFormat(aValue)
 	end
 end
 
+function TWidget:ClearScrollList()
+	if not self.Widget then
+		return
+	end
+	local containerArr = {}
+	for i = 0, self.Widget:GetElementCount() - 1 do
+		table.insert(containerArr, self.Widget:At(i))
+	end
+	self.Widget:RemoveItems()
+	for _, containerWdg in ipairs(containerArr) do
+		containerWdg:DestroyWidget()
+	end
+end
+
+
 ---------------------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------- INITIALIZATION ------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------

@@ -841,7 +841,7 @@ end
 
 function TUMeterGUI:FillHistoryScroll(aList, aBtnSysName, aBtnShowName, aScrollList)
 	local cnt = 1
-	aScrollList.Widget:RemoveItems()
+	aScrollList:ClearScrollList()
 	for historyElement in aList:iterate() do
 		local wtName = aBtnSysName..tostring(cnt)
 		local btnWdg = TWidget:CreateNewObjectByDesc(wtName, self.HistoryPanel.HistoryBtnDesc, self.HistoryPanel)
