@@ -93,18 +93,12 @@ function TWidget:CreateNewObject( WidgetName )
 end
 --------------------------------------------------------------------------------
 function TWidget:CreateNewObjectByDesc( WidgetName, Desc, Parent )
-	--[[if not Parent then
+	if not Parent then
 		LogInfo("ERROR - no parent for create wdg")
 	end
 	local Widget = Parent.Widget:CreateChildByDesc( Desc )
 	Widget:SetName( WidgetName )
-	]]
 
-	local Widget = mainForm:CreateWidgetByDesc( Desc )
-	Widget:SetName( WidgetName )
-	if Parent then
-		Parent.Widget:AddChild( Widget )
-	end
 	return setmetatable( { Widget = Widget, LastTagValues = {}, bDraggable = false }, { __index = self } )
 end
 --------------------------------------------------------------------------------
