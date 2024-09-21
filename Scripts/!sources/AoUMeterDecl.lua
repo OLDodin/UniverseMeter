@@ -43,7 +43,7 @@ Global("Settings", {
 		ShowPositionOnBtn = false,			-- show active mode position on btn
 		ScaleFonts = false,
 		UseAlternativeRage = false,			-- update player rage value every FastUpdateInterval
-		MemoryUsageLimit = 50*1024,			-- 50 MB
+		MemoryUsageLimit = common.GetClientArch() == CLIENT_ARCH_WIN64 and 300*1024 or 50*1024,	
 		HistoryTotalLimit = 3,
 		HistoryCurrentLimit = 10,
 	})
