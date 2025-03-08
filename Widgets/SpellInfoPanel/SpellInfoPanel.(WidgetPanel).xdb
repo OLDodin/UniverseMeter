@@ -7,9 +7,7 @@
 		<Item href="Buttons/AllTimeBtn/Button.(WidgetButton).xdb#xpointer(/WidgetButton)" />
 		<Item href="Buttons/UpdateTimeLapseBtn/Button.(WidgetButton).xdb#xpointer(/WidgetButton)" />
 		<Item href="GlobalInfoHeaderPanel/GlobalInfoHeaderPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
-		<Item href="SpellPanel/SpellPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
 		<Item href="SpellHeaderPanel/SpellHeaderPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
-		<Item href="SpellDetailPanel/SpellDetailPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
 		<Item href="SpellDetailHeaderPanel/SpellDetailHeaderPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
 		<Item href="TextViews/SpellPlayerName.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
 		<Item href="TextViews/Desc.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />

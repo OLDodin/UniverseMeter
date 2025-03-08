@@ -4,7 +4,6 @@
 	<Priority>6</Priority>
 	<Children>
 		<Item href="ScrollHorizontal\ScrollableContainer.(WidgetPanel).xdb"/>
-		<Item href="ElementPanel.(WidgetPanel).xdb" />
 		<Item href="BigPanel.(WidgetPanel).xdb" />
 	</Children>
 	<Placement>

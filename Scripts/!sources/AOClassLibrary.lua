@@ -1,51 +1,12 @@
 ---------------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------------- HELPER FUNCTIONS -----------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------
-function GetTableSize( t )
-	if not t then
-		return 0
-	end
-	return table.nkeys(t)
+local addonRelatedWidgetGroup = common.GetAddonRelatedWidgetGroup("meter")
+function GetDescFromResource(aName)
+	return addonRelatedWidgetGroup:GetWidget(aName)
 end
 --------------------------------------------------------------------------------
 
---------------------------------------------------------------------------------
-function LogInfo( ... )
-	local arg = {...}
-	local argNorm = {}
-
-	for i, value in pairs(arg) do
-		if common.IsWString( arg[ i ] ) then
-			argNorm[ i ] = arg[ i ]
-		else
-			argNorm[ i ] = tostring( arg[ i ] )
-		end
-	end
-	common.LogInfo( common.GetAddonName(), unpack( argNorm ) )
-end
---------------------------------------------------------------------------------
-function LogTable( t, tabstep )
-	tabstep = tabstep or 1
-	if t == nil then
-		LogInfo( "nil (no table)" )
-		return
-	end
-	assert( type( t ) == "table", "Invalid data passed" )
-	local TabString = string.rep( "    ", tabstep )
-	local isEmpty = true
-	for i, v in pairs( t ) do
-		if type( v ) == "table" then
-			LogInfo( TabString, i, ":" )
-			LogTable( v, tabstep + 1 )
-		else
-			LogInfo( TabString, i, " = ", v )
-		end
-		isEmpty = false
-	end
-	if isEmpty then
-		LogInfo( TabString, "{} (empty table)" )
-	end
-end
 --------------------------------------------------------------------------------
 function RegisterEventHandlers( handlers)
 	for event, handler in pairs( handlers ) do

@@ -7,7 +7,6 @@
 		<Item href="ScrollCurrentPanel.(WidgetPanel).xdb" />
 		<Item href="ScrollTotalPanel.(WidgetPanel).xdb" />
 		<Item href="Header.(WidgetTextView).xdb" />
-		<Item href="Button.(WidgetButton).xdb" />
 	</Children>
 	<BackLayer href="../SettingsPanel/SettingsPanel.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
 	<Placement>

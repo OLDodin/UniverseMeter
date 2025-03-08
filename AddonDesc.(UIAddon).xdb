@@ -1,40 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <UIAddon>
-  <AutoStart>true</AutoStart>
-  <Form href="Widgets/MainForm.(WidgetForm).xdb#xpointer(/WidgetForm)"/>
-  <Name>UniverseMeter</Name>
-  <ScriptFileRefs>
-    <Item href="Scripts/LibDnD.lua"/>
-	<Item href="Scripts/AVL/avl_WStr.lua"/>
-    <Item href="Scripts/AOClassLibrary.lua"/>
-	<Item href="Scripts/LinkedList.lua"/>
-    <Item href="Scripts/AoUMeterDecl.lua"/>
-	<Item href="Scripts/AoUMeterUtil.lua"/>
-	<Item href="Scripts/TSpellData.lua"/>
-	<Item href="Scripts/TCombatant.lua"/>
-	<Item href="Scripts/TFight.lua"/>
-	<Item href="Scripts/TUMeter.lua"/>
-    <Item href="Scripts/AoUMeterGUI.lua"/>
-	<Item href="Scripts/PlayerInfo/PlayerBase.lua"/>
-	<Item href="Scripts/PlayerInfo/PlayerBuffs.lua"/>
-	<Item href="Scripts/BuffCondition.lua"/>
-	<Item href="Scripts/PlayerInfoCache.lua"/>
-	<Item href="Scripts/AoUMeterEvents.lua"/>
-    <Item href="Scripts/AoUMeterInit.lua"/>
-  </ScriptFileRefs>
-  <author>OLDodin</author>
-  <textsGroups>
-    <Item>
-      <groupName>rus</groupName>
-      <texts href="Locales/rus/Locale.(UIRelatedTexts).xdb#xpointer(/UIRelatedTexts)"/>
-    </Item>
-    <Item>
-      <groupName>eng</groupName>
-      <texts href="Locales/eng/Locale.(UIRelatedTexts).xdb#xpointer(/UIRelatedTexts)"/>
-    </Item>
-  </textsGroups>
-  <www/>
-<addon_name>UniverseMeter</addon_name>
-<localizedNameFileRef href="name.txt"/>
-<localizedDescFileRef href="desc.txt"/>
+	<AutoStart>true</AutoStart>
+	<Form href="Widgets/MainForm.(WidgetForm).xdb#xpointer(/WidgetForm)"/>
+	<Name>UniverseMeter</Name>
+	<ScriptFileRefs>
+		<Item href="Scripts/AddonBase.lua"/>
+		<Item href="Scripts/LibDnD.lua"/>
+		<Item href="Scripts/AVL/avl_WStr.lua"/>
+		<Item href="Scripts/AOClassLibrary.lua"/>
+		<Item href="Scripts/LinkedList.lua"/>
+		<Item href="Scripts/AoUMeterDecl.lua"/>
+		<Item href="Scripts/AoUMeterUtil.lua"/>
+		<Item href="Scripts/TSpellData.lua"/>
+		<Item href="Scripts/TCombatant.lua"/>
+		<Item href="Scripts/TFight.lua"/>
+		<Item href="Scripts/TUMeter.lua"/>
+		<Item href="Scripts/AoUMeterGUI.lua"/>
+		<Item href="Scripts/PlayerInfo/PlayerBase.lua"/>
+		<Item href="Scripts/PlayerInfo/PlayerBuffs.lua"/>
+		<Item href="Scripts/BuffCondition.lua"/>
+		<Item href="Scripts/PlayerInfoCache.lua"/>
+		<Item href="Scripts/AoUMeterEvents.lua"/>
+		<Item href="Scripts/AoUMeterInit.lua"/>
+	</ScriptFileRefs>
+	<author>OLDodin</author>
+	<textsGroups>
+		<Item>
+			<groupName>rus</groupName>
+			<texts href="Locales/rus/Locale.(UIRelatedTexts).xdb#xpointer(/UIRelatedTexts)"/>
+		</Item>
+		<Item>
+			<groupName>eng</groupName>
+			<texts href="Locales/eng/Locale.(UIRelatedTexts).xdb#xpointer(/UIRelatedTexts)"/>
+		</Item>
+	</textsGroups>
+	<widgetGroups>
+		<Item>
+			<groupName>meter</groupName>
+			<widgets href="Widgets/Resources/meter/WidgetTemplates.xdb" />
+		</Item>
+	</widgetGroups>
+	<addon_name>UniverseMeter</addon_name>
+	<localizedNameFileRef href="name.txt"/>
+	<localizedDescFileRef href="desc.txt"/>
 </UIAddon>

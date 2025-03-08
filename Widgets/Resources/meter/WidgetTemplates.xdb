@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<UIRelatedWidgets>
+	<items>
+		<Item>
+			<name>TimeTextView</name>
+			<widget href="DpsTemplateBtn/TimeTxt.(WidgetTextView).xdb" />
+		</Item>
+		<Item>
+			<name>DpsTemplateBtn</name>
+			<widget href="DpsTemplateBtn/Button.(WidgetButton).xdb" />
+		</Item>
+		<Item>
+			<name>LinePanel</name>
+			<widget href="DpsTemplateBtn/LinePanel.(WidgetPanel).xdb" />
+		</Item>
+		<Item>
+			<name>BarrierTemplateBtn</name>
+			<widget href="BarrierTemplateBtn/Button.(WidgetButton).xdb" />
+		</Item>
+		<Item>
+			<name>HistoryBtn</name>
+			<widget href="HistoryBtn/Button.(WidgetButton).xdb" />
+		</Item>
+		<Item>
+			<name>TotalInfoPanel</name>
+			<widget href="PlayerInfoPanel/TotalInfoPanel.(WidgetPanel).xdb" />
+		</Item>
+		<Item>
+			<name>PlayerInfoPanel</name>
+			<widget href="PlayerInfoPanel/PlayerInfoPanel.(WidgetPanel).xdb" />
+		</Item>
+		<Item>
+			<name>SpellDetailPanel</name>
+			<widget href="SpellDetailPanel/SpellDetailPanel.(WidgetPanel).xdb" />
+		</Item>
+		<Item>
+			<name>SpellPanel</name>
+			<widget href="SpellPanel/SpellPanel.(WidgetPanel).xdb" />
+		</Item>
+	</items>
+</UIRelatedWidgets>
+

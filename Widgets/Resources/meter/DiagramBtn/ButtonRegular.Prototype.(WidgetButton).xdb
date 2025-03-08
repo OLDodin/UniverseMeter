@@ -13,7 +13,6 @@
 		</Y>
 	</Placement>
 	<IgnoreDblClick>true</IgnoreDblClick>
-	<TextTag>button_label</TextTag>
 	<Variants>
 		<Item>
 			

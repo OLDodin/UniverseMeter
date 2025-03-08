@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetPanel>
+	<Priority>50</Priority>
+	<Name>PlayerInfoBar</Name>
+	<BackLayer href="Bar1.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerSimpleTexture)" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Size>230</Size>
+			<Pos>13</Pos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>2</Pos>
+			<HighPos>2</HighPos>
+		</Y>
+	</Placement>
+</WidgetPanel>

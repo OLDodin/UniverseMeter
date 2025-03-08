@@ -217,15 +217,6 @@ function LogMemoryUsage()
 	LogToChat("1 memory usage "..tostring(gcinfo()).."kb" )
 end
 
-------------------------------------------------------------------
------- Loging To Chat
-------------------------------------------------------------------
-
-function LogToChat(aMessage)
-	if not common.IsWString( aMessage ) then	aMessage = userMods.ToWString(aMessage) end
-	userMods.SendSelfChatMessage(aMessage, "notice")
-end
-
 --------------------------------------------------------------------------------
 -- Timers functions
 --------------------------------------------------------------------------------
@@ -248,7 +239,7 @@ end
 
 function StartTimer(aCallback, aSpeed)
 	if m_timer then 
-		m_timer.widget:DestroyWidget()
+		return
 	end
 	local timerWidget = mainForm:GetChildUnchecked("Timer", false)
 	if not aCallback or not timerWidget then 

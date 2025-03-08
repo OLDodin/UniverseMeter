@@ -19,7 +19,7 @@ function TMainPanelGUI:CreateNewObject(name)
 			FightText = widget:GetChildByName("FightPanel"):GetChildByName("FightNameTextView").Widget, -- Button to switch the active fight
 			ModeBtn = widget:GetChildByName("ModePanel"),
 			ModeText = widget:GetChildByName("ModePanel"):GetChildByName("ModeNameTextView").Widget, -- Button to switch the active mode       
-			TotalPanel = widget:GetChildByName("TotalInfoPanel"), -- Panel to display the total
+			TotalPanel = nil, -- Panel to display the total
 			PlayerList = {}, -- Panel player list
 		}, { __index = widget })
 end
@@ -63,10 +63,10 @@ function TDetailsPanelGUI:CreateNewObject(name)
 			SpellScrollList = widget.Widget:GetChildChecked("ScrollableContainerV", true),
 			TimeLapsePanel = widget:GetChildByName("ScrollDPSPanel"),
 			TimeLapseScroll = widget:GetChildByName("ScrollDPSPanel"):GetChildByName("ScrollableContainerH"),
-			BarrierTemplateBtn = widget:GetChildByName("ScrollDPSPanel"):GetChildByName("ElementPanel"):GetChildByName("BarrierTemplateBtn"):GetDesc(),
-			DpsTemplateBtnDesc = widget:GetChildByName("ScrollDPSPanel"):GetChildByName("ElementPanel"):GetChildByName("DpsTemplateBtn"):GetDesc(),
-			DpsTemplateTxtDesc = widget:GetChildByName("ScrollDPSPanel"):GetChildByName("ElementPanel"):GetChildByName("TimeTextView"):GetDesc(),		
-			DpsTemplateLineDesc = widget:GetChildByName("ScrollDPSPanel"):GetChildByName("ElementPanel"):GetChildByName("LinePanel"):GetDesc(),		
+			BarrierTemplateBtn = GetDescFromResource("BarrierTemplateBtn"),
+			DpsTemplateBtnDesc = GetDescFromResource("DpsTemplateBtn"),
+			DpsTemplateTxtDesc = GetDescFromResource("TimeTextView"),		
+			DpsTemplateLineDesc = GetDescFromResource("LinePanel"),	
 			BigPanel = widget:GetChildByName("ScrollDPSPanel"):GetChildByName("BigPanel"),
 			AllTimeBtn = widget:GetChildByName("AllTimeBtn"),
 			UpdateTimeLapseBtn = widget:GetChildByName("UpdateTimeLapseBtn"),
@@ -129,7 +129,7 @@ function THistoryPanelGUI:CreateNewObject(name)
 			HeaderText = widget:GetChildByName("HeaderText"),
 			HeaderCurrentText = widget:GetChildByName("ScrollCurrentPanel"):GetChildByName("HeaderCurrentText"),
 			HeaderTotalText = widget:GetChildByName("ScrollTotalPanel"):GetChildByName("HeaderTotalText"),
-			HistoryBtnDesc = widget:GetChildByName("HistoryBtn"):GetDesc(),
+			HistoryBtnDesc = GetDescFromResource("HistoryBtn")
 		}, { __index = widget })
 end
 --------------------------------------------------------------------------------
@@ -958,17 +958,16 @@ function TUMeterGUI:Init()
 	-------------------------------------------------------------------------------
 	-- Widget description
 	-------------------------------------------------------------------------------
-	local totalPanelDesc = self.MainPanel.TotalPanel:GetDesc()
-	local playerPanelDesc = self.MainPanel:GetChildByName("PlayerInfoPanel"):GetDesc()
-	local spellPanelDesc = self.DetailsPanel:GetChildByName("SpellPanel"):GetDesc()
-	local spellInfoPanelDesc = self.DetailsPanel:GetChildByName("SpellDetailPanel"):GetDesc()
+	local totalPanelDesc = GetDescFromResource("TotalInfoPanel")
+	local playerPanelDesc = GetDescFromResource("PlayerInfoPanel")
+	local spellPanelDesc = GetDescFromResource("SpellPanel")
+	local spellInfoPanelDesc = GetDescFromResource("SpellDetailPanel")
 
 	-------------------------------------------------------------------------------
 	-- Main Panel
 	-------------------------------------------------------------------------------
 
 	-- Total panel
-	self.MainPanel.TotalPanel:Destroy()
 	self.MainPanel.TotalPanel = TTotalPanelGUI:CreateNewObjectByDesc("TotalPanel", totalPanelDesc, self.MainPanel)
 	self.MainPanel.TotalPanel:SetPosition(20, 47)
 	self.MainPanel.TotalPanel:Show()
@@ -979,7 +978,6 @@ function TUMeterGUI:Init()
 	end
 
 	-- Player list
-	self.MainPanel:GetChildByName("PlayerInfoPanel"):Destroy()
 	for playerIndex = 1, Settings.MaxCombatants do
 		local wtName = "PlayerPanel" .. playerIndex
 		self.MainPanel.PlayerList[playerIndex] = TPlayerPanelGUI:CreateNewObjectByDesc(wtName, playerPanelDesc, self.MainPanel)
@@ -1033,7 +1031,6 @@ function TUMeterGUI:Init()
 	self.DetailsPanel.SpellHeaderPanel:Show()
 
 	-- Spell list
-	self.DetailsPanel:GetChildByName("SpellPanel"):Destroy()
 	local spellListOffset = spellHeaderOffset + 18
 	
 	local spellScrollListPos = self.DetailsPanel.SpellScrollList:GetPlacementPlain()
@@ -1068,7 +1065,6 @@ function TUMeterGUI:Init()
 	self.DetailsPanel.SpellDetailsHeaderPanel:SetPosition(spellDetailsOffsetX, spellDetailsOffsetY)
 
 	-- Spell info
-	self.DetailsPanel:GetChildByName("SpellDetailPanel"):Destroy()
 	local damageOffset = spellDetailsOffsetY + spellDetailBarHeight
 	for infoIndex = 1, DMGTYPES do
 		local wtName = "SpellInfoPanel" .. infoIndex
