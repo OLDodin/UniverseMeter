@@ -175,8 +175,7 @@ onReaction["SavePressed"] = function(reaction)
 	savedData.maxCombatants = parsedCombantants
 	
 	userMods.SetGlobalConfigSection( "UniverseMeterSettings", savedData )
-	common.StateUnloadManagedAddon("UserAddon/UniverseMeter")
-	common.StateLoadManagedAddon("UserAddon/UniverseMeter")
+	common.StateReloadManagedAddon(common.GetAddonSysName())
 	
 	DPSMeterGUI.SettingsPanel:DnDHide()
 end

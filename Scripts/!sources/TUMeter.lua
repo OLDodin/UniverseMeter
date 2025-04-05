@@ -1,4 +1,4 @@
-local cachedGetBuffInfo = object.GetBuffInfo
+local cachedGetBuffTooltipInfo = object.GetBuffTooltipInfo
 local cachedGetDescription = spellLib.GetDescription
 local cachedGetAbilityInfo = avatar.GetAbilityInfo
 local cachedGetMapModifierInfo = cartographer.GetMapModifierInfo
@@ -177,7 +177,7 @@ function TUMeter:GetInfoFromCache(anID, aCache, aGetInfoFunc)
 end
 
 function TUMeter:GetInfoFromParams(aParams)
-	return self:GetInfoFromCache(aParams.buffId, self.BuffInfoCache, cachedGetBuffInfo)
+	return self:GetInfoFromCache(aParams.buffId, self.BuffInfoCache, cachedGetBuffTooltipInfo)
 	or self:GetInfoFromCache(aParams.spellId, self.SpellDescCache, cachedGetDescription)
 	or self:GetInfoFromCache(aParams.abilityId, self.AbilityInfoCache, cachedGetAbilityInfo)
 	or self:GetInfoFromCache(aParams.mapModifierId, self.MapModifierInfoCache, cachedGetMapModifierInfo)

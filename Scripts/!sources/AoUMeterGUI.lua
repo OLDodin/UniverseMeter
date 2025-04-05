@@ -675,7 +675,11 @@ function TUMeterGUI:UpdateSpellDetailsList(spellIndex)
 	if spellData then
 		if spellData.Desc then
 			if not spellData.CachedDesc then
-				spellData.CachedDesc = spellData.Desc:ToWString()
+				if apitype( spellData.Desc ) == "ValuedText" then
+					spellData.CachedDesc = spellData.Desc:ToWString()
+				else
+					spellData.CachedDesc = spellData.Desc
+				end
 			end
 			self.DetailsPanel.DescText:SetVal("Desc", spellData.CachedDesc)
 		else
