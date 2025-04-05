@@ -21,7 +21,7 @@ onGenEvent["AOPANEL_START"] = function(params)
 end
 
 onGenEvent["EVENT_ADDON_LOAD_STATE_CHANGED"] = function(params)
-	if params.unloading and string.find(params.name, "AOPanel") then
+	if params.state == ADDON_STATE_NOT_LOADED and string.find(params.name, "AOPanel") then
 		DPSMeterGUI.ShowHideBtn:DnDShow()
 		m_isBtnInAOPanelNow = false
 	end
