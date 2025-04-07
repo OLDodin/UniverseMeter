@@ -3,6 +3,18 @@
 	<AutoStart>true</AutoStart>
 	<Form href="Widgets/MainForm.(WidgetForm).xdb#xpointer(/WidgetForm)"/>
 	<Name>UniverseMeter</Name>
+	<userAddonInfo>
+		<name href="name.txt" />
+		<description href="desc.txt" />
+		<license href="LICENSE" />
+		<sourceLink href="" />
+		<supportLink href="" />
+		<author>OLDodin</author>
+		<version></version>
+		<apiVersion>-1</apiVersion>
+		<buildTime>0</buildTime>
+		<useCommonScripts>false</useCommonScripts>
+	</userAddonInfo>
 	<ScriptFileRefs>
 		<Item href="Scripts/AddonBase.lua"/>
 		<Item href="Scripts/LibDnD.lua"/>
@@ -23,7 +35,6 @@
 		<Item href="Scripts/AoUMeterEvents.lua"/>
 		<Item href="Scripts/AoUMeterInit.lua"/>
 	</ScriptFileRefs>
-	<author>OLDodin</author>
 	<textsGroups>
 		<Item>
 			<groupName>rus</groupName>
@@ -40,7 +51,4 @@
 			<widgets href="Widgets/Resources/meter/WidgetTemplates.xdb" />
 		</Item>
 	</widgetGroups>
-	<addon_name>UniverseMeter</addon_name>
-	<localizedNameFileRef href="name.txt"/>
-	<localizedDescFileRef href="desc.txt"/>
 </UIAddon>
