@@ -184,6 +184,15 @@ function TUMeter:GetInfoFromParams(aParams)
 	or nil
 end
 
+-- например, для парных боссов приходит урон и для 2го, но уже только с указанием sourceName targetName
+local function BuildBySourceName(aSrcName, aTargetName)
+	local spellName = aSrcName and not aSrcName:IsEmpty() and aSrcName
+	if spellName and aTargetName then
+		spellName = spellName..StrArrow..aTargetName
+	end
+	return spellName
+end
+
 --------------------------------------------------------------------------------
 -- Get information of a spell
 --------------------------------------------------------------------------------
@@ -205,7 +214,7 @@ function TUMeter:GetSpellInfoFromParams(aParams)
 			aParams.ability and not aParams.ability:IsEmpty() and aParams.ability
 			or aParams.isExploit and StrExploit
 			or aParams.isFall and StrFall
-			or aParams.sourceName and not aParams.sourceName:IsEmpty() and aParams.sourceName
+			or BuildBySourceName(aParams.sourceName, aParams.targetName)
 			or StrUnknown
 		end		
 

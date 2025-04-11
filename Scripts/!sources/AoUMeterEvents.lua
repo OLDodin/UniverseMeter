@@ -275,13 +275,13 @@ end
 --==============================================================================
 
 onMyEvent["EVENT_UNITS_CHANGED"] = function(aParams)
-	for _, objID in pairs(aParams.despawned) do
+	for _, objID in ipairs(aParams.despawned) do
 		if objID then
 			UnsubscribeListeners(objID)
 		end
 	end
 	FabricDestroyUnused()
-	for _, objID in pairs(aParams.spawned) do
+	for _, objID in ipairs(aParams.spawned) do
 		FabricMakePlayerInfo(objID, m_buffListener)
 	end
 end
@@ -421,15 +421,12 @@ local m_paramsListForIHps = {}
 local m_paramsListForPets = {}
 
 function ReRegisterEvents()
-	if GetTableSize(m_paramsListForHps) > 0 or GetTableSize(m_paramsListForIHps) > 0 then
-		common.UnRegisterEvent("EVENT_HEALING_RECEIVED")
-	end
-	if GetTableSize(m_paramsListForDps) > 0 or GetTableSize(m_paramsListForDef) > 0 then
-		common.UnRegisterEvent("EVENT_UNIT_DAMAGE_RECEIVED")
-	end
-	if GetTableSize(m_paramsListForPets) > 0 then
-		common.UnRegisterEvent("EVENT_UNIT_FOLLOWERS_LIST_CHANGED")
-	end
+	UnRegisterEventHandlersNew("EVENT_HEALING_RECEIVED", HpsEventReceived, m_paramsListForHps)
+	UnRegisterEventHandlersNew("EVENT_HEALING_RECEIVED", IHpsEventReceived, m_paramsListForIHps)
+	UnRegisterEventHandlersNew("EVENT_UNIT_DAMAGE_RECEIVED", DpsEventReceived, m_paramsListForDps)
+	UnRegisterEventHandlersNew("EVENT_UNIT_DAMAGE_RECEIVED", DefEventReceived , m_paramsListForDef)
+	UnRegisterEventHandlersNew("EVENT_UNIT_FOLLOWERS_LIST_CHANGED", ReloadPet, m_paramsListForPets)
+
 
 	local unitList = GetPartyMembers()
 	BuildEventParamsForDef(unitList)
@@ -501,6 +498,16 @@ function BuildEventParamsForPetChanged(anUnitList)
 		if member.id then
 			table.insert(m_paramsListForPets, {id = member.id})
 		end
+	end
+end
+
+function UnRegisterEventHandlersNew(anEvent, aHandler, aParamList)
+	if aParamList then 
+		for _, params in ipairs(aParamList) do 
+			common.UnRegisterEventHandler(aHandler, anEvent, params)
+		end
+	else 
+		common.UnRegisterEventHandler(aHandler, anEvent)
 	end
 end
 
