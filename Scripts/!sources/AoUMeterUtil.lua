@@ -223,17 +223,16 @@ end
 local m_timer = nil
 
 function OnTimer(aParams)
-	if not aParams.effectType == ET_FADE then
+	if aParams.effectType ~= ET_FADE then
 		return
 	end
 	if not m_timer then
 		return
 	end
-	if not aParams.wtOwner:IsEqual(m_timer.widget) then
+	if aParams.wtOwner ~= m_timer.widget then
 		return
 	end
 
-	m_timer.widget:PlayFadeEffect( 1.0, 1.0, m_timer.speed*1000, EA_MONOTONOUS_INCREASE, true )
 	m_timer.callback()
 end
 
@@ -250,7 +249,8 @@ function StartTimer(aCallback, aSpeed)
 	m_timer.widget = timerWidget
 	m_timer.speed = tonumber(aSpeed) or 1
 
-	common.RegisterEventHandler(OnTimer, "EVENT_EFFECT_FINISHED")
-    timerWidget:PlayFadeEffect(1.0, 1.0, m_timer.speed*1000, EA_MONOTONOUS_INCREASE, true )
+	common.RegisterEventHandler(OnTimer, "EVENT_EFFECT_SEQUENCE_STEP")
+	timerWidget:PlayFadeEffectSequence({ { 1.0, 1.0, m_timer.speed*1000, EA_MONOTONOUS_INCREASE }, cycled = true, sendStepEvent = true })
+
 	return true
 end
