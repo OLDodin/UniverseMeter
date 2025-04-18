@@ -340,7 +340,7 @@ end
 --------------------------------------------------------------------------------
 onMyEvent["EVENT_SECOND_TIMER"] = function(params)
 	OnEventSecondZatichka()
-	UpdateFabric()
+	--UpdateFabric()
 	
 	DPSMeterGUI.DPSMeter:SecondTick()
 	DPSMeterGUI.DPSMeter:UpdateCombatantPos()
