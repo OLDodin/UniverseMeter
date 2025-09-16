@@ -187,6 +187,7 @@ function TSpellPanelGUI:CreateNewObjectByDesc(name, desc, owner)
 			CPS = widget:GetChildByName("SpellTextViewCPS").Widget,
 			DmgBlock = widget:GetChildByName("SpellTextViewDmgBlock").Widget,
 			Percent = widget:GetChildByName("SpellTextViewPercentage").Widget,
+			DeadImg = widget:GetChildByName("DeadImg"),
 		}, { __index = widget })
 end
 --------------------------------------------------------------------------------
@@ -523,6 +524,12 @@ function TUMeterGUI:DisplaySpell(aSpellIndex, aCombatant)
 		spellPanel.CPS:SetVal("CPS", cachedFormatFloat(GetAverageCntPerSecond(spellData) , "%.1f"))
 		spellPanel.DmgBlock:SetVal("DamageBlock", cachedFormatFloat(spellData.ResistPercentage , "%g"))
 		spellPanel.Percent:SetVal("Percentage", cachedFormatInt(spellData.Percentage , "%d"))
+		
+		if spellData.WasDead then
+			spellPanel.DeadImg:Show()
+		else
+			spellPanel.DeadImg:Hide()
+		end
 	else
 		spellPanel:Hide()
 	end
@@ -570,12 +577,12 @@ function TUMeterGUI:CreateTimeLapse()
 		timeLapse[i].selectedCombatant = selectedCombatant
 		maxAmount = math.max(amount, maxAmount)
 	end
-	local btnWidth = 4
+	local btnWidth = 5
 	self.DetailsPanel.BigPanel:DestroyAllChild()
 	self.DetailsPanel.BigPanel:SetWidth(btnWidth*fightTime+50)
 	self.DetailsPanel.BigPanel:Show()
 	
-	local maxBtnHeight = 235
+	local maxBtnHeight = 230
 	local minBtnHeight = 6
 	
 	for i = 1, fightTime do 
@@ -610,7 +617,9 @@ function TUMeterGUI:CreateTimeLapse()
 					end
 				end
 		
-				local btnHeight = math.max((amount / maxAmount)*maxBtnHeight, minBtnHeight)
+				--local btnHeight = math.max((amount / maxAmount)*maxBtnHeight, minBtnHeight)
+				
+				local btnHeight = (amount / maxAmount)*maxBtnHeight + minBtnHeight
 				
 				dpsBtn:SetWidth(btnWidth)
 				dpsBtn:SetHeight(btnHeight)

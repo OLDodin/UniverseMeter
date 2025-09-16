@@ -278,8 +278,8 @@ onMyEvent["EVENT_UNITS_CHANGED"] = function(aParams)
 		if objID then
 			UnsubscribeListeners(objID)
 			
-			for i, _ in ipairs(CurrentBuffsState) do
-				CurrentBuffsState[i][objID] = nil
+			for i, buffState in ipairs(CurrentBuffsState) do
+				buffState[objID] = nil
 			end
 		end
 	end

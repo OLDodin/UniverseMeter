@@ -60,10 +60,9 @@ function PlayerRage:GetEventFunc()
 end
 
 function PlayerRage:RegisterEvent(anID)
---	self.unitParams.unitId = anID
---	cachedRegisterEventHandler(self.eventFunc, "EVENT_UNIT_RAGE_CHANGED", self.unitParams)
+
 end
 
 function PlayerRage:UnRegisterEvent()
---	cachedUnRegisterEventHandler(self.eventFunc, "EVENT_UNIT_RAGE_CHANGED", self.unitParams)
+
 end

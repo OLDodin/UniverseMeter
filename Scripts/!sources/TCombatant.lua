@@ -198,17 +198,19 @@ end
 --------------------------------------------------------------------------------
 function TCombatant:AddNewSpell(aSpellInfo, aMode)
 	if aSpellInfo then
-		if aSpellInfo.lethal and aMode == enumMode.Dps then
-			self:SetWasKill(true)
-		elseif aSpellInfo.lethal and aMode == enumMode.Def then
-			self:SetWasDead(true)
-		end
 		local SpellData
 		if aMode == enumMode.Dps or aMode == enumMode.Def then
 			SpellData = TDamageSpellData:CreateNewObject()
 		elseif aMode == enumMode.Hps or aMode == enumMode.IHps  then
 			SpellData = THealSpellData:CreateNewObject()
 		end
+		if aSpellInfo.lethal and aMode == enumMode.Dps then
+			self:SetWasKill(true)
+		elseif aSpellInfo.lethal and aMode == enumMode.Def then
+			self:SetWasDead(true)
+			SpellData.WasDead = true
+		end
+		
 		if SpellData then
 			SpellData.PetName = aSpellInfo.PetName
 			SpellData.Name = aSpellInfo.Name
@@ -240,6 +242,7 @@ function TCombatant:UpdateSpellDataByInfo(aSpellInfo, aSpellData, aMode)
 		self:SetWasKill(true)
 	elseif aSpellInfo.lethal and aMode == enumMode.Def then
 		self:SetWasDead(true)
+		aSpellData.WasDead = true
 	end
 	FillSpellDataFromParams(aSpellData, aSpellInfo)
 end

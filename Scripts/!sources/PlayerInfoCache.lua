@@ -9,12 +9,6 @@ local function CreatePlayerSubInfo(anID, aSubClass)
 	return playerSubClassInfo
 end
 
-function FabricMakePlayerInfoIfNotExist(anID, aListener)
-	if not m_players[anID] then
-		FabricMakePlayerInfo(anID, aListener)
-	end
-end
-
 function FabricMakePlayerInfo(anID, aListener)
 	if not IsExistUnit(anID) then
 		return
