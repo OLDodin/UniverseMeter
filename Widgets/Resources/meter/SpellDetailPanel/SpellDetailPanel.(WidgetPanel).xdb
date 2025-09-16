@@ -2,11 +2,16 @@
 <WidgetPanel>
 	<Name>SpellDetailPanel</Name>
 	<Children>
-		<Item href="SpellDetailBar/SpellDetailBar.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
-		<Item href="TextViews/Name.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
-		<Item href="TextViews/Count.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
-		<Item href="TextViews/DamageStats.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
-		<Item href="TextViews/DamagePercentage.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="SpellDetailBar/SpellDetailBar.(WidgetPanel).xdb" />
+		<Item href="TextViews/Name.(WidgetTextView).xdb" />
+		<Item href="TextViews/Count.(WidgetTextView).xdb" />
+		<Item href="TextViews/DamagePercentage.(WidgetTextView).xdb" />
+		
+		<Item href="TextViews/StatsMin.xdb" />
+		<Item href="TextViews/StatsSeparator1.xdb" />
+		<Item href="TextViews/StatsAvg.xdb" />
+		<Item href="TextViews/StatsSeparator2.xdb" />
+		<Item href="TextViews/StatsMax.xdb" />
 	</Children>
 	<BackLayer href="" />
 	<Placement>

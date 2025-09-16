@@ -23,15 +23,12 @@ function TUMeter:CreateNewObject()
 			GlobalFightPeriodsCnt = 1,
 			HistoryTotalFights = TList(),
 			HistoryCurrentFights = TList(),
-			LastTickPlayersDetermination = {},
+			CurrentPlayersDetermination = {}, 
+			LastTickPlayersDetermination = { timestamp = 0 },
+			LastLastTickPlayersDetermination = { timestamp = 0 },
 			CheckMemoryCnt = 0,
-			ClearCacheCnt = 0,
 			bHistoryIncresed = false,
 			
-			BuffInfoCache = {},
-			SpellDescCache = {},
-			AbilityInfoCache = {},
-			MapModifierInfoCache = {},
 			EmptyPeriod =  TFightPeriod:CreateNewObject(-1)
 		}, { __index = self })
 	local newFightPeriod = obj:AddNewFightPeriod()
@@ -126,62 +123,63 @@ function TUMeter:SecondTick()
 	
 	self.bHasChangesOnTick = false
 	
-	self:CheckClearCache()
 	self:CheckMemoryPanic()
 end
 
-function TUMeter:CollectPlayersRage()
-	if not Settings.UseAlternativeRage then
-		return
-	end
-	self.LastTickPlayersDetermination = {}
+function TUMeter:UpdateUnitRage(anID, aValue)
+	self.CurrentPlayersDetermination[anID] = aValue
+end
+
+function TUMeter:CollectUnitsRage()
+	self.LastLastTickPlayersDetermination = self.LastTickPlayersDetermination
 	
-	local unitList = avatar.GetUnitList()
-	table.insert(unitList, avatar.GetId())
-	for _, objID in ipairs(unitList) do
-		 if IsExistPlayer(objID) then
-			self.LastTickPlayersDetermination[objID] = cachedGetRage(objID)
-		 end
+	self.LastTickPlayersDetermination = self.CurrentPlayersDetermination
+	self.LastTickPlayersDetermination.timestamp = common.GetLocalDateTimeMs()
+	
+	self.CurrentPlayersDetermination = {}
+end
+
+function TUMeter:GetUnitRage(anID)
+	if not anID then
+		return nil
 	end
+	local determinationArr = self.LastTickPlayersDetermination
+	if common.GetLocalDateTimeMs() - self.LastTickPlayersDetermination.timestamp < 50 then
+		determinationArr = self.LastLastTickPlayersDetermination
+	end
+	
+	if not determinationArr[anID] then
+		determinationArr[anID] = IsExistUnit(anID) and cachedGetRage(anID) or nil
+	end
+	
+	return determinationArr[anID]
 end
 
 function TUMeter:GetFightCombatant(anID)
 	if not anID then return end
 	local combatant = self:GetLastFightPeriod():GetCombatant(anID)
-	if not combatant then
+	if combatant then
+		return combatant, false
+	else
 		local masterID = unit.GetFollowerMaster(anID)
 		combatant = self:GetLastFightPeriod():GetCombatant(masterID)
+		return combatant, true
 	end
-	return combatant
 end
 
-function TUMeter:GetInfoFromCache(anID, aCache, aGetInfoFunc)
-	if anID == nil then
-		return nil
+function TUMeter:GetInfoFromID(anID)
+	local typeOfID = apitype(anID)
+	if typeOfID == "SpellId" then
+		return cachedGetDescription(anID)
+	elseif typeOfID == "AbilityId" then
+		return cachedGetAbilityInfo(anID)
+	elseif typeOfID == "BuffId" then
+		return cachedGetBuffTooltipInfo(anID)
+	elseif typeOfID == "MapModifierId" then
+		return cachedGetMapModifierInfo(anID)
+	else
+		return
 	end
-	for _, info in ipairs(aCache) do
-		if info.meterInfoID:IsEqual(anID) then
-			return info
-		end
-	end
-
-	local info = aGetInfoFunc(anID)
-	local storeInfo = {}
-	if info then
-		storeInfo.meterInfoID = anID
-		storeInfo.name = info.name
-		storeInfo.description = info.description
-		table.insert(aCache, storeInfo)
-	end
-	return storeInfo
-end
-
-function TUMeter:GetInfoFromParams(aParams)
-	return self:GetInfoFromCache(aParams.buffId, self.BuffInfoCache, cachedGetBuffTooltipInfo)
-	or self:GetInfoFromCache(aParams.spellId, self.SpellDescCache, cachedGetDescription)
-	or self:GetInfoFromCache(aParams.abilityId, self.AbilityInfoCache, cachedGetAbilityInfo)
-	or self:GetInfoFromCache(aParams.mapModifierId, self.MapModifierInfoCache, cachedGetMapModifierInfo)
-	or nil
 end
 
 -- например, для парных боссов приходит урон и для 2го, но уже только с указанием sourceName targetName
@@ -196,47 +194,39 @@ end
 --------------------------------------------------------------------------------
 -- Get information of a spell
 --------------------------------------------------------------------------------
-function TUMeter:GetSpellInfoFromParams(aParams)
+function TUMeter:GetSpellInfoFromParams(aParams, anIsPet)
 	local spellInfo = {}
+	
+	spellInfo.infoID = aParams.buffId or aParams.spellId or aParams.abilityId or aParams.mapModifierId
 
 	if aParams.damageSource == "DamageSource_DAMAGEPOOL" then
 		spellInfo.Name = StrDamagePool
+		spellInfo.fromBarrier = true
 	elseif aParams.damageSource == "DamageSource_BARRIER" then
 		spellInfo.Name = StrFromBarrier
+		spellInfo.fromBarrier = true
 	else
-		spellInfo.Name = nil
-		local someInfo = self:GetInfoFromParams(aParams)
-		if someInfo and not someInfo.name:IsEmpty() then
-			spellInfo.Name = someInfo.name
+		spellInfo.Name = aParams.ability
+		
+		if spellInfo.Name == nil or spellInfo.Name:IsEmpty() then
+			local someInfo = self:GetInfoFromID(spellInfo.infoID)
+			if someInfo and someInfo.name and not someInfo.name:IsEmpty() then
+				spellInfo.Name = someInfo.name
+			else
+				spellInfo.Name =
+				aParams.isExploit and StrExploit
+				or aParams.isFall and StrFall
+				or BuildBySourceName(aParams.sourceName, aParams.targetName)
+				or StrUnknown
+			end
 		end
-		if spellInfo.Name == nil then
-			spellInfo.Name =
-			aParams.ability and not aParams.ability:IsEmpty() and aParams.ability
-			or aParams.isExploit and StrExploit
-			or aParams.isFall and StrFall
-			or BuildBySourceName(aParams.sourceName, aParams.targetName)
-			or StrUnknown
-		end		
-
-		spellInfo.Desc = someInfo and someInfo.description or nil
 	end
 	
-	local sourceId = aParams.source or aParams.healerId or nil
-	if IsExistUnit(sourceId) then
-		spellInfo.IsPet =  cachedIsPet(sourceId)
-		if Settings.UseAlternativeRage then
-			spellInfo.Determination = self.LastTickPlayersDetermination[sourceId] or cachedGetRage(sourceId)
-		else
-			spellInfo.Determination = cachedGetRage(sourceId)
-		end
-		if spellInfo.IsPet then
-			spellInfo.PetName = cachedGetName(sourceId)
-		end
-	else
-		spellInfo.IsPet = false
-		spellInfo.Determination = nil
-	end
-
+	spellInfo.IsPet = anIsPet
+	spellInfo.PetName = anIsPet and aParams.sourceName or nil
+	
+	spellInfo.Determination = self:GetUnitRage(aParams.source or aParams.healerId)
+	
 	spellInfo.sysSubElement = aParams.sysSubElement
 	
 	--dd event
@@ -269,32 +259,29 @@ function TUMeter:GetSpellInfoFromParams(aParams)
 
 	spellInfo.sourceID = aParams.source or aParams.healerId
 	spellInfo.targetID = aParams.target or aParams.unitId
-	   
-	if aParams.targetTags then 
-		for i, combatTag in pairs( aParams.targetTags ) do
-			local info = combatTag:GetInfo()
-			if info.isHelpful then 
-				if info.name == StrDefense then
-					spellInfo.Defense = true
-				end
-			else
-				if info.name == StrVulnerability then
-					spellInfo.Vulnerability = true
-				end
+   
+	for _, combatTag in pairs( aParams.targetTags or {} ) do
+		local info = combatTag:GetInfo()
+		if info.isHelpful then 
+			if info.name == StrDefense then
+				spellInfo.Defense = true
+			end
+		else
+			if info.name == StrVulnerability then
+				spellInfo.Vulnerability = true
 			end
 		end
 	end
-	if aParams.sourceTags then 
-		for i, combatTag in pairs( aParams.sourceTags ) do
-			local info = combatTag:GetInfo()
-			if info.isHelpful then
-				if info.name == StrValor then
-					spellInfo.Valor = true
-				end
-			else
-				if info.name == StrWeakness then
-					spellInfo.Weakness = true
-				end
+
+	for _, combatTag in pairs( aParams.sourceTags or {} ) do
+		local info = combatTag:GetInfo()
+		if info.isHelpful then
+			if info.name == StrValor then
+				spellInfo.Valor = true
+			end
+		else
+			if info.name == StrWeakness then
+				spellInfo.Weakness = true
 			end
 		end
 	end
@@ -312,7 +299,7 @@ function TUMeter:ShouldCollectData()
 
 	-- Should parse all other fighters ?
 	for i, combatant in pairs(self:GetLastFightPeriod().CombatantsList) do
-		if combatant.ID and object.IsExist(combatant.ID) and combatant:IsClose() and object.IsInCombat(combatant.ID) then
+		if combatant.ID and object.IsExist(combatant.ID) and combatant:IsClose() and (object.IsInCombat(combatant.ID) or PlayerPetInCombat(combatant.ID)) then			
 			return true
 		end
 	end
@@ -320,9 +307,8 @@ function TUMeter:ShouldCollectData()
 	return false
 end
 
-
-function TUMeter:CollectData(aMode, aCombatant, aParams)
-	local spellInfo = self:GetSpellInfoFromParams(aParams)
+function TUMeter:CollectData(aMode, aCombatant, anIsPet, aParams)
+	local spellInfo = self:GetSpellInfoFromParams(aParams, anIsPet)
 	self:UpdateFightData(aMode, aCombatant, spellInfo)
 	return true
 end
@@ -334,7 +320,7 @@ function TUMeter:CollectDamageDealedData(aParams)
 	if aParams.source == aParams.target then return end
 	
 	-- look for the type of the source
-	local currFightCombatant = self:GetFightCombatant(aParams.source)
+	local currFightCombatant, isPet = self:GetFightCombatant(aParams.source)
 	-- If the source is not part of the group or the target is an ally
 	if not currFightCombatant then return end
 
@@ -346,7 +332,7 @@ function TUMeter:CollectDamageDealedData(aParams)
 	end
 
 	-- if collecting dps data
-	return self:CollectData(enumMode.Dps, currFightCombatant, aParams)
+	return self:CollectData(enumMode.Dps, currFightCombatant, isPet, aParams)
 end
 --------------------------------------------------------------------------------
 -- Collect damage received data by someone in the party
@@ -363,23 +349,19 @@ function TUMeter:CollectDamageReceivedData(aParams)
 		self:Start()
 	end
 
-	return self:CollectData(enumMode.Def, currFightCombatant, aParams)
+	return self:CollectData(enumMode.Def, currFightCombatant, aParams.source and unit.GetFollowerMaster(aParams.source) ~= nil or false, aParams)
 end
 
 --------------------------------------------------------------------------------
 -- Collect heal data from event EVENT_HEALING_RECEIVED
 --------------------------------------------------------------------------------
 function TUMeter:CollectHealData(aParams)
-	--[[if aParams.isFall then
-		return
-	end
-]]
 	-- Check that the healer is part of the group
-	local currFightCombatant = self:GetFightCombatant(aParams.healerId)
+	local currFightCombatant, isPet = self:GetFightCombatant(aParams.healerId)
 
 	-- if this happen, most probably it's a bloodlust but the heal is coming from the target...
 	if not currFightCombatant then
-		currFightCombatant = self:GetFightCombatant(aParams.unitId)
+		currFightCombatant, isPet = self:GetFightCombatant(aParams.unitId)
 	end
 
 	if not currFightCombatant then return end
@@ -390,14 +372,10 @@ function TUMeter:CollectHealData(aParams)
 		self:Start()
 	end
 
-	return self:CollectData(enumMode.Hps, currFightCombatant, aParams)
+	return self:CollectData(enumMode.Hps, currFightCombatant, isPet, aParams)
 end
 
 function TUMeter:CollectHealDataIN(aParams)
-	--[[if aParams.isFall then
-		return
-	end
-]]
 	-- Check that the healer is part of the group
 	local currFightCombatant = self:GetFightCombatant(aParams.unitId)
 
@@ -407,7 +385,7 @@ function TUMeter:CollectHealDataIN(aParams)
 		self:Start()
 	end
 
-	return self:CollectData(enumMode.IHps, currFightCombatant, aParams)
+	return self:CollectData(enumMode.IHps, currFightCombatant, aParams.healerId and unit.GetFollowerMaster(aParams.healerId) ~= nil or false, aParams)
 end
 --------------------------------------------------------------------------------
 -- Update the data in the given mode
@@ -415,9 +393,9 @@ end
 function TUMeter:UpdateFightData(aMode, aCombatant, aSpellInfo)
 	aCombatant:CreateCombatantData(aMode)
 	aCombatant.Data[aMode].Amount = aCombatant.Data[aMode].Amount + aSpellInfo.amount
-	
+
 	if aSpellInfo.Determination ~= nil then
-		aCombatant:UpdateGlobalInfo(aSpellInfo.Determination, aMode)
+		aCombatant:UpdateGlobalInfo(enumGlobalInfo.Determination, aMode, aSpellInfo.Determination)
 	end
 	
 	local spellData = aCombatant:GetSpellByIdentifier(aMode, aSpellInfo.IsPet, aSpellInfo.sysSubElement, aSpellInfo.Name)
@@ -435,12 +413,13 @@ end
 function TUMeter:CollectMissedDataOnStartFight(anObjID)
 	local currFightCombatant = self:GetFightCombatant(anObjID)
 	if not currFightCombatant then return end
-	
+
 	if not self.bCollectData and currFightCombatant:IsClose() and self:ShouldCollectData() then
 		local periodsArrSize = self.GlobalFightPeriodsArr.length
 		if periodsArrSize > 1 then
 			local prevPeriod = TList:unpackFromList(self.GlobalFightPeriodsArr:prev(self.GlobalFightPeriodsArr.last))
-			if prevPeriod:HasData() then
+			local currPeriod = self:GetLastFightPeriod()
+			if prevPeriod:HasData() or currPeriod:HasData() then
 				self:Start()
 			end
 		end
@@ -526,21 +505,6 @@ function TUMeter:PushFightToHistory(aFight, aHistory)
 
 	if aFight:HasData() then
 		aHistory:insert_first(aFight)
-	end
-end
-
-function TUMeter:CheckClearCache()
-	self.ClearCacheCnt = self.ClearCacheCnt + 1
-	if self.ClearCacheCnt < 300 then
-		return
-	end
-	self.ClearCacheCnt = 0
-	
-	if gcinfo() > Settings.MemoryUsageLimit then
-		self.BuffInfoCache = {}
-		self.SpellDescCache = {}
-		self.AbilityInfoCache = {}
-		self.MapModifierInfoCache = {}
 	end
 end
 

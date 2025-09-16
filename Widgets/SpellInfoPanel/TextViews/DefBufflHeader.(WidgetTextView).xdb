@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetTextView>
+	<Priority>150</Priority>
+	<Name>DefBuffHeaderTextView</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>18</Pos>
+			<Size>400</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>20</Pos>
+			<Size>20</Size>
+		</Y>
+	</Placement>
+	<TransparentInput>true</TransparentInput>
+	<Visible>true</Visible>
+	<Enabled>true</Enabled>
+	<FormatFileRef href="Desc.txt" />
+	<TextValues />
+</WidgetTextView>

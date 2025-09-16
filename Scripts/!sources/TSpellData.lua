@@ -10,6 +10,17 @@ function TValueDetails:CreateNewObject()
 		Max = -1			-- Maximum input
 	}
 end
+
+function TValueDetails:CreateNewObjectOneValue(aValue, aCnt)
+	return 
+	{
+		Count = aCnt,			-- Count how many input
+		Amount = aValue * aCnt,	-- Total amount cumulated
+		Min = aValue,			-- Minimum input
+		Max = aValue,			-- Maximum input
+		Percentage = aValue
+	}
+end
 --------------------------------------------------------------------------------
 -- Recalc min, max, avg by adding a new value
 --------------------------------------------------------------------------------
@@ -40,7 +51,7 @@ end
 
 function TValueDetails:GetAvg()
 	if self.Count == 0 then
-		return -1
+		return 0
 	end
 	return math.ceil(self.Amount / self.Count)
 end
@@ -66,7 +77,7 @@ local function CreateAndMergeDetails(anObj, aListTo, aListFrom, anIndex)
 		return
 	end
 	if not aListTo[anIndex] then
-		aListTo[anIndex] = TValueDetails:CreateNewObject()
+		aListTo[anIndex] = TValueDetails.CreateNewObject()
 	end
 	
 	TValueDetails.MergeDetails(aListTo[anIndex], aListFrom[anIndex])
@@ -143,11 +154,29 @@ function ResistDetailsList(aSpellData)
 	end
 end
 
-function IsPetData(aSpellData)
-	return aSpellData.PetName ~= nil
+-- при смерти игрока событие об уроне получим уже после спадания баффов из-за смерти
+-- то при летальном уроне учитываем баффы, спавшие после смерти плюс 0.5с на запаздывания событий об уроне
+function AdditionalBuffCheckLethal(aParams, anObjID, anIndex)
+	local buffState = CurrentBuffsStateByTime[anIndex][anObjID]
+	if buffState and buffState.removeAfterDeath then
+		local currTime = common.GetLocalDateTimeMs()
+		if currTime - buffState.removeTime <= Settings.WaitBuffAfterDeathTime  then
+			return buffState.info
+		end
+	end
+	return nil
 end
-	
 
+function UpdateBuffsStateByTime()
+	local currTime = common.GetLocalDateTimeMs()
+	for i, value in ipairs(CurrentBuffsStateByTime) do
+		for playerID, buffState in pairs(value) do
+			if currTime - buffState.buffFinishedTime_h  > Settings.WaitBuffAfterDeathTime then
+				CurrentBuffsStateByTime[i][playerID] = nil
+			end
+		end
+	end
+end
 
 
 --------------------------------------------------------------------------------
@@ -212,13 +241,15 @@ function TDamageSpellData:ReceiveValuesFromParams(aParams)
 	if aParams.Valor then 
 		CreateAndRecalcDetails(self, self, enumBuff.Valor*m_enumBuffMult, aParams.amount)
 	end
-	
+
 	for i, value in ipairs(CurrentBuffsState) do
-		local srcBuff = value[aParams.sourceID]
-		local targetBuff = value[aParams.targetID]
+		local srcBuff = value[aParams.sourceID] or AdditionalBuffCheckLethal(aParams, aParams.sourceID, i)
+		local targetBuff = value[aParams.targetID] or AdditionalBuffCheckLethal(aParams, aParams.targetID, i)
+		
 		if srcBuff and srcBuff.forDps and srcBuff.forSrc then
 			CreateAndRecalcDetails(self, self, srcBuff.ind*m_customBuffMult, aParams.amount)
 		end
+		
 		if targetBuff and targetBuff.forDps and targetBuff.forTarget then
 			CreateAndRecalcDetails(self, self, targetBuff.ind*m_customBuffMult, aParams.amount)
 		end

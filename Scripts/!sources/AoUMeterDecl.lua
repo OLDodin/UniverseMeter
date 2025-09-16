@@ -5,8 +5,8 @@ Global( "enumHit", { Normal = 1, Critical = 2, Glancing = 3 } )
 Global( "enumMiss", { Dodge = 1, Miss = 2 } )
 Global( "enumHitBlock", { Block = 1, Parry = 2, Barrier = 3, Resist = 4, Absorb = 5, RunesAbsorb = 6, MultAbsorb = 7, Mount = 8 } )
 Global( "enumHealResist", { Resisted = 1, RuneResisted = 2, Absorbed = 3, Overload = 4 } )
-Global( "enumBuff", { Valor = 1, Weakness = 2, Vulnerability = 3, Defense = 4 } )
-Global( "enumGlobalInfo", { Determination = 1 } )
+Global( "enumBuff", { Valor = 1, Vulnerability = 2, Weakness = 3, Defense = 4 } )
+Global( "enumGlobalInfo", { Determination = 1,  Critical = 2, Physical = 3, Elemental = 4, Holy = 5, Natural = 6 } )
 Global( "enumState", { Idle = 0, Attacked = 1, Killed = 2, Lost = 3 } )
 Global( "enumMode", { Dps = 1, Hps = 2, Def = 3, IHps = 4 } )
 Global( "enumFight", { Current = 0, Total = 1, History = 3 } )
@@ -14,7 +14,7 @@ Global( "enumFight", { Current = 0, Total = 1, History = 3 } )
 --------------------------------------------------------------------------------
 -- Constants
 --------------------------------------------------------------------------------
-Global( "MAXSPELLS", 50)
+Global( "INITSPELLSCNT", 20)
 Global( "DPSHPSTYPES", 0)
 Global( "DEFTYPES", 0)
 Global( "DMGTYPES", GetTableSize(enumHit))
@@ -42,15 +42,19 @@ Global("Settings", {
 		CollectTotalTimelapse = false,		-- memory consumption optimization
 		ShowPositionOnBtn = false,			-- show active mode position on btn
 		ScaleFonts = false,
-		UseAlternativeRage = false,			-- update player rage value every FastUpdateInterval
 		MemoryUsageLimit = common.GetClientArch() == CLIENT_ARCH_WIN64 and 300*1024 or 50*1024,	
 		HistoryTotalLimit = 3,
 		HistoryCurrentLimit = 10,
+		WaitBuffAfterDeathTime = 500,		-- time in ms
 	})
 --------------------------------------------------------------------------------
 -- Localization
 --------------------------------------------------------------------------------
-Global( "StrPet", "" )
+Global( "StrTypePet", "" )
+Global( "StrTypeAbility", "" )
+Global( "StrTypeSpell", "" )
+Global( "StrTypeMap", "" )
+Global( "StrTypeBuff", "" )
 Global( "StrDamagePool", "" )
 Global( "StrFromBarrier", "" )
 Global( "StrNone", "" )
@@ -142,8 +146,16 @@ Global( "HitTypeColors", {
 		[4] = { r = 0.5; g = 0.5; b = 1.0; a = 1 }, 
 		[5] = { r = 1.0; g = 1.0; b = 0.5; a = 1 }, 
 	})
+Global( "GlobalInfoTypeColors", {
+		[1] = { r = 1.0; g = 1.0; b = 1.0; a = 1 }, --Determination
+		[2] = { r = 1.0; g = 0.0; b = 0.0; a = 1 }, --Critical
+		[3] = { r = 0.7; g = 0.5; b = 0.3; a = 1 }, --Physical
+		[4] = { r = 0.2; g = 0.35; b = 1.0; a = 1 }, --Elemental
+		[5] = { r = 1.0; g = 1.0; b = 0.5; a = 1 }, --Holy
+		[6] = { r = 0.3; g = 1.0; b = 0.3; a = 1 }, --Natural
+	})
 	
-for i = 6, 50, 5 do
+for i = 6, 100, 5 do
 	HitTypeColors[i] = { r = 1.0; g = 1.0; b = 0.0; a = 1 }
 	HitTypeColors[i+1] = { r = 0.5; g = 1.0; b = 0.5; a = 1 } 
 	HitTypeColors[i+2] = { r = 1.0; g = 1.0; b = 0.5; a = 1 } 
@@ -158,21 +170,6 @@ Global("DPSMeterGUI", {})
 
 Global( "BuffCheckList", {})
 Global( "CurrentBuffsState", {})
+Global( "CurrentBuffsStateByTime", {})
 
 Global( "CurrentScoreOnMainBtn", 0)
-
-Global( "ENUM_SubElement_Strings", {
-		["ENUM_SubElement_PHYSICAL"]	= "ENUM_SubElement_PHYSICAL",
-		
-		["ENUM_SubElement_FIRE"]		= "ENUM_SubElement_FIRE",
-		["ENUM_SubElement_COLD"]		= "ENUM_SubElement_COLD",
-		["ENUM_SubElement_LIGHTNING"]	= "ENUM_SubElement_LIGHTNING",
-		
-		["ENUM_SubElement_HOLY"]		= "ENUM_SubElement_HOLY",
-		["ENUM_SubElement_SHADOW"]		= "ENUM_SubElement_SHADOW",
-		["ENUM_SubElement_ASTRAL"]		= "ENUM_SubElement_ASTRAL",
-		
-		["ENUM_SubElement_POISON"]		= "ENUM_SubElement_POISON",
-		["ENUM_SubElement_DISEASE"]	    = "ENUM_SubElement_DISEASE",
-		["ENUM_SubElement_ACID"]		= "ENUM_SubElement_ACID",
-	})

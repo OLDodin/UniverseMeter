@@ -7,6 +7,7 @@ local cachedIsExist = object.IsExist
 local cachedIsUnit = object.IsUnit
 local cachedIsPet = unit.IsPet
 local cachedIsPlayer = unit.IsPlayer
+local cachedGetDistance = object.GetDistance
 
 --------------------------------------------------------------------------------
 -- Functions
@@ -60,6 +61,11 @@ end
 function IsExistPlayer(anObjID)
 	return anObjID and cachedIsExist(anObjID) and cachedIsUnit(anObjID) and cachedIsPlayer(anObjID)
 end
+
+function IsPetData(aSpellData)
+	return aSpellData.PetName ~= nil
+end
+
 --------------------------------------------------------------------------------
 -- Get pourcentage from ratio Value / ValueAt
 function GetPercentageAt( Value, ValueAt )
@@ -126,16 +132,16 @@ end
 --------------------------------------------------------------------------------
 -- Compute the range between 2 positions
 --------------------------------------------------------------------------------
-function sqr(x)
-	return x * x;
-end
-function PosRange(a, b)	
-	if (b == nil or a == nil) then
-		return 9999;
+function GetDistanceToTarget(anID)
+	local res = anID and cachedIsExist(anID) and cachedGetDistance(anID) or nil
+	if not res then 
+		return 9999
 	end
+	res = math.ceil(res)
 
-	return math.sqrt( sqr(b.posX - a.posX)  + sqr(b.posY - a.posY) + sqr(b.posZ - a.posZ));
+	return res
 end
+
 --------------------------------------------------------------------------------
 -- Get member list
 --------------------------------------------------------------------------------
@@ -165,6 +171,15 @@ function GetPartyMembers()
 	end
 	
 	return partyMembersInfoList
+end
+
+function PlayerPetInCombat(anPlayerID)
+	for _, followerID in pairs(unit.GetFollowers(anPlayerID) or {}) do
+		if object.IsInCombat(followerID) then
+			return true
+		end
+	end
+	return false
 end
 
 function round(aTime)

@@ -1,4 +1,5 @@
 local cachedIsValidBuff = object.IsValidBuff
+local cachedGetName = object.GetName
 local m_players = {}
 
 local function CreatePlayerSubInfo(anID, aSubClass)
@@ -8,16 +9,28 @@ local function CreatePlayerSubInfo(anID, aSubClass)
 	return playerSubClassInfo
 end
 
+function FabricMakePlayerInfoIfNotExist(anID, aListener)
+	if not m_players[anID] then
+		FabricMakePlayerInfo(anID, aListener)
+	end
+end
+
 function FabricMakePlayerInfo(anID, aListener)
 	if not IsExistUnit(anID) then
 		return
 	end
+		
 	local player = m_players[anID] or {}
 		
 	if not player.buffs then
 		player.buffs = CreatePlayerSubInfo(anID, PlayerBuffs)
 	end
 	player.buffs:SubscribeGui(aListener)
+	
+	if not player.rage then
+		player.rage = CreatePlayerSubInfo(anID, PlayerRage)
+	end
+	player.rage:SubscribeGui(aListener)
 
 	m_players[anID] = player
 end
@@ -66,17 +79,32 @@ function UpdateFabric()
 	end
 end
 
-function BuffsChanged(aParams)
-	for objId, buffs in pairs( aParams.objects ) do
-		local playerInfo = m_players[objId]
-		if playerInfo then
-			for buffID, _ in pairs( buffs ) do
-				if not cachedIsValidBuff(buffID) then
-					playerInfo.buffs.delEventFunc( { buffId = buffID } )
-				end
-			end
-		end
-	end 
+function BuffAdded(aParams)
+	local playerInfo = m_players[aParams.objectId]
+	if playerInfo then
+		playerInfo.buffs.addEventFunc(aParams)
+	end
+end
+
+function BuffChanged(aParams)
+	local playerInfo = m_players[aParams.objectId]
+	if playerInfo then
+		playerInfo.buffs.changeEventFunc(aParams)
+	end
+end
+
+function BuffRemoved(aParams)
+	local playerInfo = m_players[aParams.objectId]
+	if playerInfo then
+		playerInfo.buffs.delEventFunc(aParams)
+	end
+end
+
+function RageChanged(aParams)
+	local playerInfo = m_players[aParams.unitId]
+	if playerInfo then
+		playerInfo.rage.eventFunc(aParams)
+	end
 end
 
 function OnEventSecondZatichka()

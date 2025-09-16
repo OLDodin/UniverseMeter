@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetTextView>
+	<Priority>150</Priority>
+	<Name>SpellDetailHeaderTextViewStatsAvg</Name>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<HighPos>65</HighPos>
+			<Size>60</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Pos>1</Pos>
+			<HighPos>0</HighPos>
+		</Y>
+	</Placement>
+	<TransparentInput>true</TransparentInput>
+	<Visible>true</Visible>
+	<Enabled>true</Enabled>
+	<FormatFileRef href="StatsAvg.txt" />
+	<TextValues />
+</WidgetTextView>

@@ -106,10 +106,6 @@
       <resource href="Multiplier.txt" />
     </Item>
     <Item>
-      <name>Pet</name>
-      <resource href="Pet.txt" />
-    </Item>
-    <Item>
       <name>Current</name>
       <resource href="Current.txt" />
     </Item>
@@ -404,6 +400,78 @@
 	<Item>
       <name>HealRuneResisted</name>
       <resource href="HealRuneResisted.txt" />
+    </Item>
+	<Item>
+      <name>TypeSpell</name>
+      <resource href="typeSpell.txt" />
+    </Item>
+	<Item>
+      <name>TypeAbility</name>
+      <resource href="typeAbility.txt" />
+    </Item>
+	<Item>
+      <name>TypeMap</name>
+      <resource href="typeMap.txt" />
+    </Item>
+	<Item>
+      <name>TypeBuff</name>
+      <resource href="typeBuff.txt" />
+    </Item>
+	<Item>
+      <name>TypePet</name>
+      <resource href="typePet.txt" />
+    </Item>
+	<Item>
+      <name>AntiHpsBuffHeaderText</name>
+      <resource href="AntiHpsBuffHeaderText.txt" />
+    </Item>
+	<Item>
+      <name>DefBuffHeaderText</name>
+      <resource href="DefBuffHeaderText.txt" />
+    </Item>
+	<Item>
+      <name>DpsBuffHeaderText</name>
+      <resource href="DpsBuffHeaderText.txt" />
+    </Item>
+	<Item>
+      <name>HpsBuffHeaderText</name>
+      <resource href="HpsBuffHeaderText.txt" />
+    </Item>
+	<Item>
+      <name>ResistDpsHeaderText</name>
+      <resource href="ResistDpsHeaderText.txt" />
+    </Item>
+	<Item>
+      <name>ResistHpsHeaderText</name>
+      <resource href="ResistHpsHeaderText.txt" />
+    </Item>
+	<Item>
+      <name>DefBuffHeaderText2</name>
+      <resource href="DefBuffHeaderText2.txt" />
+    </Item>
+	<Item>
+      <name>DpsBuffHeaderText2</name>
+      <resource href="DpsBuffHeaderText2.txt" />
+	</Item>
+	<Item>
+      <name>ResistDpsHeaderText2</name>
+      <resource href="ResistDpsHeaderText2.txt" />
+    </Item>
+	<Item>
+      <name>Physical</name>
+      <resource href="Physical.txt" />
+    </Item>
+	<Item>
+      <name>Holy</name>
+      <resource href="Holy.txt" />
+    </Item>
+	<Item>
+      <name>Elemental</name>
+      <resource href="Elemental.txt" />
+    </Item>
+	<Item>
+      <name>Natural</name>
+      <resource href="Natural.txt" />
     </Item>
   </items>
 </UIRelatedTexts>

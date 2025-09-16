@@ -10,14 +10,14 @@
 	<realHeight>30</realHeight>
 	<disableLODControl>false</disableLODControl>
 	<alphaTex>true</alphaTex>
-	<binaryFileSize>1261</binaryFileSize>
+	<binaryFileSize>59</binaryFileSize>
 	<binaryFile href="ButtonRegularNormal4.(UITexture).bin" />
 	<binaryFileSize2>0</binaryFileSize2>
 	<binaryFile2 href="" />
-	<sourceFile href="ButtonRegularNormal4.tga" />
-	<sourceFileCRC>-686443742</sourceFileCRC>
+	<sourceFile href="ButtonRegularNormal4.(UITexture).tga" />
+	<sourceFileCRC>-987811729</sourceFileCRC>
 	<wrap>false</wrap>
-	<LocalizationInfo />
 	<atlasPart>true</atlasPart>
+	<isRealTimeLoading>false</isRealTimeLoading>
 	<pool>UNDEFINED</pool>
 </UITexture>

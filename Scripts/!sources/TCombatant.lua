@@ -24,6 +24,7 @@ function TCombatant:CreateNewObject(anID, aName, aClassName, anIsNear)
 			Name = aName,			-- Name of the combatant
 			Data = {					-- Data (Dps, Hps, Def)
 			},
+			--GlobalInfoList = {},
 			BitPackedValue = 0
 		}, { __index = self })
 		
@@ -59,11 +60,63 @@ end
 --------------------------------------------------------------------------------
 -- Get extra info by index
 --------------------------------------------------------------------------------
+function TCombatant:CalculateDamageTypePercent(aType, aMode)
+	local typeAmount = 0
+	local totalAmount = 0
+	local typeCnt = 0
+	for _, spellData in ipairs( self.Data[aMode] ) do
+		if not spellData.FromBarrier then
+			if (aType == enumGlobalInfo.Physical and spellData.Element == "ENUM_SubElement_PHYSICAL")
+			
+			or  (aType == enumGlobalInfo.Elemental and 
+				(spellData.Element == "ENUM_SubElement_FIRE" 
+				or spellData.Element == "ENUM_SubElement_COLD" 
+				or spellData.Element == "ENUM_SubElement_LIGHTNING"))
+					
+			or (aType == enumGlobalInfo.Holy and 
+				(spellData.Element == "ENUM_SubElement_HOLY" 
+				or spellData.Element == "ENUM_SubElement_SHADOW" 
+				or spellData.Element == "ENUM_SubElement_ASTRAL"))
+
+			or (aType == enumGlobalInfo.Natural and 
+				(spellData.Element == "ENUM_SubElement_POISON" 
+				or spellData.Element == "ENUM_SubElement_DISEASE" 
+				or spellData.Element == "ENUM_SubElement_ACID")) 
+			
+			then	
+				typeAmount = typeAmount + spellData.Amount
+				typeCnt = typeCnt + spellData.Count
+			end
+			
+			totalAmount = totalAmount + spellData.Amount
+		end
+	end
+
+	return TValueDetails:CreateNewObjectOneValue(GetPercentageAt(typeAmount, totalAmount), typeCnt)
+end
+
 function TCombatant:GetGlobalInfoByIndex(anIndex, aMode)
 	if not self.Data[aMode] then 
 		return
 	end
-	return self.Data[aMode].Determination
+	if anIndex == enumGlobalInfo.Determination then
+		return self.Data[aMode].Determination
+	elseif anIndex == enumGlobalInfo.Critical then
+		local critCnt = 0
+		local totalCnt = 0
+		for _, spellData in ipairs( self.Data[aMode] ) do
+			local critSpellData = DetailsList(spellData)[enumHit.Critical]
+			critCnt = critCnt + (critSpellData and critSpellData.Count or 0)
+			if aMode == enumMode.Dps or aMode == enumMode.Def then
+				totalCnt = totalCnt + spellData.Hits
+			elseif aMode == enumMode.Hps or aMode == enumMode.IHps  then
+				totalCnt = totalCnt + spellData.Count
+			end
+		end
+		return TValueDetails:CreateNewObjectOneValue(GetPercentageAt(critCnt, totalCnt), critCnt)
+	elseif anIndex == enumGlobalInfo.Physical or anIndex == enumGlobalInfo.Elemental or anIndex == enumGlobalInfo.Holy or anIndex == enumGlobalInfo.Natural then
+		return self:CalculateDamageTypePercent(anIndex, aMode)
+	end
 end
 --------------------------------------------------------------------------------
 -- Get spell by index
@@ -75,6 +128,19 @@ function TCombatant:GetSpellByIndex(anIndex, aMode)
 	return self.Data[aMode][anIndex]
 end
 
+function TCombatant:GetSpellCount(aMode)
+--self.Data[aMode] содержит и буквенные ключи
+	if not self.Data[aMode] then 
+		return 0
+	end
+	
+	local cnt = 0
+	for _, _ in ipairs( self.Data[aMode] ) do
+		cnt = cnt + 1
+	end
+	return cnt
+end
+
 function TCombatant:GetAmount(aMode)
 	if not self.Data[aMode] then 
 		return 0
@@ -82,19 +148,20 @@ function TCombatant:GetAmount(aMode)
 	return self.Data[aMode].Amount
 end
 
---calculation fast because used only for one second timelapse
-function TCombatant:GetBarrierAmount()
-	if not self.Data[enumMode.Def] then 
+function TCombatant:GetBarrierAmount(aMode)
+	if not self.Data[aMode] then 
 		return 0
 	end
 	local barrierAmount = 0
-	for _, spellData in ipairs( self.Data[enumMode.Def] ) do
+	local barrierCnt = 0
+	for _, spellData in ipairs( self.Data[aMode] ) do
 		local resistList = ResistDetailsList(spellData)
 		if resistList[enumHitBlock.Barrier] then
 			barrierAmount = barrierAmount + resistList[enumHitBlock.Barrier].Amount
+			barrierCnt = barrierCnt + 1
 		end
 	end
-	return barrierAmount
+	return barrierAmount, barrierCnt
 end
 
 --------------------------------------------------------------------------------
@@ -103,14 +170,17 @@ end
 function TCombatant:CreateGlobalInfo(aMode)
 	self:CreateCombatantData(aMode)
 	if not self.Data[aMode].Determination then
-		self.Data[aMode].Determination = TValueDetails:CreateNewObject(enumGlobalInfo.Determination)
+		self.Data[aMode].Determination = TValueDetails:CreateNewObject()
 	end
 end
 
-function TCombatant:UpdateGlobalInfo(aDetermination, aMode)
-	self:CreateGlobalInfo(aMode)
-	TValueDetails.RecalcDetails(self.Data[aMode].Determination, aDetermination)
-	self.Data[aMode].Determination.Percentage = TValueDetails.GetAvg(self.Data[aMode].Determination)
+function TCombatant:UpdateGlobalInfo(anInfoIndex, aMode, aDetermination)
+	if anInfoIndex == enumGlobalInfo.Determination then
+		self:CreateGlobalInfo(aMode)
+		TValueDetails.RecalcDetails(self.Data[aMode].Determination, aDetermination)
+		--self.Data[mode].GlobalInfoList[enumGlobalInfo.Determination]
+		self.Data[aMode].Determination.Percentage = TValueDetails.GetAvg(self.Data[aMode].Determination)
+	end
 end
 
 function TCombatant:MergeGlobalInfo(aMode, aCombatantData)
@@ -121,6 +191,8 @@ function TCombatant:MergeGlobalInfo(aMode, aCombatantData)
 	TValueDetails.MergeDetails(self.Data[aMode].Determination, aCombatantData.Data[aMode].Determination)
 	self.Data[aMode].Determination.Percentage = TValueDetails.GetAvg(self.Data[aMode].Determination)
 end
+
+
 --------------------------------------------------------------------------------
 -- Add a new spell to the list
 --------------------------------------------------------------------------------
@@ -138,11 +210,11 @@ function TCombatant:AddNewSpell(aSpellInfo, aMode)
 			SpellData = THealSpellData:CreateNewObject()
 		end
 		if SpellData then
-			SpellData.PetName = aSpellInfo.IsPet and (aSpellInfo.PetName and StrPet..aSpellInfo.PetName or StrPet) or nil
+			SpellData.PetName = aSpellInfo.PetName
 			SpellData.Name = aSpellInfo.Name
-			--SpellData.Element = aSpellInfo.sysSubElement
-			SpellData.Element = ENUM_SubElement_Strings[aSpellInfo.sysSubElement]
-			SpellData.Desc = aSpellInfo.Desc
+			SpellData.FromBarrier = aSpellInfo.fromBarrier
+			SpellData.Element = aSpellInfo.sysSubElement
+			SpellData.InfoID = aSpellInfo.infoID
 
 			self:CreateCombatantData(aMode)
 			table.insert(self.Data[aMode], SpellData)
@@ -240,11 +312,7 @@ function TCombatant:UpdateRange()
 	if self.ID == avatar.GetId() then
 		self:SetRange(0)
 	else
-		local pos = nil
-		if self.ID and object.IsExist(self.ID) then
-			pos = object.GetPos(self.ID)
-		end
-		self:SetRange(PosRange(avatar.GetPos(), pos))
+		self:SetRange(GetDistanceToTarget(self.ID))
 	end
 end
 --------------------------------------------------------------------------------

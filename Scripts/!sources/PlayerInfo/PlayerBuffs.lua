@@ -1,11 +1,11 @@
 Global( "PlayerBuffs", {} )
 local cachedGetBuffInfo = object.GetBuffInfo
+local cachedGetBuffDynamicInfo = object.GetBuffDynamicInfo
 local cachedGetBuffs = object.GetBuffs
 local cachedGetBuffsInfo = object.GetBuffsInfo
 
 function PlayerBuffs:Init(anID)
 	self.playerID = anID
-	self.unitParams = {}
 	self.ignoreBuffsID = {}
 	self.passedBuffsID = {}
 
@@ -36,7 +36,7 @@ end
 
 function PlayerBuffs:TryDestroy()
 	if self.base:CanDestroy() then
-		self:UnRegisterEvent()
+		self:UnRegisterEvent(self.playerID)
 		return true
 	end
 	return false
@@ -46,17 +46,14 @@ function PlayerBuffs:UpdateValueIfNeeded()
 
 end
 
-function PlayerBuffs:CallListenerIfNeeded(aBuffID, aListener, aCondition, aBuffInfo)
-	if aListener and not self.ignoreBuffsID[aBuffID] then
-		local buffInfo = aBuffInfo or cachedGetBuffInfo(aBuffID)
-		if buffInfo and buffInfo.name then
-			local searchResult, findedObj = aCondition:Check(buffInfo)
-			if searchResult then
-				self.passedBuffsID[aBuffID] = findedObj
-				aListener.listenerChangeBuff(buffInfo, self.playerID, findedObj)
-			else
-				self.ignoreBuffsID[aBuffID] = true
-			end
+function PlayerBuffs:CallAddListenerIfNeeded(aBuffID, aBuffName, aListener, aCondition, aBuffInfo)
+	if aListener and aBuffName and not self.ignoreBuffsID[aBuffID] then
+		local searchResult, findedObj = aCondition:Check( { name = aBuffName } )
+		if searchResult then
+			self.passedBuffsID[aBuffID] = findedObj
+			aListener.listenerAddBuff(aBuffInfo and aBuffInfo or cachedGetBuffDynamicInfo(aBuffID), self.playerID, findedObj)
+		else
+			self.ignoreBuffsID[aBuffID] = true
 		end
 	end
 end
@@ -66,7 +63,7 @@ function PlayerBuffs:GetReadAllEventFunc()
 		local unitBuffs = cachedGetBuffs(aParams.unitId, true)
 		if next(unitBuffs) then
 			for buffID, buffInfo in pairs(cachedGetBuffsInfo(unitBuffs) or {}) do
-				self:CallListenerIfNeeded(buffID, self.base.guiListener, GetBuffCondition(), buffInfo)
+				self:CallAddListenerIfNeeded(buffID, buffInfo.name, self.base.guiListener, GetBuffCondition(), buffInfo)
 			end
 		end
 	end
@@ -74,16 +71,18 @@ end
 
 function PlayerBuffs:GetAddEventFunc()
 	return function(aParams)
-		self:CallListenerIfNeeded(aParams.buffId, self.base.guiListener, GetBuffCondition())
+		if not aParams.isNeedVisualize then
+			return
+		end
+		self:CallAddListenerIfNeeded(aParams.buffId, aParams.buffName, self.base.guiListener, GetBuffCondition())
 	end
 end
 
 function PlayerBuffs:GetDelEventFunc()
 	return function(aParams)
-		if self.base.guiListener then
-			if self.passedBuffsID[aParams.buffId] then
-				self.base.guiListener.listenerRemoveBuff(aParams.buffId, self.playerID, self.passedBuffsID[aParams.buffId])
-			end
+		local passedInfo = self.passedBuffsID[aParams.buffId]
+		if self.base.guiListener and passedInfo then
+			self.base.guiListener.listenerRemoveBuff(aParams.buffId, self.playerID, passedInfo)
 		end
 		self.passedBuffsID[aParams.buffId] = nil
 		self.ignoreBuffsID[aParams.buffId] = nil
@@ -92,18 +91,21 @@ end
 
 function PlayerBuffs:GetChangedEventFunc()
 	return function(aParams)
-		
+		local passedInfo = self.passedBuffsID[aParams.buffId]
+		if self.base.guiListener and passedInfo then
+			self.base.guiListener.listenerChangeBuff(self.playerID, cachedGetBuffDynamicInfo(aParams.buffId), passedInfo)
+		end
 	end
 end
 
 function PlayerBuffs:RegisterEvent(anID)
-	self.unitParams.objectId = anID
-
-	common.RegisterEventHandler(self.addEventFunc, 'EVENT_OBJECT_BUFF_ADDED', self.unitParams)
-	common.RegisterEventHandler(self.delEventFunc, 'EVENT_OBJECT_BUFF_REMOVED', self.unitParams)
+	common.EnablePersonalEvent('EVENT_OBJECT_BUFF_ADDED', anID)
+	common.EnablePersonalEvent('EVENT_OBJECT_BUFF_CHANGED', anID)
+	common.EnablePersonalEvent('EVENT_OBJECT_BUFF_REMOVED', anID)
 end
 
-function PlayerBuffs:UnRegisterEvent()
-	common.UnRegisterEventHandler(self.addEventFunc, 'EVENT_OBJECT_BUFF_ADDED', self.unitParams)
-	common.UnRegisterEventHandler(self.delEventFunc, 'EVENT_OBJECT_BUFF_REMOVED', self.unitParams)
+function PlayerBuffs:UnRegisterEvent(anID)
+	common.DisablePersonalEvent('EVENT_OBJECT_BUFF_ADDED', anID)
+	common.DisablePersonalEvent('EVENT_OBJECT_BUFF_CHANGED', anID)
+	common.DisablePersonalEvent('EVENT_OBJECT_BUFF_REMOVED', anID)
 end

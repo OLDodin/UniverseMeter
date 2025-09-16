@@ -168,15 +168,23 @@ function LogTable( t, tabstep )
 		LogInfo( "nil (no table)" )
 		return
 	end
-	assert( type( t ) == "table", "Invalid data passed" )
+	assert( type( t ) == "table", "Invalid data passed " )
 	local TabString = string.rep( "    ", tabstep )
 	local isEmpty = true
 	for i, v in pairs( t ) do
 		if type( v ) == "table" then
 			LogInfo( TabString, i, ":" )
 			LogTable( v, tabstep + 1 )
-		else
+		elseif apitype( v ) == "WString" then
+			if v:IsEmpty() then
+				LogInfo( TabString, "(WString):", i, " = ", "(empty WString)")
+			else
+				LogInfo( TabString, "(WString):", i, " = ", v )
+			end
+		elseif v == nil then
 			LogInfo( TabString, i, " = ", tostring(v) )
+		else
+			LogInfo( TabString, i, " = ", v )
 		end
 		isEmpty = false
 	end

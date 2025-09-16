@@ -30,6 +30,7 @@
 		<Item href="Scripts/AoUMeterGUI.lua"/>
 		<Item href="Scripts/PlayerInfo/PlayerBase.lua"/>
 		<Item href="Scripts/PlayerInfo/PlayerBuffs.lua"/>
+		<Item href="Scripts/PlayerInfo/PlayerRage.lua"/>
 		<Item href="Scripts/BuffCondition.lua"/>
 		<Item href="Scripts/PlayerInfoCache.lua"/>
 		<Item href="Scripts/AoUMeterEvents.lua"/>

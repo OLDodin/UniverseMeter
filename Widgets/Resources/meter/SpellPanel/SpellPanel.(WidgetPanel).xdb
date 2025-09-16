@@ -2,22 +2,26 @@
 <WidgetPanel>
 	<Name>SpellPanel</Name>
 	<Children>
-		<Item href="SpellBar/SpellBar.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
-		<Item href="TextViews/Name.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
-		<Item href="TextViews/DamageStats.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
-		<Item href="TextViews/DamagePercentage.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="SpellBar/SpellBar.(WidgetPanel).xdb" />
+		<Item href="TextViews/Index.(WidgetTextView).xdb" />
+		<Item href="TextViews/Type.(WidgetTextView).xdb" />
+		<Item href="TextViews/Name.(WidgetTextView).xdb" />
+		<Item href="TextViews/DamageStats.(WidgetTextView).xdb" />
+		<Item href="TextViews/CPS.(WidgetTextView).xdb" />
+		<Item href="TextViews/DamageBlock.(WidgetTextView).xdb" />
+		<Item href="TextViews/DamagePercentage.(WidgetTextView).xdb" />
 	</Children>
 	<BackLayer href="" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_LOW</Align>
 			<Size>356</Size>
-			<Pos>22</Pos>
+			<Pos>0</Pos>
 		</X>
 		<Y>
 			<Align>WIDGET_ALIGN_LOW</Align>
 			<Size>18</Size>
-			<Pos>54</Pos>
+			<Pos>0</Pos>
 		</Y>
 	</Placement>
 	<reactionOnPointing>SpellPanelOnPointing</reactionOnPointing>

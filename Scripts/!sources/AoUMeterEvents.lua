@@ -165,7 +165,6 @@ onReaction["SavePressed"] = function(reaction)
 	savedData.сollectTotalTimelapse = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.TotalTimelapseCheckBox)
 	savedData.showPositionOnBtn = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.ShowScoreCheckBox)
 	savedData.scaleFonts = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.ScaleFontsCheckBox)
-	savedData.useAlternativeRage = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.UseAlternativeRageCheckBox)
 	
 	local parsedCombantants = DPSMeterGUI.SettingsPanel.MaxCombatantTextEdit:GetText():ToInt()
 	if not parsedCombantants then
@@ -278,6 +277,10 @@ onMyEvent["EVENT_UNITS_CHANGED"] = function(aParams)
 	for _, objID in ipairs(aParams.despawned) do
 		if objID then
 			UnsubscribeListeners(objID)
+			
+			for i, _ in ipairs(CurrentBuffsState) do
+				CurrentBuffsState[i][objID] = nil
+			end
 		end
 	end
 	FabricDestroyUnused()
@@ -286,8 +289,20 @@ onMyEvent["EVENT_UNITS_CHANGED"] = function(aParams)
 	end
 end
 
-onMyEvent["EVENT_OBJECT_BUFFS_ELEMENT_CHANGED"] = function(aParams)
-	BuffsChanged(aParams)
+onMyEvent["EVENT_OBJECT_BUFF_ADDED"] = function(aParams)
+	BuffAdded(aParams)
+end
+
+onMyEvent["EVENT_OBJECT_BUFF_REMOVED"] = function(aParams)
+	BuffRemoved(aParams)
+end
+
+onMyEvent["EVENT_OBJECT_BUFF_CHANGED"] = function(aParams)
+	BuffChanged(aParams)
+end
+
+onMyEvent["EVENT_UNIT_RAGE_CHANGED"] = function(aParams)
+	RageChanged(aParams)
 end
 
 --------------------------------------------------------------------------------
@@ -329,18 +344,18 @@ onMyEvent["EVENT_RAID_MEMBER_ADDED"] = onMyEvent["EVENT_GROUP_MEMBER_ADDED"]
 onMyEvent["EVENT_GROUP_MEMBER_CHANGED"] = onMyEvent["EVENT_GROUP_MEMBER_ADDED"]
 onMyEvent["EVENT_RAID_MEMBER_CHANGED"] = onMyEvent["EVENT_GROUP_MEMBER_ADDED"]
 
-onMyEvent["EVENT_OBJECT_COMBAT_STATUS_CHANGED"] = function(params)
-	if params.inCombat and not DPSMeterGUI.DPSMeter.bCollectData then
-		DPSMeterGUI.DPSMeter:CollectMissedDataOnStartFight(params.objectId)
+onMyEvent["EVENT_OBJECT_COMBAT_STATUS_CHANGED"] = function(aParams)
+	if aParams.inCombat and not DPSMeterGUI.DPSMeter.bCollectData then
+		DPSMeterGUI.DPSMeter:CollectMissedDataOnStartFight(aParams.objectId)
 	end
 end
 
 --------------------------------------------------------------------------------
 -- Event: EVENT_SECOND_TIMER
 --------------------------------------------------------------------------------
-onMyEvent["EVENT_SECOND_TIMER"] = function(params)
+onMyEvent["EVENT_SECOND_TIMER"] = function(aParams)
 	OnEventSecondZatichka()
-	--UpdateFabric()
+	UpdateBuffsStateByTime()
 	
 	DPSMeterGUI.DPSMeter:SecondTick()
 	DPSMeterGUI.DPSMeter:UpdateCombatantPos()
@@ -370,7 +385,7 @@ function FastUpdate()
 		DPSMeterGUI.DPSMeter:FastTick()
 		DPSMeterGUI:UpdateValues()
 	end
-	DPSMeterGUI.DPSMeter:CollectPlayersRage()
+	DPSMeterGUI.DPSMeter:CollectUnitsRage()
 end
 --------------------------------------------------------------------------------
 -- Event: EVENT_UNIT_DAMAGE_RECEIVED
@@ -540,7 +555,6 @@ function GlobalReset()
 		Settings.CollectTotalTimelapse = savedData.сollectTotalTimelapse
 		Settings.ShowPositionOnBtn = savedData.showPositionOnBtn
 		Settings.ScaleFonts = savedData.scaleFonts
-		Settings.UseAlternativeRage = savedData.useAlternativeRage
 		if savedData.maxCombatants then
 			Settings.MaxCombatants = savedData.maxCombatants
 		end
@@ -548,120 +562,24 @@ function GlobalReset()
 
 	StrAllTime = GetTextLocalized("StrAllTime")
 	
-	
 	FillBuffCheckList()
 	InitBuffConditionMgr()
 	
+	-- Create the DPSMeter here
+	DPSMeterGUI = TUMeterGUI:CreateNewObject(TUMeter:CreateNewObject())
+	DPSMeterGUI:Init()
 	
-	m_buffListener.listenerChangeBuff = PlayerChangeBuff
+	
+	m_buffListener.listenerAddBuff = PlayerAddBuff
 	m_buffListener.listenerRemoveBuff = PlayerRemoveBuff
+	m_buffListener.listenerChangeBuff = PlayerChangeBuff
+	m_buffListener.listenerRage = PlayerRageChanged
 	
 	local unitList = avatar.GetUnitList()
 	table.insert(unitList, avatar.GetId())
 	for _, unitID in ipairs(unitList) do
 		FabricMakePlayerInfo(unitID, m_buffListener)
 	end
-	
-	-- Create the DPSMeter here
-	DPSMeterGUI = TUMeterGUI:CreateNewObject(TUMeter:CreateNewObject())
-	DPSMeterGUI:Init()
-
-	-- Initialize localizations
-	StrPet = userMods.FromWString(GetTextLocalized("Pet"))
-	StrDamagePool = userMods.FromWString(GetTextLocalized("DamagePool"))
-	StrFromBarrier = userMods.FromWString(GetTextLocalized("FromBarrier"))
-	
-	StrNone = userMods.ToWString("")
-	StrPet = userMods.ToWString(StrPet .. "-")
-	StrWeakness = GetTextLocalized("Weakness")
-	StrDefense = GetTextLocalized("Defense")
-	StrVulnerability = GetTextLocalized("Vulnerability")
-	StrInsidiousness = GetTextLocalized("Insidiousness")
-	StrValor = GetTextLocalized("Valor")
-	StrMapModifier = GetTextLocalized("MapModifier")
-	StrExploit = GetTextLocalized("Exploit")
-	StrFall = GetTextLocalized("Fall")
-	
-
-
-	TitleMode[enumMode.Dps] = GetTextLocalized("DPS")
-	TitleMode[enumMode.Hps] = GetTextLocalized("HPS")
-	TitleMode[enumMode.IHps] = GetTextLocalized("IHPS")
-	TitleMode[enumMode.Def] = GetTextLocalized("DEF")
-	
-	
-
-	TitleFight[enumFight.Current] = GetTextLocalized("Current")
-	TitleFight[enumFight.Total] = GetTextLocalized("Overall")
-	TitleFight[enumFight.History] = GetTextLocalized("History")
-	
-
-	TitleDmgType[enumHit.Normal] = GetTextLocalized("Normal")
-	TitleDmgType[enumHit.Critical] = GetTextLocalized("Critical")
-	TitleDmgType[enumHit.Glancing] = GetTextLocalized("Glancing")
-
-	TitleBuffType[enumBuff.Weakness] = GetTextLocalized("Weakness")
-	TitleBuffType[enumBuff.Defense] = GetTextLocalized("Defense")
-	TitleBuffType[enumBuff.Vulnerability] = GetTextLocalized("Vulnerability")
-	TitleBuffType[enumBuff.Valor] = GetTextLocalized("Valor")
-		
-	TitleMissType[enumMiss.Dodge] = GetTextLocalized("Dodge")
-	TitleMissType[enumMiss.Miss] = GetTextLocalized("Miss")
-
-	TitleHitBlockType[enumHitBlock.Block] = GetTextLocalized("Blocked")
-	TitleHitBlockType[enumHitBlock.Parry] = GetTextLocalized("Parry")
-	TitleHitBlockType[enumHitBlock.Barrier] = GetTextLocalized("Barrier")
-	TitleHitBlockType[enumHitBlock.Resist] = GetTextLocalized("Resisted")
-	TitleHitBlockType[enumHitBlock.Absorb] = GetTextLocalized("Absorbed")
-	TitleHitBlockType[enumHitBlock.RunesAbsorb] = GetTextLocalized("Rune")
-	TitleHitBlockType[enumHitBlock.MultAbsorb] = GetTextLocalized("Multiplier")
-	TitleHitBlockType[enumHitBlock.Mount] = GetTextLocalized("Mount")
-	
-
-	TitleHealResistType[enumHealResist.Resisted] = GetTextLocalized("Resisted")
-	TitleHealResistType[enumHealResist.RuneResisted] = GetTextLocalized("HealRuneResisted")
-	TitleHealResistType[enumHealResist.Absorbed] = GetTextLocalized("Absorbed")
-	TitleHealResistType[enumHealResist.Overload] = GetTextLocalized("Overload")
-
-	TitleGlobalInfoType[enumGlobalInfo.Determination] = GetTextLocalized("Determination")
-
-	DPSMeterGUI.DetailsPanel.GlobalInfoHeaderNameText:SetVal("Name", GetTextLocalized("GlobalInfo"))
-	DPSMeterGUI.DetailsPanel.GlobalInfoHeaderStatsText:SetVal("Min", GetTextLocalized("Min"))
-	DPSMeterGUI.DetailsPanel.GlobalInfoHeaderStatsText:SetVal("Avg", GetTextLocalized("Avg"))
-	DPSMeterGUI.DetailsPanel.GlobalInfoHeaderStatsText:SetVal("Max", GetTextLocalized("Max"))
-
-	DPSMeterGUI.DetailsPanel.SpellHeaderNameText:SetVal("Name", GetTextLocalized("Ability"))
-	DPSMeterGUI.DetailsPanel.SpellHeaderStatsText:SetVal("DamageDone", GetTextLocalized("Dmg"))
-	DPSMeterGUI.DetailsPanel.SpellHeaderStatsText:SetVal("Absorbed", GetTextLocalized("Abs"))
-	DPSMeterGUI.DetailsPanel.SpellHeaderStatsText:SetVal("CPS", GetTextLocalized("CPS"))
-
-	DPSMeterGUI.DetailsPanel.SpellDetailsHeaderNameText:SetVal("Name", GetTextLocalized("Type"))
-	DPSMeterGUI.DetailsPanel.SpellDetailsHeaderStatsText:SetVal("Min", GetTextLocalized("Min"))
-	DPSMeterGUI.DetailsPanel.SpellDetailsHeaderStatsText:SetVal("Avg", GetTextLocalized("Avg"))
-	DPSMeterGUI.DetailsPanel.SpellDetailsHeaderStatsText:SetVal("Max", GetTextLocalized("Max"))
-	
-	DPSMeterGUI.DetailsPanel.SpellCurrTimeText:SetVal("Name", GetTextLocalized("Showed"))
-	DPSMeterGUI.DetailsPanel.SpellCurrTimeText:SetVal("Time", StrAllTime)
-	DPSMeterGUI.DetailsPanel.DescText:SetVal("Desc", userMods.ToWString(" "))
-
-
-
-	-- Update the mode in the fight panel (at the top of the player list)
-	DPSMeterGUI.MainPanel.ModeText:SetVal("Name", TitleMode[DPSMeterGUI.ActiveMode])
-
-	-- Update the mode in the title of the spell panel
-	DPSMeterGUI.DetailsPanel.PlayerNameText:SetVal("Mode", TitleMode[DPSMeterGUI.ActiveMode])
-
-	-- Update the mode in the header of the spell panel
-	DPSMeterGUI.DetailsPanel.SpellHeaderStatsText:SetVal("DPS", TitleMode[DPSMeterGUI.ActiveMode])
-
-	DPSMeterGUI:Reset()
-	
-	-- Update the fight in the fight panel (at the top of the player list)
-	DPSMeterGUI.MainPanel.FightText:SetVal("Name", TitleFight[DPSMeterGUI.ActiveFightMode])
-
-	-- Update the fight in the title of the spell panel
-	DPSMeterGUI.DetailsPanel.PlayerNameText:SetVal("Fight", TitleFight[DPSMeterGUI.ActiveFightMode])
 
 	if AoPanelDetected then DPSMeterGUI.ShowHideBtn:DnDHide() end
 	
@@ -679,20 +597,43 @@ function GlobalReset()
 	StartTimer(FastUpdate, Settings.FastUpdateInterval)
 end
 
-function PlayerChangeBuff(aBuffInfo, aPlayerID, aFindedObj)
+function PlayerAddBuff(aBuffDynamicInfo, aPlayerID, aFindedObj)
 	CurrentBuffsState[aFindedObj.ind][aPlayerID] = aFindedObj
+	CurrentBuffsStateByTime[aFindedObj.ind][aPlayerID] = {
+		info = aFindedObj, 
+		buffFinishedTime_h = aBuffDynamicInfo.remainingMs + common.GetLocalDateTimeMs(), 
+		removeAfterDeath = false
+		}
 end
 
-function PlayerRemoveBuff(aBuffInfo, aPlayerID, aFindedObj)
+function PlayerRemoveBuff(aBuffID, aPlayerID, aFindedObj)
 	CurrentBuffsState[aFindedObj.ind][aPlayerID] = nil
+	
+	if not object.IsExist(aPlayerID) or object.IsDead(aPlayerID) then
+		local buffState = CurrentBuffsStateByTime[aFindedObj.ind][aPlayerID]
+		if buffState then
+			buffState.removeAfterDeath = true
+			buffState.removeTime = common.GetLocalDateTimeMs()
+		end
+	end
+end
+
+function PlayerChangeBuff(aPlayerID, aBuffDynamicInfo, aFindedObj)
+	CurrentBuffsStateByTime[aFindedObj.ind][aPlayerID] = {
+		info = aFindedObj, 
+		buffFinishedTime_h = aBuffDynamicInfo.remainingMs + common.GetLocalDateTimeMs(), 
+		removeAfterDeath = false
+		}
+end
+
+
+
+function PlayerRageChanged(aPlayerID, aRage)
+	DPSMeterGUI.DPSMeter:UpdateUnitRage(aPlayerID, aRage)
 end
 
 function FillBuffCheckList()
 	local index = 1
-	for i = 1, 1 do
-		table.insert(BuffCheckList, {name = GetTextLocalized("IHpsBuff"..i), ind = index, forTarget = true, forHps = true})
-		index = index + 1
-	end
 	for i = 1, 3 do
 		table.insert(BuffCheckList, {name = GetTextLocalized("HpsBuff"..i), ind = index, forSrc = true, forHps = true})
 		index = index + 1
@@ -705,12 +646,17 @@ function FillBuffCheckList()
 		table.insert(BuffCheckList, {name = GetTextLocalized("DpsBuff"..i), ind = index, forSrc = true, forDps = true})
 		index = index + 1
 	end
-	DPSHPSTYPES = 8
-	DEFTYPES = 24
-	for i = 1, DEFTYPES do
+	DPSHPSTYPES = 7
+	DEFTYPES = 25
+	for i = 1, 1 do
+		table.insert(BuffCheckList, {name = GetTextLocalized("IHpsBuff"..i), ind = index, forTarget = true, forHps = true})
+		index = index + 1
+	end
+	for i = 1, 24 do
 		table.insert(BuffCheckList, {name = GetTextLocalized("DefBuff"..i), ind = index, forTarget = true, forDps = true})
 		index = index + 1
 	end
+	
 	
 	for i = 1, DPSHPSTYPES do
 		TitleCustomDpsBuffType[i] = BuffCheckList[i].name
@@ -721,5 +667,6 @@ function FillBuffCheckList()
 	
 	for i = 1, index-1 do
 		CurrentBuffsState[i] = {}
+		CurrentBuffsStateByTime[i] = {}
 	end
 end

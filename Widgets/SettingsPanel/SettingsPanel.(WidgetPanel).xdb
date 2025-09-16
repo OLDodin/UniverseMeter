@@ -24,9 +24,7 @@
 		<Item href="Buttons/ShowScoreTextView.xdb#xpointer(/WidgetTextView)" />
 		<Item href="Buttons/ScaleFontsCheckBox.xdb#xpointer(/WidgetButton)" />
 		<Item href="Buttons/ScaleFontsTextView.xdb#xpointer(/WidgetTextView)" />
-		<Item href="Buttons/UseAlternativeRageCheckBox.xdb#xpointer(/WidgetButton)" />
-		<Item href="Buttons/UseAlternativeRageTextView.xdb#xpointer(/WidgetTextView)" />
-		
+				
 		<Item href="Buttons/SaveBtn/Button.(WidgetButton).xdb#xpointer(/WidgetButton)" />
 		<Item href="Buttons/HeaderText/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />		
 		

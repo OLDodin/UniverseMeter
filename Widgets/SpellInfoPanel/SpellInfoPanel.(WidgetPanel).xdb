@@ -11,6 +11,11 @@
 		<Item href="SpellDetailHeaderPanel/SpellDetailHeaderPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
 		<Item href="TextViews/SpellPlayerName.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
 		<Item href="TextViews/Desc.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		
+		<Item href="TextViews/ResistHeader.(WidgetTextView).xdb" />
+		<Item href="TextViews/DpsBuffHeader.(WidgetTextView).xdb" />
+		<Item href="TextViews/DefBufflHeader.(WidgetTextView).xdb" />
+		
 		<Item href="TimeLapsePanel/ScrollPanel.(WidgetPanel).xdb"/>
 		<Item href="TimeLapsePanel/ScrollVertical/ScrollableContainer.(WidgetPanel).xdb"/>
 		<Item href="TimeLapsePanel/TextViews/CurrTime.(WidgetTextView).xdb"/>
@@ -22,7 +27,7 @@
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Size>1150</Size>
+			<Size>1250</Size>
 			<Pos>333</Pos>
 		</X>
 		<Y>
