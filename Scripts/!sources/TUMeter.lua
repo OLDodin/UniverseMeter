@@ -184,8 +184,8 @@ end
 
 -- например, для парных боссов приходит урон и для 2го, но уже только с указанием sourceName targetName
 local function BuildBySourceName(aSrcName, aTargetName)
-	local spellName = aSrcName and not aSrcName:IsEmpty() and aSrcName
-	if spellName and aTargetName then
+	local spellName = aSrcName and not aSrcName:IsEmpty() and aSrcName or StrUnknown
+	if aTargetName then
 		spellName = spellName..StrArrow..aTargetName
 	end
 	return spellName
@@ -391,8 +391,7 @@ end
 -- Update the data in the given mode
 --------------------------------------------------------------------------------
 function TUMeter:UpdateFightData(aMode, aCombatant, aSpellInfo)
-	aCombatant:CreateCombatantData(aMode)
-	aCombatant.Data[aMode].Amount = aCombatant.Data[aMode].Amount + aSpellInfo.amount
+	aCombatant:IncreaseCombatantAmount(aSpellInfo.amount, aMode)
 
 	if aSpellInfo.Determination ~= nil then
 		aCombatant:UpdateGlobalInfo(enumGlobalInfo.Determination, aMode, aSpellInfo.Determination)

@@ -114,7 +114,15 @@ function GetResistAmount(aSpellData)
 end
 
 
-function CalculateSpellDetailsPercentage(aSpellData)
+function CalculateSpellDetailsPercentage(aSpellData, aFightTime, aCombatantAmount, aInvertResistPercentage)
+	local spellResistAmount = GetResistAmount(aSpellData)
+	aSpellData.AmountPerSec = aSpellData.Amount / aFightTime
+	aSpellData.Percentage = GetPercentageAt(aSpellData.Amount, aCombatantAmount)
+	aSpellData.ResistPercentage = GetPercentageAt(spellResistAmount, aSpellData.Amount + spellResistAmount)
+	if aInvertResistPercentage then
+		aSpellData.ResistPercentage = -1 * aSpellData.ResistPercentage
+	end
+		
 	return GetFunctionOwnerForSpellData(aSpellData).CalculateSpellDetailsPercentage(aSpellData)
 end
 

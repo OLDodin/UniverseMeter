@@ -24,7 +24,6 @@ function TCombatant:CreateNewObject(anID, aName, aClassName, anIsNear)
 			Name = aName,			-- Name of the combatant
 			Data = {					-- Data (Dps, Hps, Def)
 			},
-			--GlobalInfoList = {},
 			BitPackedValue = 0
 		}, { __index = self })
 		
@@ -42,7 +41,36 @@ function TCombatant:CreateCombatantData(aMode)
 	if not self.Data[aMode] then
 		self.Data[aMode] = TCombatantData:CreateNewObject()
 	end
+	
+	return self.Data[aMode]
 end
+
+-- increase Amount in one second TFightPeriod
+function TCombatant:IncreaseCombatantAmount(aValue, aMode)
+	local combatantData = self:CreateCombatantData(aMode)
+	combatantData.Amount = combatantData.Amount + aValue
+end
+-- update Amount in TFight
+function TCombatant:RecalculateAmount(aValue, aMode, anUpdateLast)
+	local combatantData = self:CreateCombatantData(aMode)
+	if combatantData.LastAmount == nil then
+		combatantData.LastAmount = 0
+	end
+	combatantData.Amount = combatantData.LastAmount + aValue
+	if anUpdateLast then
+		combatantData.LastAmount = combatantData.Amount
+	end
+end
+
+function TCombatant:CalculateCombatantsData(aMode, aFightTime, aFightAmount, aLeaderAmount)
+	local currData = self.Data[aMode]
+	if currData then
+		currData.AmountPerSec = currData.Amount / aFightTime
+		currData.Percentage = GetPercentageAt(currData.Amount, aFightAmount)
+		currData.LeaderPercentage = GetPercentageAt(currData.Amount, aLeaderAmount)
+	end
+end
+
 --------------------------------------------------------------------------------
 -- Get spell by identifier 
 --------------------------------------------------------------------------------
@@ -168,28 +196,29 @@ end
 -- Update Global Info
 --------------------------------------------------------------------------------
 function TCombatant:CreateGlobalInfo(aMode)
-	self:CreateCombatantData(aMode)
-	if not self.Data[aMode].Determination then
-		self.Data[aMode].Determination = TValueDetails:CreateNewObject()
+	local combatantData = self:CreateCombatantData(aMode)
+	if not combatantData.Determination then
+		combatantData.Determination = TValueDetails:CreateNewObject()
 	end
+	return combatantData
 end
 
 function TCombatant:UpdateGlobalInfo(anInfoIndex, aMode, aDetermination)
 	if anInfoIndex == enumGlobalInfo.Determination then
-		self:CreateGlobalInfo(aMode)
-		TValueDetails.RecalcDetails(self.Data[aMode].Determination, aDetermination)
-		--self.Data[mode].GlobalInfoList[enumGlobalInfo.Determination]
-		self.Data[aMode].Determination.Percentage = TValueDetails.GetAvg(self.Data[aMode].Determination)
+		local combatantData = self:CreateGlobalInfo(aMode)
+		TValueDetails.RecalcDetails(combatantData.Determination, aDetermination)
+		combatantData.Determination.Percentage = TValueDetails.GetAvg(combatantData.Determination)
 	end
 end
 
-function TCombatant:MergeGlobalInfo(aMode, aCombatantData)
-	if not aCombatantData.Data[aMode] or not aCombatantData.Data[aMode].Determination then
+function TCombatant:MergeGlobalInfo(aMode, aCombatant)
+	local newCombatantData = aCombatant.Data[aMode]
+	if not newCombatantData or not newCombatantData.Determination then
 		return
 	end
-	self:CreateGlobalInfo(aMode)
-	TValueDetails.MergeDetails(self.Data[aMode].Determination, aCombatantData.Data[aMode].Determination)
-	self.Data[aMode].Determination.Percentage = TValueDetails.GetAvg(self.Data[aMode].Determination)
+	local combatantData = self:CreateGlobalInfo(aMode)
+	TValueDetails.MergeDetails(combatantData.Determination, newCombatantData.Determination)
+	combatantData.Determination.Percentage = TValueDetails.GetAvg(combatantData.Determination)
 end
 
 
@@ -218,8 +247,7 @@ function TCombatant:AddNewSpell(aSpellInfo, aMode)
 			SpellData.Element = aSpellInfo.sysSubElement
 			SpellData.InfoID = aSpellInfo.infoID
 
-			self:CreateCombatantData(aMode)
-			table.insert(self.Data[aMode], SpellData)
+			table.insert(self:CreateCombatantData(aMode), SpellData)
 			if SpellData.PetName then
 				SpellData.PetName = SpellData.PetName:Truncate(15)
 			end
@@ -232,8 +260,8 @@ function TCombatant:AddCopySpell(aMode, aSpellData, aHitTime)
 	local spellData = SimpleRecursiveCloneTable(aSpellData)
 	spellData.FirstHitTime = aHitTime
 	spellData.LastHitTime = aHitTime
-	self:CreateCombatantData(aMode)
-	table.insert(self.Data[aMode], spellData)
+	
+	table.insert(self:CreateCombatantData(aMode), spellData)
 	return spellData
 end
 
@@ -266,38 +294,23 @@ end
 -- Compare spell by amount
 --------------------------------------------------------------------------------
 local function CompareSpells(A, B)
-	if not A.Name or not B.Name then
-		return false
-	end
 	if A.Amount == B.Amount then
 		return A.Name < B.Name end
 	return A.Amount > B.Amount
-end
---------------------------------------------------------------------------------
--- Sort the spell list by damage amount
---------------------------------------------------------------------------------
-function TCombatant:SortSpellByAmount(aMode)
-	table.sort(self.Data[aMode], CompareSpells)
 end
 --------------------------------------------------------------------------------
 -- Calculate the damage, DPS, HPS, according to the fight time
 --------------------------------------------------------------------------------
 function TCombatant:CalculateSpell(aFightTime, aMode)
 	if not (aFightTime > 0) then aFightTime = 1 end
-	if not self.Data[aMode] then
+	local combatantData = self.Data[aMode]
+	if not combatantData then
 		return
 	end
-	for _, spellData in ipairs( self.Data[aMode] ) do
-		local spellResistAmount = GetResistAmount(spellData)
-		spellData.AmountPerSec = spellData.Amount / aFightTime
-		spellData.Percentage = GetPercentageAt(spellData.Amount, self.Data[aMode].Amount)
-		CalculateSpellDetailsPercentage(spellData)
-		spellData.ResistPercentage = GetPercentageAt(spellResistAmount, (spellData.Amount + spellResistAmount))
-		if aMode == enumMode.Dps or aMode == enumMode.Def then
-			spellData.ResistPercentage = spellData.ResistPercentage ~= 0 and -1 * spellData.ResistPercentage or spellData.ResistPercentage
-		end
+	for _, spellData in ipairs( combatantData ) do
+		CalculateSpellDetailsPercentage(spellData, aFightTime, combatantData.Amount, aMode == enumMode.Dps or aMode == enumMode.Def)
 	end
-	self:SortSpellByAmount(aMode)
+	table.sort(combatantData, CompareSpells)
 end
 --------------------------------------------------------------------------------
 -- Update information of a combatant

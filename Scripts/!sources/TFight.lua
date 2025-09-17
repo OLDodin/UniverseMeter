@@ -218,12 +218,9 @@ function TFight:UpdateOnlyDisplayData(aFightPeriod)
 		local combatant = self:UpdateCombatantByCombatant(combatantFromPeriod)
 		
 		for _, mode in pairs(enumMode) do 
-			if combatantFromPeriod.Data[mode] then
-				combatant:CreateCombatantData(mode)
-				if combatant.Data[mode].LastAmount == nil then
-					combatant.Data[mode].LastAmount = 0
-				end
-				combatant.Data[mode].Amount = combatant.Data[mode].LastAmount + combatantFromPeriod.Data[mode].Amount
+			local combatantFromPeriodData = combatantFromPeriod.Data[mode]
+			if combatantFromPeriodData then
+				combatant:RecalculateAmount(combatantFromPeriodData.Amount, mode, false)
 			end		
 		end
 	end
@@ -238,15 +235,11 @@ function TFight:AddFightPeriodAndApply(aFightPeriod, aCalculateSpellData)
 		local combatant = self:UpdateCombatantByCombatant(combatantFromPeriod)
 		
 		for _, mode in pairs(enumMode) do 
-			if combatantFromPeriod.Data[mode] then
-				combatant:CreateCombatantData(mode)
-				if combatant.Data[mode].LastAmount == nil then
-					combatant.Data[mode].LastAmount = 0
-				end
-				combatant.Data[mode].Amount = combatant.Data[mode].LastAmount + combatantFromPeriod.Data[mode].Amount
-				combatant.Data[mode].LastAmount = combatant.Data[mode].Amount
+			local combatantFromPeriodData = combatantFromPeriod.Data[mode]
+			if combatantFromPeriodData then
+				combatant:RecalculateAmount(combatantFromPeriodData.Amount, mode, true)
 				
-				if combatantFromPeriod.Data[mode].Amount ~= 0 then
+				if combatantFromPeriodData.Amount ~= 0 then
 					self.Timer:SetLastHit()
 				end
 			end		
@@ -310,26 +303,10 @@ end
 --------------------------------------------------------------------------------
 -- Compare combatant by damage amount
 --------------------------------------------------------------------------------
-local function CompareCombatantsBySortValue2(A, B)
+local function CompareCombatantsBySortValue(A, B)
 	if A.SortValue == B.SortValue then
 		return A.Name < B.Name end
 	return A.SortValue > B.SortValue
-end
---------------------------------------------------------------------------------
--- Sort combatant by SortValue. This value is update in TFightPeriod:RecalculateCombatantsData(Mode)
--- It can be damage amount, heal amout, ...
---------------------------------------------------------------------------------
-function TFight:SortCombatantsBySortValue(aMode)
-	table.sort(self.CombatantsList, CompareCombatantsBySortValue2)
-	local imbaCombatant = self.CombatantsList[1]
-	if imbaCombatant then
-		local leaderAmount = imbaCombatant:GetAmount(aMode)
-		for i, combatant in pairs( self.CombatantsList ) do
-			if combatant.Data[aMode] then
-				combatant.Data[aMode].LeaderPercentage = GetPercentageAt(combatant.Data[aMode].Amount, leaderAmount)
-			end
-		end
-	end
 end
 --------------------------------------------------------------------------------
 -- Recalculate combatant data according to the inner fight time
@@ -338,20 +315,25 @@ function TFight:RecalculateCombatantsData(aMode)
 	local fightTime = self.Timer:GetElapsedTime()
 	if not (fightTime > 0) then fightTime = 1 end
 	-- Calculate the total amount
-	self.Data[aMode].Amount = 0
+	local fightData = self.Data[aMode]
+	fightData.Amount = 0
 	for _, combatant in pairs( self.CombatantsList ) do
-		self.Data[aMode].Amount = self.Data[aMode].Amount + combatant:GetAmount(aMode)
 		combatant.SortValue = combatant:GetAmount(aMode)
+		fightData.Amount = fightData.Amount + combatant.SortValue
 	end
 	-- Calculate the total amount per second
-	self.Data[aMode].AmountPerSec = self.Data[aMode].Amount / fightTime
-	-- For each combatant, calculate DPS and damage amount
-	for _, combatant in pairs( self.CombatantsList ) do
-		if combatant.Data[aMode] then
-			combatant.Data[aMode].AmountPerSec = combatant.Data[aMode].Amount / fightTime
-			combatant.Data[aMode].Percentage = GetPercentageAt(combatant.Data[aMode].Amount, self.Data[aMode].Amount)
+	fightData.AmountPerSec = fightData.Amount / fightTime
+	
+	-- Sort combatant by SortValue.
+	table.sort(self.CombatantsList, CompareCombatantsBySortValue)
+
+	local imbaCombatant = self.CombatantsList[1]
+	if imbaCombatant then
+		local leaderAmount = imbaCombatant:GetAmount(aMode)
+		-- For each combatant, calculate DPS and damage amount
+		for _, combatant in pairs( self.CombatantsList ) do
+			combatant:CalculateCombatantsData(aMode, fightTime, fightData.Amount, leaderAmount)
+			combatant.SortValue = nil
 		end
 	end
-
-	self:SortCombatantsBySortValue(aMode)
 end
