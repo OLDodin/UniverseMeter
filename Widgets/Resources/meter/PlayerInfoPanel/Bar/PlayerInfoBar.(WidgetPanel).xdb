@@ -2,7 +2,7 @@
 <WidgetPanel>
 	<Priority>50</Priority>
 	<Name>PlayerInfoBar</Name>
-	<BackLayer href="Bar1.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerSimpleTexture)" />
+	<BackLayer href="../../BarTexture/Bar.(WidgetLayerSimpleTexture).xdb" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_LOW</Align>

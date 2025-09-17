@@ -180,13 +180,13 @@ function TSpellPanelGUI:CreateNewObjectByDesc(name, desc, owner)
 	local widget = TWidget:CreateNewObjectByDesc(name, desc, owner)
 	return setmetatable({
 			Bar = widget:GetChildByName("SpellBar"),
-			Index = widget:GetChildByName("SpellTextViewIndex").Widget,
-			Type = widget:GetChildByName("SpellTextViewType").Widget,
-			Name = widget:GetChildByName("SpellTextViewName").Widget,
-			Damage = widget:GetChildByName("SpellTextViewStats").Widget,
-			CPS = widget:GetChildByName("SpellTextViewCPS").Widget,
-			DmgBlock = widget:GetChildByName("SpellTextViewDmgBlock").Widget,
-			Percent = widget:GetChildByName("SpellTextViewPercentage").Widget,
+			Index = widget:GetChildByName("SpellTextViewIndex"),
+			Type = widget:GetChildByName("SpellTextViewType"),
+			Name = widget:GetChildByName("SpellTextViewName"),
+			Damage = widget:GetChildByName("SpellTextViewStats"),
+			CPS = widget:GetChildByName("SpellTextViewCPS"),
+			DmgBlock = widget:GetChildByName("SpellTextViewDmgBlock"),
+			Percent = widget:GetChildByName("SpellTextViewPercentage"),
 			DeadImg = widget:GetChildByName("DeadImg"),
 		}, { __index = widget })
 end
@@ -198,14 +198,14 @@ function TSpellDetailsPanelGUI:CreateNewObjectByDesc(name, desc, owner)
 	local widget = TWidget:CreateNewObjectByDesc(name, desc, owner)
 	return setmetatable({
 			Bar = widget:GetChildByName("SpellDetailBar"),
-			Name = widget:GetChildByName("SpellDetailTextViewName").Widget,
-			Count = widget:GetChildByName("SpellDetailTextViewCount").Widget,
-			DamageMin = widget:GetChildByName("SpellDetailTextViewStatsMin").Widget,
-			DamageSeparator1 = widget:GetChildByName("SpellDetailTextViewStatsSeparator1").Widget,
-			DamageAvg = widget:GetChildByName("SpellDetailTextViewStatsAvg").Widget,
-			DamageSeparator2 = widget:GetChildByName("SpellDetailTextViewStatsSeparator2").Widget,
-			DamageMax = widget:GetChildByName("SpellDetailTextViewStatsMax").Widget,
-			Percent = widget:GetChildByName("SpellDetailTextViewPercentage").Widget,
+			Name = widget:GetChildByName("SpellDetailTextViewName"),
+			Count = widget:GetChildByName("SpellDetailTextViewCount"),
+			DamageMin = widget:GetChildByName("SpellDetailTextViewStatsMin"),
+			DamageSeparator1 = widget:GetChildByName("SpellDetailTextViewStatsSeparator1"),
+			DamageAvg = widget:GetChildByName("SpellDetailTextViewStatsAvg"),
+			DamageSeparator2 = widget:GetChildByName("SpellDetailTextViewStatsSeparator2"),
+			DamageMax = widget:GetChildByName("SpellDetailTextViewStatsMax"),
+			Percent = widget:GetChildByName("SpellDetailTextViewPercentage"),
 		}, { __index = widget })
 end
 
@@ -1030,10 +1030,12 @@ end
 
 function ScaleFontSpellDetailsPanelGUI(aSpellDetailsPanel)
 	if Settings.ScaleFonts then
-		aSpellDetailsPanel.Name:SetFormat("<header alignx = 'left' fontsize='14' outline='1'><rs class='class'><Neutral><r name='Name'/>:</Neutral></rs></header>")
-		aSpellDetailsPanel.Count:SetFormat("<header alignx = 'left' fontsize='14' outline='1'><rs class='class'><Neutral><r name='Count'/></Neutral></rs></header>")
-		aSpellDetailsPanel.Percent:SetFormat("<header alignx = 'left' fontsize='14' outline='1'><rs class='class'><tip_white><r name='Percentage'/>%</tip_white></rs></header>")
-		--aSpellDetailsPanel.Damage:SetFormat("<header alignx = 'left' fontsize='14' outline='1'><rs class='class'><tip_blue><r name='Min'/></tip_blue><Neutral><r name='Separator1'/> | </Neutral><tip_green><r name='Avg'/></tip_green><Neutral><r name='Separator2'/> | </Neutral><tip_red><r name='Max'/></tip_red></rs></header>")
+		aSpellDetailsPanel.Name:SetTextAttributes("Name", nil, 13)
+		aSpellDetailsPanel.Count:SetTextAttributes("Count", nil, 13)
+		aSpellDetailsPanel.DamageMin:SetTextAttributes("Min", nil, 13)
+		aSpellDetailsPanel.DamageAvg:SetTextAttributes("Avg", nil, 13)
+		aSpellDetailsPanel.DamageMax:SetTextAttributes("Max", nil, 13)
+		aSpellDetailsPanel.Percent:SetTextAttributes("Percentage", nil, 13)
 	end
 end
 
@@ -1048,13 +1050,23 @@ function TUMeterGUI:CreateNewSpellPanel()
 	self.DetailsPanel.SpellScrollList:PushBack(newSpellPanel.Widget)
 	
 	if Settings.ScaleFonts then
-		newSpellPanel.Index:SetFormat("<header alignx = 'left' fontsize='14' outline='1'><rs class='class'><Neutral><r name='Index'/>.</Neutral></rs></header>")
-		newSpellPanel.Type:SetFormat("<header alignx = 'left' fontsize='14' outline='1'><rs class='class'><Neutral><r name='Type'/></Neutral></rs></header>")
-		newSpellPanel.Name:SetFormat("<header alignx = 'left' fontsize='14' outline='1'><rs class='class'><Neutral><r name='PetName'/> <r name='Name'/></Neutral></rs></header>")
-		newSpellPanel.Damage:SetFormat("<header alignx = 'right' fontsize='14' outline='1'><rs class='class'><tip_red><r name='DamageDone'/> (<r name='DPS'/>)</tip_red></rs></header>")
-		newSpellPanel.CPS:SetFormat("<header alignx = 'right' fontsize='14' outline='1'><rs class='class'><tip_red><r name='CPS'/></tip_red></rs></header>")
-		newSpellPanel.DmgBlock:SetFormat("<header alignx = 'right' fontsize='14' outline='1'><rs class='class'><tip_red><r name='DamageBlock'/>%</tip_red></rs></header>")
-		newSpellPanel.Percent:SetFormat("<header alignx = 'left' fontsize='14' outline='1'><rs class='class'><tip_white><r name='Percentage'/>%</tip_white></rs></header>")
+		newSpellPanel.Index:SetTextAttributes("Index", nil, 14)
+		newSpellPanel.Type:SetTextAttributes("Type", nil, 14)
+		newSpellPanel.Name:SetTextAttributes("PetName", nil, 14)
+		newSpellPanel.Name:SetTextAttributes("Name", nil, 14)
+		newSpellPanel.Damage:SetTextAttributes("DamageDone", nil, 14)
+		newSpellPanel.Damage:SetTextAttributes("DPS", nil, 14)
+		newSpellPanel.CPS:SetTextAttributes("CPS", nil, 14)
+		newSpellPanel.DmgBlock:SetTextAttributes("DamageBlock", nil, 14)
+		newSpellPanel.Percent:SetTextAttributes("Percentage", nil, 14)
+	else
+		newSpellPanel.Index:SetPosition(nil, 1)
+		newSpellPanel.Type:SetPosition(nil, 1)
+		newSpellPanel.Name:SetPosition(nil, 1)
+		newSpellPanel.Damage:SetPosition(nil, 1)
+		newSpellPanel.CPS:SetPosition(nil, 1)
+		newSpellPanel.DmgBlock:SetPosition(nil, 1)
+		newSpellPanel.Percent:SetPosition(nil, 1)
 	end
 	
 	self.DetailsPanel.SpellList[spellIndex] = newSpellPanel
@@ -1191,21 +1203,30 @@ function TUMeterGUI:Init()
 	-------------------------------------------------------------------------------
 	local totalPanelDesc = GetDescFromResource("TotalInfoPanel")
 	local playerPanelDesc = GetDescFromResource("PlayerInfoPanel")
-	local spellPanelDesc = GetDescFromResource("SpellPanel")
 	local spellInfoPanelDesc = GetDescFromResource("SpellDetailPanel")
 
 	-------------------------------------------------------------------------------
 	-- Main Panel
 	-------------------------------------------------------------------------------
-
+	if Settings.ScaleFonts then
+		self.BarWidth = 295
+		self.MainPanel:SetWidth(370)
+	else
+		self.MainPanel:SetWidth(330)
+	end
+	
 	-- Total panel
 	self.MainPanel.TotalPanel = TTotalPanelGUI:CreateNewObjectByDesc("TotalPanel", totalPanelDesc, self.MainPanel)
 	self.MainPanel.TotalPanel:SetPosition(20, 47)
 	self.MainPanel.TotalPanel:Show()
 	self.MainPanel.TotalPanel.Bar:SetWidth(self.BarWidth)
+	self.MainPanel.TotalPanel:SetWidth(self.BarWidth + 26)
 	if Settings.ScaleFonts then
-		self.MainPanel.TotalPanel.Name:SetFormat("<header alignx = 'left' fontsize='16' outline='1'><rs class='class'><Neutral>Total (<r name='Minute'/>:<r name='Second'/>)</Neutral></rs></header>")
-		self.MainPanel.TotalPanel.Value:SetFormat("<header alignx = 'left' fontsize='16' outline='1'><rs class='class'><tip_red><r name='DamageDone'/> ( <r name='DPS'/> )</tip_red></rs></header>")
+		self.MainPanel.TotalPanel.Name:SetTextAttributes("Minute", nil, 16)
+		self.MainPanel.TotalPanel.Name:SetTextAttributes("Second", nil, 16)
+		self.MainPanel.TotalPanel.Value:SetTextAttributes("DamageDone", nil, 16)
+		self.MainPanel.TotalPanel.Value:SetTextAttributes("DPS", nil, 16)
+		self.MainPanel.TotalPanel.Value:SetPosition(175)
 	end
 
 	-- Player list
@@ -1213,10 +1234,14 @@ function TUMeterGUI:Init()
 		local wtName = "PlayerPanel" .. playerIndex
 		self.MainPanel.PlayerList[playerIndex] = TPlayerPanelGUI:CreateNewObjectByDesc(wtName, playerPanelDesc, self.MainPanel)
 		self.MainPanel.PlayerList[playerIndex]:SetPosition(20, 47 + playerIndex * 24)
+		self.MainPanel.PlayerList[playerIndex]:SetWidth(self.BarWidth + 26)
 		if Settings.ScaleFonts then
-			self.MainPanel.PlayerList[playerIndex].Name:SetFormat("<header alignx = 'left' fontsize='16' outline='1'><rs class='class'><Neutral><r name='Index'/>. <r name='Name'/></Neutral></rs></header>")
-			self.MainPanel.PlayerList[playerIndex].Percent:SetFormat("<header alignx = 'left' fontsize='16' outline='1'><rs class='class'><tip_white><r name='Percentage'/>%</tip_white></rs></header>")
-			self.MainPanel.PlayerList[playerIndex].Value:SetFormat("<header alignx = 'left' fontsize='16' outline='1'><rs class='class'><tip_red><r name='DamageDone'/> ( <r name='DPS'/> )</tip_red></rs></header>")
+			self.MainPanel.PlayerList[playerIndex].Name:SetTextAttributes("Index", nil, 16)
+			self.MainPanel.PlayerList[playerIndex].Name:SetTextAttributes("Name", nil, 16)
+			self.MainPanel.PlayerList[playerIndex].Percent:SetTextAttributes("Percentage", nil, 16)
+			self.MainPanel.PlayerList[playerIndex].Value:SetTextAttributes("DamageDone", nil, 16)
+			self.MainPanel.PlayerList[playerIndex].Value:SetTextAttributes("DPS", nil, 16)
+			self.MainPanel.PlayerList[playerIndex].Value:SetPosition(175)
 		end
 	end
 

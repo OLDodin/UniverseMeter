@@ -2,7 +2,7 @@
 <WidgetPanel>
 	<Priority>50</Priority>
 	<Name>SpellDetailBar</Name>
-	<BackLayer href="Bar1.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
+	<BackLayer href="../../BarTexture/Bar.(WidgetLayerSimpleTexture).xdb" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_LOW</Align>

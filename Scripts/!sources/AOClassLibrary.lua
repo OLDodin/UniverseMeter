@@ -1,3 +1,10 @@
+local tagFontName = userMods.ToWString("fontname")
+local tagAlignX = userMods.ToWString("alignx")
+local tagFontsize = userMods.ToWString("fontsize")
+local tagShadow = userMods.ToWString("shadow")
+local tagOutline = userMods.ToWString("outline")
+local tagColor = userMods.ToWString("color")
+
 ---------------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------------- HELPER FUNCTIONS -----------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------
@@ -246,6 +253,36 @@ function TWidget:SetFormat(aValue)
 		self.Widget:SetFormat(aValue)
 	end
 end
+
+function TWidget:SetTextAttributes(aTagTextValue, aFontName, aFontSize, anAlign, aShadow, anOutline, aColor)
+	if self.Widget then
+		local attributes = {}
+		if aFontName then
+			attributes[ tagFontName ] = aFontName
+		end	
+		if anAlign then
+			attributes[ tagAlignX ] = anAlign
+		end	
+		if aFontSize then
+			attributes[ tagFontsize ] = tostring(aFontSize)
+		end	
+		if aShadow then
+			attributes[ tagShadow ] = tostring(aShadow)
+		end	
+		if anOutline then
+			attributes[ tagOutline ] = tostring(anOutline)
+		end	
+		
+		if aColor then
+			-- example "0xFFEEDDCC"
+			attributes[ tagColor ] = tostring(anOutline)
+		end	
+		if table.nkeys(attributes) > 0 then
+			self.Widget:SetTextAttributes(true, aTagTextValue and userMods.ToWString(aTagTextValue), attributes)
+		end
+	end
+end
+
 
 function TWidget:ClearScrollList()
 	if not self.Widget then

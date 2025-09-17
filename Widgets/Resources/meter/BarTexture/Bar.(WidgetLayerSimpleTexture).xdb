@@ -5,7 +5,7 @@
 	<BlendEffect>BLEND_EFFECT_ALPHABLND</BlendEffect>
 	<flatPlacement>false</flatPlacement>
 	<lazyLoad>false</lazyLoad>
-	<textureItem href="Bar1.(UISingleTexture).xdb#xpointer(/UISingleTexture)" />
+	<textureItem href="Bar.(UITextureElement).xdb#xpointer(/UITextureElement)" />
 	<textureMask href="" />
 	<Scaling>true</Scaling>
 </WidgetLayerSimpleTexture>
