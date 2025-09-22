@@ -5,22 +5,24 @@ Global( "enumHit", { Normal = 1, Critical = 2, Glancing = 3 } )
 Global( "enumMiss", { Dodge = 1, Miss = 2 } )
 Global( "enumHitBlock", { Block = 1, Parry = 2, Barrier = 3, Resist = 4, Absorb = 5, RunesAbsorb = 6, MultAbsorb = 7, Mount = 8 } )
 Global( "enumHealResist", { Resisted = 1, RuneResisted = 2, Absorbed = 3, Overload = 4 } )
-Global( "enumBuff", { Valor = 1, Vulnerability = 2, Weakness = 3, Defense = 4 } )
 Global( "enumGlobalInfo", { Determination = 1,  Critical = 2, Physical = 3, Elemental = 4, Holy = 5, Natural = 6 } )
 Global( "enumState", { Idle = 0, Attacked = 1, Killed = 2, Lost = 3 } )
 Global( "enumMode", { Dps = 1, Hps = 2, Def = 3, IHps = 4 } )
 Global( "enumFight", { Current = 0, Total = 1, History = 3 } )
 
 --------------------------------------------------------------------------------
+-- Init in FillBuffCheckList
+--------------------------------------------------------------------------------
+Global( "ServerBuffIndex", { Valor = 0, Vulnerability = 0, Weakness = 0, Defense = 0 } )
+Global( "DPSHPSTYPES", 0)
+Global( "DEFTYPES", 0)
+--------------------------------------------------------------------------------
 -- Constants
 --------------------------------------------------------------------------------
 Global( "INITSPELLSCNT", 20)
-Global( "DPSHPSTYPES", 0)
-Global( "DEFTYPES", 0)
 Global( "DMGTYPES", GetTableSize(enumHit))
 Global( "MISSTYPES", GetTableSize(enumMiss))
 Global( "BLOCKDMGTYPES", GetTableSize(enumHitBlock))
-Global( "BUFFTYPES", GetTableSize(enumBuff))            	    
 Global( "EXTRATYPES", GetTableSize(enumGlobalInfo))
 --------------------------------------------------------------------------------
 
@@ -72,12 +74,20 @@ Global( "StrFall", "" )
 Global ( "StrMainBtn", userMods.ToWString("D") )
 Global ( "StrSpace", userMods.ToWString(" ") )
 
+Global( "StrHpsBuffHeader", "" )
+Global( "StrAntiHpsBuffHeader", "" )
+Global( "StrResistHpsBuffHeader", "" )
+Global( "StrIncreaseDefBuffHeader", "" )
+Global( "StrDecreaseDefBuffHeader", "" )
+Global( "StrResistDefBuffHeader", "" )
+Global( "StrIncreaseDpsBuffHeader", "" )
+Global( "StrDecreaseDpsBuffHeader", "" )
+Global( "StrResistDpsBuffHeader", "" )
 
 
 Global( "TitleMode", {})
 Global( "TitleFight", {})
 Global( "TitleDmgType", {})
-Global( "TitleBuffType", {})
 Global( "TitleMissType", {})
 Global( "TitleHitBlockType", {})
 Global( "TitleHealResistType", {})
@@ -87,15 +97,13 @@ Global( "TitleCustomDefBuffType", {})
 --------------------------------------------------------------------------------
 -- Events
 --------------------------------------------------------------------------------
-Global("onGenEvent", {})
 Global("onMyEvent", {})
-Global("onMyEvent2", {})
 Global("onReaction", {})
 --------------------------------------------------------------------------------
 -- Colors
 --------------------------------------------------------------------------------
-Global( "TotalColor", { r = 128/255; g = 128/255; b = 128/255; a = 1 } )
-Global( "TotalColorInFight", { r = 128/255; g = 0/255; b = 0/255; a = 1 } )
+Global( "TotalColor", { r = 128/255, g = 128/255, b = 128/255, a = 1 } )
+Global( "TotalColorInFight", { r = 128/255, g = 0/255, b = 0/255, a = 1 } )
 Global("ClassColorsIndex", {
 		["WARRIOR"]		= 1,
 		["PALADIN"]		= 2,
@@ -111,56 +119,60 @@ Global("ClassColorsIndex", {
 		["UNKNOWN"]		= 12,
 	})
 Global("ClassColors", {
-		[1]		= { r = 165/255; g = 138/255; b = 087/255; a = 1 },
-		[2]		= { r = 204/255; g = 255/255; b = 255/255; a = 1 },
-		[3]		= { r = 047/255; g = 145/255; b = 255/255; a = 1 },
-		[4]		= { r = 255/255; g = 128/255; b = 000/255; a = 1 },
-		[5]		= { r = 255/255; g = 128/255; b = 255/255; a = 1 },
-		[6]		= { r = 001/255; g = 188/255; b = 064/255; a = 1 },
-		[7]		= { r = 255/255; g = 227/255; b = 048/255; a = 1 },
-		[8]		= { r = 241/255; g = 043/255; b = 071/255; a = 1 },
-		[9]		= { r = 000/255; g = 255/255; b = 200/255; a = 1 },
-		[10]    = { r = 135/255; g = 163/255; b = 177/255; a = 1 },
-		[11]    = { r = 125/255; g = 101/255; b = 219/255; a = 1 },
-		[12]	= { r = 127/255; g = 127/255; b = 127/255; a = 1 },
+		[1]		= { r = 165/255, g = 138/255, b = 087/255, a = 1 },
+		[2]		= { r = 204/255, g = 255/255, b = 255/255, a = 1 },
+		[3]		= { r = 047/255, g = 145/255, b = 255/255, a = 1 },
+		[4]		= { r = 255/255, g = 128/255, b = 000/255, a = 1 },
+		[5]		= { r = 255/255, g = 128/255, b = 255/255, a = 1 },
+		[6]		= { r = 001/255, g = 188/255, b = 064/255, a = 1 },
+		[7]		= { r = 255/255, g = 227/255, b = 048/255, a = 1 },
+		[8]		= { r = 241/255, g = 043/255, b = 071/255, a = 1 },
+		[9]		= { r = 000/255, g = 255/255, b = 200/255, a = 1 },
+		[10]    = { r = 135/255, g = 163/255, b = 177/255, a = 1 },
+		[11]    = { r = 125/255, g = 101/255, b = 219/255, a = 1 },
+		[12]	= { r = 127/255, g = 127/255, b = 127/255, a = 1 },
 	})
 Global( "DamageTypeColors", {
-		["ENUM_SubElement_PHYSICAL"]	= { r = 0.7; g = 0.5; b = 0.3; a = 1 },
+		["ENUM_SubElement_PHYSICAL"]	= { r = 0.7, g = 0.5, b = 0.3, a = 1 },
 		
-		["ENUM_SubElement_FIRE"]		= { r = 0.2; g = 0.35; b = 1.0; a = 1 },
-		["ENUM_SubElement_COLD"]		= { r = 0.2; g = 0.35; b = 1.0; a = 1 },
-		["ENUM_SubElement_LIGHTNING"]	= { r = 0.2; g = 0.35; b = 1.0; a = 1 },
+		["ENUM_SubElement_FIRE"]		= { r = 0.2, g = 0.35, b = 1.0, a = 1 },
+		["ENUM_SubElement_COLD"]		= { r = 0.2, g = 0.35, b = 1.0, a = 1 },
+		["ENUM_SubElement_LIGHTNING"]	= { r = 0.2, g = 0.35, b = 1.0, a = 1 },
 		
-		["ENUM_SubElement_HOLY"]		= { r = 1.0; g = 1.0; b = 0.5; a = 1 },
-		["ENUM_SubElement_SHADOW"]		= { r = 1.0; g = 1.0; b = 0.5; a = 1 },
-		["ENUM_SubElement_ASTRAL"]		= { r = 1.0; g = 1.0; b = 0.5; a = 1 },
+		["ENUM_SubElement_HOLY"]		= { r = 1.0, g = 1.0, b = 0.5, a = 1 },
+		["ENUM_SubElement_SHADOW"]		= { r = 1.0, g = 1.0, b = 0.5, a = 1 },
+		["ENUM_SubElement_ASTRAL"]		= { r = 1.0, g = 1.0, b = 0.5, a = 1 },
 		
-		["ENUM_SubElement_POISON"]		= { r = 0.3; g = 1.0; b = 0.3; a = 1 },
-		["ENUM_SubElement_DISEASE"]	    = { r = 0.3; g = 1.0; b = 0.3; a = 1 },
-		["ENUM_SubElement_ACID"]		= { r = 0.3; g = 1.0; b = 0.3; a = 1 },
+		["ENUM_SubElement_POISON"]		= { r = 0.3, g = 1.0, b = 0.3, a = 1 },
+		["ENUM_SubElement_DISEASE"]	    = { r = 0.3, g = 1.0, b = 0.3, a = 1 },
+		["ENUM_SubElement_ACID"]		= { r = 0.3, g = 1.0, b = 0.3, a = 1 },
 	})
 Global( "HitTypeColors", {
-		[1] = { r = 1.0; g = 1.0; b = 1.0; a = 1 }, -- Normal
-		[2] = { r = 1.0; g = 0.0; b = 0.0; a = 1 }, -- Critical
-		[3] = { r = 0.5; g = 1.0; b = 0.5; a = 1 }, 
-		[4] = { r = 0.5; g = 0.5; b = 1.0; a = 1 }, 
-		[5] = { r = 1.0; g = 1.0; b = 0.5; a = 1 }, 
+		[1] = { r = 1.0, g = 1.0, b = 1.0, a = 1 }, -- Normal
+		[2] = { r = 1.0, g = 0.0, b = 0.0, a = 1 }, -- Critical
+		[3] = { r = 0.5, g = 1.0, b = 0.5, a = 1 }, 
+		[4] = { r = 0.5, g = 0.5, b = 1.0, a = 1 }, 
+		[5] = { r = 1.0, g = 1.0, b = 0.5, a = 1 }, 
 	})
 Global( "GlobalInfoTypeColors", {
-		[1] = { r = 1.0; g = 1.0; b = 1.0; a = 1 }, --Determination
-		[2] = { r = 1.0; g = 0.0; b = 0.0; a = 1 }, --Critical
-		[3] = { r = 0.7; g = 0.5; b = 0.3; a = 1 }, --Physical
-		[4] = { r = 0.2; g = 0.35; b = 1.0; a = 1 }, --Elemental
-		[5] = { r = 1.0; g = 1.0; b = 0.5; a = 1 }, --Holy
-		[6] = { r = 0.3; g = 1.0; b = 0.3; a = 1 }, --Natural
+		[1] = { r = 1.0, g = 1.0, b = 1.0, a = 1 }, --Determination
+		[2] = { r = 1.0, g = 0.0, b = 0.0, a = 1 }, --Critical
+		[3] = { r = 0.7, g = 0.5, b = 0.3, a = 1 }, --Physical
+		[4] = { r = 0.2, g = 0.35, b = 1.0, a = 1 }, --Elemental
+		[5] = { r = 1.0, g = 1.0, b = 0.5, a = 1 }, --Holy
+		[6] = { r = 0.3, g = 1.0, b = 0.3, a = 1 }, --Natural
 	})
 	
-for i = 6, 100, 5 do
-	HitTypeColors[i] = { r = 1.0; g = 1.0; b = 0.0; a = 1 }
-	HitTypeColors[i+1] = { r = 0.5; g = 1.0; b = 0.5; a = 1 } 
-	HitTypeColors[i+2] = { r = 1.0; g = 1.0; b = 0.5; a = 1 } 
-	HitTypeColors[i+3] = { r = 0.5; g = 0.5; b = 1.0; a = 1 } 
-	HitTypeColors[i+4] = { r = 1.0; g = 1.0; b = 0.0; a = 1 }
+for i = 6, 100, 8 do
+	HitTypeColors[i] = { r = 1.0, g = 1.0, b = 0.0, a = 1 }
+	HitTypeColors[i+1] = { r = 0.5, g = 1.0, b = 0.5, a = 1 } 
+	HitTypeColors[i+2] = { r = 1.0, g = 1.0, b = 0.5, a = 1 } 
+	HitTypeColors[i+3] = { r = 0.5, g = 0.5, b = 1.0, a = 1 } 
+	HitTypeColors[i+4] = { r = 1.0, g = 1.0, b = 0.0, a = 1 }
+	HitTypeColors[i+5] = { r = 0.7, g = 0.7, b = 0.4, a = 1 }
+	HitTypeColors[i+6] = { r = 0.5, g = 0.1, b = 0.7, a = 1 }
+	HitTypeColors[i+7] = { r = 0.7, g = 0.5, b = 0.3, a = 1 }
+	HitTypeColors[i+8] = { r = 1.0, g = 0.0, b = 0.0, a = 1 }
 end
 --------------------------------------------------------------------------------
 -- GUI
@@ -168,7 +180,6 @@ end
 Global("AoPanelDetected", false)
 Global("DPSMeterGUI", {})
 
-Global( "BuffCheckList", {})
 Global( "CurrentBuffsState", {})
 Global( "CurrentBuffsStateByTime", {})
 

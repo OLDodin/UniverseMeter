@@ -5,6 +5,7 @@ local cachedGetMapModifierInfo = cartographer.GetMapModifierInfo
 local cachedIsPet = unit.IsPet
 local cachedGetRage = unit.GetRage
 local cachedGetName = object.GetName
+local cachedIsExist = object.IsExist
 
 --------------------------------------------------------------------------------
 -- Type TUMeter
@@ -27,7 +28,13 @@ function TUMeter:CreateNewObject()
 			LastTickPlayersDetermination = { timestamp = 0 },
 			LastLastTickPlayersDetermination = { timestamp = 0 },
 			CheckMemoryCnt = 0,
+			ClearCacheCnt = 0,
 			bHistoryIncresed = false,
+			
+			BuffInfoCache = {},
+			SpellDescCache = {},
+			AbilityInfoCache = {},
+			MapModifierInfoCache = {},
 			
 			EmptyPeriod =  TFightPeriod:CreateNewObject(-1)
 		}, { __index = self })
@@ -123,6 +130,7 @@ function TUMeter:SecondTick()
 	
 	self.bHasChangesOnTick = false
 	
+	self:CheckClearCache()
 	self:CheckMemoryPanic()
 end
 
@@ -167,19 +175,52 @@ function TUMeter:GetFightCombatant(anID)
 	end
 end
 
+
+local function GetInfoFromCache(anID, aCache, aGetInfoFunc)
+	if anID == nil then
+		return nil
+	end
+	for _, info in ipairs(aCache) do
+		if info.meterInfoID:IsEqual(anID) then
+			return info
+		end
+	end
+
+	local info = aGetInfoFunc(anID)
+	local storeInfo = {}
+	if info then
+		storeInfo.meterInfoID = anID
+		storeInfo.name = info.name
+		storeInfo.description = info.description
+		--storeInfo.texture = info.texture
+		--spellLib.GetIcon( anID )
+		--image
+		table.insert(aCache, storeInfo)
+	end
+	return storeInfo
+end
+
 function TUMeter:GetInfoFromID(anID)
 	local typeOfID = apitype(anID)
-	if typeOfID == "SpellId" then
-		return cachedGetDescription(anID)
+	if typeOfID == "BuffId" then
+		return GetInfoFromCache(anID, self.BuffInfoCache, cachedGetBuffTooltipInfo)
 	elseif typeOfID == "AbilityId" then
-		return cachedGetAbilityInfo(anID)
-	elseif typeOfID == "BuffId" then
-		return cachedGetBuffTooltipInfo(anID)
+		return GetInfoFromCache(anID, self.AbilityInfoCache, cachedGetAbilityInfo)
+	elseif typeOfID == "SpellId" then
+		return GetInfoFromCache(anID, self.SpellDescCache, cachedGetDescription)
 	elseif typeOfID == "MapModifierId" then
-		return cachedGetMapModifierInfo(anID)
+		return GetInfoFromCache(anID, self.MapModifierInfoCache, cachedGetMapModifierInfo)
 	else
-		return
+		return nil
 	end
+end
+--так быстрее чем в GetInfoFromID
+function TUMeter:GetInfoFromParams(aParams)
+	return GetInfoFromCache(aParams.buffId, self.BuffInfoCache, cachedGetBuffTooltipInfo)
+	or GetInfoFromCache(aParams.spellId, self.SpellDescCache, cachedGetDescription)
+	or GetInfoFromCache(aParams.abilityId, self.AbilityInfoCache, cachedGetAbilityInfo)
+	or GetInfoFromCache(aParams.mapModifierId, self.MapModifierInfoCache, cachedGetMapModifierInfo)
+	or nil
 end
 
 -- например, для парных боссов приходит урон и для 2го, но уже только с указанием sourceName targetName
@@ -191,10 +232,20 @@ local function BuildBySourceName(aSrcName, aTargetName)
 	return spellName
 end
 
+local function BuildHealBySourceName(aSrcID, aTargetID)
+	local spellName = aSrcID and cachedIsExist(aSrcID) and cachedGetName(aSrcID) or StrUnknown
+	local targetName = aTargetID and cachedIsExist(aTargetID) and cachedGetName(aTargetID) or StrUnknown
+
+	if targetName then
+		spellName = spellName..StrArrow..targetName
+	end
+	return spellName
+end
+
 --------------------------------------------------------------------------------
 -- Get information of a spell
 --------------------------------------------------------------------------------
-function TUMeter:GetSpellInfoFromParams(aParams, anIsPet)
+function TUMeter:GetSpellInfoFromParams(aParams, anIsPet, aMode)
 	local spellInfo = {}
 	
 	spellInfo.infoID = aParams.buffId or aParams.spellId or aParams.abilityId or aParams.mapModifierId
@@ -209,14 +260,15 @@ function TUMeter:GetSpellInfoFromParams(aParams, anIsPet)
 		spellInfo.Name = aParams.ability
 		
 		if spellInfo.Name == nil or spellInfo.Name:IsEmpty() then
-			local someInfo = self:GetInfoFromID(spellInfo.infoID)
+			local someInfo = self:GetInfoFromParams(aParams)
 			if someInfo and someInfo.name and not someInfo.name:IsEmpty() then
 				spellInfo.Name = someInfo.name
 			else
 				spellInfo.Name =
 				aParams.isExploit and StrExploit
 				or aParams.isFall and StrFall
-				or BuildBySourceName(aParams.sourceName, aParams.targetName)
+				or (aMode == enumMode.Dps or aMode == enumMode.Def) and BuildBySourceName(aParams.sourceName, aParams.targetName)
+				or (aMode == enumMode.Hps or aMode == enumMode.IHps) and BuildHealBySourceName(aParams.healerId, aParams.unitId)
 				or StrUnknown
 			end
 		end
@@ -299,7 +351,7 @@ function TUMeter:ShouldCollectData()
 
 	-- Should parse all other fighters ?
 	for i, combatant in pairs(self:GetLastFightPeriod().CombatantsList) do
-		if combatant.ID and object.IsExist(combatant.ID) and combatant:IsClose() and (object.IsInCombat(combatant.ID) or PlayerPetInCombat(combatant.ID)) then			
+		if combatant.ID and cachedIsExist(combatant.ID) and combatant:IsClose() and (object.IsInCombat(combatant.ID) or PlayerPetInCombat(combatant.ID)) then			
 			return true
 		end
 	end
@@ -308,7 +360,7 @@ function TUMeter:ShouldCollectData()
 end
 
 function TUMeter:CollectData(aMode, aCombatant, anIsPet, aParams)
-	local spellInfo = self:GetSpellInfoFromParams(aParams, anIsPet)
+	local spellInfo = self:GetSpellInfoFromParams(aParams, anIsPet, aMode)
 	self:UpdateFightData(aMode, aCombatant, spellInfo)
 	return true
 end
@@ -505,6 +557,19 @@ function TUMeter:PushFightToHistory(aFight, aHistory)
 	if aFight:HasData() then
 		aHistory:insert_first(aFight)
 	end
+end
+
+function TUMeter:CheckClearCache()
+	self.ClearCacheCnt = self.ClearCacheCnt + 1
+	if self.ClearCacheCnt < 300 then
+		return
+	end
+	self.ClearCacheCnt = 0
+	
+	self.BuffInfoCache = {}
+	self.SpellDescCache = {}
+	self.AbilityInfoCache = {}
+	self.MapModifierInfoCache = {}
 end
 
 function TUMeter:CheckMemoryPanic()

@@ -53,7 +53,7 @@ function TValueDetails:GetAvg()
 	if self.Count == 0 then
 		return 0
 	end
-	return math.ceil(self.Amount / self.Count)
+	return self.Amount / self.Count
 end
 
 
@@ -61,8 +61,7 @@ local m_enumMissMult = 1
 local m_enumHitMult = 10
 local m_enumHealResist = 100
 local m_enumHitBlockMult = 100
-local m_enumBuffMult = 1000
-local m_customBuffMult = 10000
+local m_customBuffMult = 1000
 
 
 local function CreateAndRecalcDetails(anObj, aList, anIndex, anAmount)
@@ -142,10 +141,6 @@ function CustomBuffList(aSpellData)
 	return res
 end
 
-function BuffList(aSpellData)
-	return MakeList(aSpellData, enumBuff, m_enumBuffMult)
-end
-
 function MissList(aSpellData)
 	return MakeList(aSpellData, enumMiss, m_enumMissMult)
 end
@@ -164,11 +159,10 @@ end
 
 -- при смерти игрока событие об уроне получим уже после спадания баффов из-за смерти
 -- то при летальном уроне учитываем баффы, спавшие после смерти плюс 0.5с на запаздывания событий об уроне
-function AdditionalBuffCheckLethal(aParams, anObjID, anIndex)
+function AdditionalBuffCheckLethal(aParams, anObjID, anIndex, aCurrTime)
 	local buffState = CurrentBuffsStateByTime[anIndex][anObjID]
 	if buffState and buffState.removeAfterDeath then
-		local currTime = common.GetLocalDateTimeMs()
-		if currTime - buffState.removeTime <= Settings.WaitBuffAfterDeathTime  then
+		if aCurrTime - buffState.removeTime <= Settings.WaitBuffAfterDeathTime  then
 			return buffState.info
 		end
 	end
@@ -237,22 +231,32 @@ function TDamageSpellData:ReceiveValuesFromParams(aParams)
 
 	if aParams.multipliersAbsorb ~= 0 then CreateAndRecalcDetails(self, self, enumHitBlock.MultAbsorb*m_enumHitBlockMult, aParams.multipliersAbsorb) end
 	
-	if aParams.Vulnerability then 
-		CreateAndRecalcDetails(self, self, enumBuff.Vulnerability*m_enumBuffMult, aParams.amount)
-	end
-	if aParams.Weakness then 
-		CreateAndRecalcDetails(self, self, enumBuff.Weakness*m_enumBuffMult, aParams.amount)
-	end
-	if aParams.Defense then 
-		CreateAndRecalcDetails(self, self, enumBuff.Defense*m_enumBuffMult, aParams.amount)
-	end
-	if aParams.Valor then 
-		CreateAndRecalcDetails(self, self, enumBuff.Valor*m_enumBuffMult, aParams.amount)
-	end
 
+	local currTime = common.GetLocalDateTimeMs()
 	for i, value in ipairs(CurrentBuffsState) do
-		local srcBuff = value[aParams.sourceID] or AdditionalBuffCheckLethal(aParams, aParams.sourceID, i)
-		local targetBuff = value[aParams.targetID] or AdditionalBuffCheckLethal(aParams, aParams.targetID, i)
+		local srcBuff
+		local targetBuff
+		--для баффов, указываемых в событии об уроне, это серверное указание в приоритете
+		if i == ServerBuffIndex.Valor then
+			if aParams.Valor or AdditionalBuffCheckLethal(aParams, aParams.sourceID, i, currTime) then
+				CreateAndRecalcDetails(self, self,  ServerBuffIndex.Valor*m_customBuffMult, aParams.amount)
+			end
+		elseif i == ServerBuffIndex.Vulnerability then
+			if aParams.Vulnerability or AdditionalBuffCheckLethal(aParams, aParams.targetID, i, currTime) then
+				CreateAndRecalcDetails(self, self,  ServerBuffIndex.Vulnerability*m_customBuffMult, aParams.amount)
+			end
+		elseif i == ServerBuffIndex.Defense then
+			if aParams.Defense or AdditionalBuffCheckLethal(aParams, aParams.targetID, i, currTime) then
+				CreateAndRecalcDetails(self, self,  ServerBuffIndex.Defense*m_customBuffMult, aParams.amount)
+			end
+		elseif i == ServerBuffIndex.Weakness then
+			if aParams.Weakness or AdditionalBuffCheckLethal(aParams, aParams.sourceID, i, currTime) then
+				CreateAndRecalcDetails(self, self,  ServerBuffIndex.Weakness*m_customBuffMult, aParams.amount)
+			end
+		else
+			srcBuff = value[aParams.sourceID] or AdditionalBuffCheckLethal(aParams, aParams.sourceID, i, currTime)
+			targetBuff = value[aParams.targetID] or AdditionalBuffCheckLethal(aParams, aParams.targetID, i, currTime)
+		end
 		
 		if srcBuff and srcBuff.forDps and srcBuff.forSrc then
 			CreateAndRecalcDetails(self, self, srcBuff.ind*m_customBuffMult, aParams.amount)
@@ -273,11 +277,6 @@ function TDamageSpellData:AddValuesFromSpellData(aSpellData, aLastHitTime)
 	CreateAndMergeDetails(self, self, aSpellData, enumMiss.Miss*m_enumMissMult)
 	CreateAndMergeDetails(self, self, aSpellData, enumMiss.Dodge*m_enumMissMult)
 	
-	CreateAndMergeDetails(self, self, aSpellData, enumBuff.Vulnerability*m_enumBuffMult)
-	CreateAndMergeDetails(self, self, aSpellData, enumBuff.Weakness*m_enumBuffMult)
-	CreateAndMergeDetails(self, self, aSpellData, enumBuff.Defense*m_enumBuffMult)
-	CreateAndMergeDetails(self, self, aSpellData, enumBuff.Valor*m_enumBuffMult)
-
 	CreateAndMergeDetails(self, self, aSpellData, enumHit.Critical*m_enumHitMult)
 	CreateAndMergeDetails(self, self, aSpellData, enumHit.Glancing*m_enumHitMult)
 	CreateAndMergeDetails(self, self, aSpellData, enumHit.Normal*m_enumHitMult)
@@ -322,12 +321,6 @@ function TDamageSpellData:CalculateSpellDetailsPercentage()
 	for _, missDetail in pairs( MissList(self) ) do
 		missDetail.Percentage = GetPercentageAt(missDetail.Count, self.Count)
 	end
-
-
-	for _, buffDetail in pairs( BuffList(self) ) do
-		buffDetail.Percentage = GetPercentageAt(buffDetail.Count, self.Count)
-	end
-
 
 	for _, buffDetail in pairs( CustomBuffList(self) ) do
 		buffDetail.Percentage = GetPercentageAt(buffDetail.Count, self.Count)

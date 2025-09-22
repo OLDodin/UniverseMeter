@@ -8,6 +8,7 @@ local cachedToWString = userMods.ToWString
 local cachedFormatFloat = common.FormatFloat
 local cachedFormatInt = common.FormatInt
 
+
 --------------------------------------------------------------------------------
 -- Type TMainPanelGUI
 Global("TMainPanelGUI", {})
@@ -71,8 +72,6 @@ function TDetailsPanelGUI:CreateNewObject(name)
 			SpellDetailsHeaderStatsMaxText = widget:GetChildByName("SpellDetailHeaderPanel"):GetChildByName("SpellDetailHeaderTextViewStatsMax"),
 			SpellInfoList = {},     -- Panel spell info list (normal, critical, glancing)
 			SpellMissList = {},     -- Panel miss list
-			SpellDpsBuffList = {},     -- Panel buff list
-			SpellDefBuffList = {},     -- Panel buff list
 			SpellBlockList = {},    -- Panel block list
 			SpellCustomDpsBuffList = {},     -- Panel custom buff list
 			SpellCustomDefBuffList = {},     -- Panel custom buff list
@@ -334,15 +333,6 @@ end
 --==============================================================================
 
 --------------------------------------------------------------------------------
--- Hide player panel in the player list
---------------------------------------------------------------------------------
-function TUMeterGUI:HideAllPlayerPanel(aFrom)
-	for i = aFrom, Settings.MaxCombatants do
-		self.MainPanel.PlayerList[i]:Hide()
-	end
-end
-
---------------------------------------------------------------------------------
 -- Update the panel "Total" in the player list
 --------------------------------------------------------------------------------
 function TUMeterGUI:DisplayTotal()
@@ -365,15 +355,14 @@ end
 --------------------------------------------------------------------------------
 -- Update values for a combatant in the player list
 --------------------------------------------------------------------------------
-function TUMeterGUI:DisplayPlayer(playerIndex)
-	local combatant = self:GetActiveFight():GetCombatantByIndex(playerIndex)
-	local playerPanel = self.MainPanel.PlayerList[playerIndex]
+function TUMeterGUI:DisplayPlayer(aCurrFight, aPlayerIndex)
+	local combatant = aCurrFight:GetCombatantByIndex(aPlayerIndex)
+	local playerPanel = self.MainPanel.PlayerList[aPlayerIndex]
 	if not combatant or not playerPanel then return end
 
 	playerPanel:Show()
 	
 	playerPanel.Bar:SetColor(ClassColors[combatant:GetClassColor()] or ClassColors[ClassColorsIndex["UNKNOWN"]])
-	playerPanel.Name:SetVal("Index", cachedFormatInt(playerIndex , "%d"))
 	playerPanel.Name:SetVal("Name", combatant.Name)
 	
 	local combatantActiveData = combatant.Data[self.ActiveMode]
@@ -383,7 +372,7 @@ function TUMeterGUI:DisplayPlayer(playerIndex)
 		playerPanel.Value:SetVal("DPS", cachedFormatFloat(combatantActiveData.AmountPerSec, "%f3K5"))
 		playerPanel.Percent:SetVal("Percentage", cachedFormatInt(combatantActiveData.Percentage, "%d"))
 	else
-		playerPanel.Bar:SetWidth(math.max(0, 1))
+		playerPanel.Bar:SetWidth(1)
 		playerPanel.Value:SetVal("DamageDone", cachedFormatFloat(0, "%f3K5"))
 		playerPanel.Value:SetVal("DPS", cachedFormatFloat(0, "%f3K5"))
 		playerPanel.Percent:SetVal("Percentage", cachedFormatInt(0, "%d"))
@@ -403,10 +392,12 @@ function TUMeterGUI:UpdatePlayerList()
 
 	self:DisplayTotal()
 	for playerIndex = 1, combatantCount do
-		self:DisplayPlayer(playerIndex)
+		self:DisplayPlayer(currentFight, playerIndex)
 	end
-	
-	self:HideAllPlayerPanel(combatantCount+1)
+
+	for i = combatantCount+1, Settings.MaxCombatants do
+		self.MainPanel.PlayerList[i]:Hide()
+	end
 end
 
 function TUMeterGUI:UpdateScoreOnMainBtn()
@@ -439,26 +430,23 @@ end
 --------------------------------------------------------------------------------
 -- Update a extra info line in the spell panel
 --------------------------------------------------------------------------------
-function TUMeterGUI:DisplayGlobalInfo(aGlobalInfoIndex)
+function TUMeterGUI:DisplayGlobalInfo(aGlobalInfoIndex, aSelectedCombatant)
 	local globalInfoData
-	local selectedCombatant = self:GetCurrentCombatant()
-	if selectedCombatant then
-		globalInfoData = selectedCombatant:GetGlobalInfoByIndex(aGlobalInfoIndex, self.ActiveDetailMode)
+	if aSelectedCombatant then
+		globalInfoData = aSelectedCombatant:GetGlobalInfoByIndex(aGlobalInfoIndex, self.ActiveDetailMode)
 	end
 	local globalInfoPanel = self.DetailsPanel.GlobalInfoList[aGlobalInfoIndex]
 
 	if globalInfoData --[[and globalInfoData.Count > 0]] then
 		globalInfoPanel:Show()
 
-		globalInfoPanel.Bar:SetColor(GlobalInfoTypeColors[aGlobalInfoIndex])
 		globalInfoPanel.Bar:SetWidth(math.max(self.DetailsPanel.SpellGlobalBarWidth * (globalInfoData.Percentage / 100), 1))
 
-		globalInfoPanel.Name:SetVal("Name", TitleGlobalInfoType[aGlobalInfoIndex])
 		globalInfoPanel.Count:SetVal("Count", cachedFormatInt(globalInfoData.Count , "%d"))
-		globalInfoPanel.DamageMin:SetVal("Min", cachedFormatFloat(globalInfoData.Min , "%f3K5"))
-		globalInfoPanel.DamageAvg:SetVal("Avg", cachedFormatFloat(TValueDetails.GetAvg(globalInfoData) , "%f3K5"))
-		globalInfoPanel.DamageMax:SetVal("Max", cachedFormatFloat(globalInfoData.Max , "%f3K5"))
-		globalInfoPanel.Percent:SetVal("Percentage", cachedFormatInt(globalInfoData.Percentage , "%d"))
+		globalInfoPanel.DamageMin:SetVal("Min", cachedFormatFloat(globalInfoData.Min , "%.1f"))
+		globalInfoPanel.DamageAvg:SetVal("Avg", cachedFormatFloat(TValueDetails.GetAvg(globalInfoData) , "%.1f"))
+		globalInfoPanel.DamageMax:SetVal("Max", cachedFormatFloat(globalInfoData.Max , "%.1f"))
+		globalInfoPanel.Percent:SetVal("Percentage", cachedFormatFloat(globalInfoData.Percentage , "%.1f"))
 	else
 		globalInfoPanel:Hide()
 	end
@@ -485,10 +473,9 @@ function TUMeterGUI:GetTypeHeader(aSpellData)
 	end
 end
 
-function TUMeterGUI:DisplaySpells()
-	local selectedCombatant = self:GetCurrentCombatant()
-	if selectedCombatant then
-		local displaySpellCnt = selectedCombatant:GetSpellCount(self.ActiveDetailMode)
+function TUMeterGUI:DisplaySpells(aSelectedCombatant)
+	if aSelectedCombatant then
+		local displaySpellCnt = aSelectedCombatant:GetSpellCount(self.ActiveDetailMode)
 		local spellPanelsCnt = table.nkeys(self.DetailsPanel.SpellList)
 		if spellPanelsCnt < displaySpellCnt then
 			for i = spellPanelsCnt + 1, displaySpellCnt do
@@ -496,7 +483,7 @@ function TUMeterGUI:DisplaySpells()
 			end
 		end
 		for spellIndex, _ in ipairs(self.DetailsPanel.SpellList) do
-			self:DisplaySpell(spellIndex, selectedCombatant)
+			self:DisplaySpell(spellIndex, aSelectedCombatant)
 		end
 	else
 		for _, spellPanel in ipairs(self.DetailsPanel.SpellList) do
@@ -505,8 +492,8 @@ function TUMeterGUI:DisplaySpells()
 	end
 end
 
-function TUMeterGUI:DisplaySpell(aSpellIndex, aCombatant)
-	local spellData = aCombatant:GetSpellByIndex(aSpellIndex, self.ActiveDetailMode)
+function TUMeterGUI:DisplaySpell(aSpellIndex, aSelectedCombatant)
+	local spellData = aSelectedCombatant:GetSpellByIndex(aSpellIndex, self.ActiveDetailMode)
 	local spellPanel = self.DetailsPanel.SpellList[aSpellIndex]
 	if spellData then
 		spellPanel:Show()
@@ -514,7 +501,6 @@ function TUMeterGUI:DisplaySpell(aSpellIndex, aCombatant)
 		spellPanel.Bar:SetColor(DamageTypeColors[spellData.Element] or { r = 1.0; g = 1.0; b = 1.0; a = 1 } )
 		spellPanel.Bar:SetWidth(math.max(self.DetailsPanel.SpellBarWidth * (spellData.Percentage / 100), 1))
 
-		spellPanel.Index:SetVal("Index", cachedFormatInt(aSpellIndex , "%d"))
 		spellPanel.Type:SetVal("Type",  self:GetTypeHeader(spellData))
 		spellPanel.Name:SetVal("PetName", spellData.PetName and spellData.PetName or StrNone)
 		spellPanel.Name:SetVal("Name", spellData.Name)
@@ -522,8 +508,8 @@ function TUMeterGUI:DisplaySpell(aSpellIndex, aCombatant)
 		spellPanel.Damage:SetVal("DamageDone", cachedFormatFloat(spellData.Amount , "%f3K5"))
 		spellPanel.Damage:SetVal("DPS", cachedFormatFloat(spellData.AmountPerSec , "%f3K5"))
 		spellPanel.CPS:SetVal("CPS", cachedFormatFloat(GetAverageCntPerSecond(spellData) , "%.1f"))
-		spellPanel.DmgBlock:SetVal("DamageBlock", cachedFormatFloat(spellData.ResistPercentage , "%g"))
-		spellPanel.Percent:SetVal("Percentage", cachedFormatInt(spellData.Percentage , "%d"))
+		spellPanel.DmgBlock:SetVal("DamageBlock", cachedFormatInt(spellData.ResistPercentage , "%d"))
+		spellPanel.Percent:SetVal("Percentage", cachedFormatFloat(spellData.Percentage , "%.1f"))
 		
 		if spellData.WasDead then
 			spellPanel.DeadImg:Show()
@@ -538,28 +524,29 @@ end
 -- Fill the spell panel
 --------------------------------------------------------------------------------
 function TUMeterGUI:UpdateSpellList()
-	local detailsPanel = self.DetailsPanel
-	if not detailsPanel:IsVisible() or not self:GetActiveDetailFight() then return end
+	local activeDetailFight = self:GetActiveDetailFight()
+	if not self.DetailsPanel:IsVisible() or not activeDetailFight then return end
 	
-	self:GetActiveDetailFight():PrepareShowDetails(self.SelectedCombatantInfo)
+	activeDetailFight:PrepareShowDetails(self.SelectedCombatantInfo)
 
 	local selectedCombatant = self:GetCurrentCombatant()
 	if selectedCombatant then
 		if self.TimelapseIndex then
 		--Settings.TimeLapsInterval
-			selectedCombatant:CalculateSpell(1, self.ActiveDetailMode)
+			selectedCombatant:CalculateSpells(1, self.ActiveDetailMode)
 		else
-			selectedCombatant:CalculateSpell(self:GetActiveDetailFight().Timer:GetElapsedTime(), self.ActiveDetailMode)
+			selectedCombatant:CalculateSpells(activeDetailFight.Timer:GetElapsedTime(), self.ActiveDetailMode)
 		end
 		
-		detailsPanel.PlayerNameText:SetVal("Name", selectedCombatant.Name)
+		self.DetailsPanel.PlayerNameText:SetVal("Name", selectedCombatant.Name)
 	end
-	for GlobalInfoIndex = 1, EXTRATYPES do
-		self:DisplayGlobalInfo(GlobalInfoIndex)
+
+	for globalInfoIndex = 1, EXTRATYPES do
+		self:DisplayGlobalInfo(globalInfoIndex, selectedCombatant)
 	end
 	
-	self:DisplaySpells()
-	
+	self:DisplaySpells(selectedCombatant)
+
 	self:UpdateSpellDetailsList(self.SelectedSpellIndex)
 end
 
@@ -617,8 +604,6 @@ function TUMeterGUI:CreateTimeLapse()
 					end
 				end
 		
-				--local btnHeight = math.max((amount / maxAmount)*maxBtnHeight, minBtnHeight)
-				
 				local btnHeight = (amount / maxAmount)*maxBtnHeight + minBtnHeight
 				
 				dpsBtn:SetWidth(btnWidth)
@@ -673,8 +658,7 @@ end
 function TUMeterGUI:UpdateValues()
 	self:UpdatePlayerList()
 	self:UpdateSpellList()
-	
-	
+
 	if not self.DetailsPanel:IsVisible() and not self.HistoryPanel:IsVisible() and self.ActiveFightMode ~= enumFight.History then
 		--free memory
 		self:CloseHistory()
@@ -699,11 +683,8 @@ function TUMeterGUI:DisplaySpellDetails(anIndex, aSpellInfoData, aSpellInfoPanel
 		aSpellInfoPanel.Count:SetVal("Count", cachedFormatInt(aSpellInfoData.Count , "%d"))
 
 		aSpellInfoPanel.DamageMin:SetVal("Min", cachedFormatFloat(aSpellInfoData.Min , "%f3K5"))
-		--aSpellInfoPanel.DamageMin:SetVal("Min", cachedToWString("-9999K"))
 		aSpellInfoPanel.DamageAvg:SetVal("Avg", cachedFormatFloat(TValueDetails.GetAvg(aSpellInfoData) , "%f3K5"))
-		--aSpellInfoPanel.DamageAvg:SetVal("Avg", cachedToWString("-9999K"))
 		aSpellInfoPanel.DamageMax:SetVal("Max", cachedFormatFloat(aSpellInfoData.Max , "%f3K5"))
-		--aSpellInfoPanel.DamageMax:SetVal("Max", cachedToWString("-9999K"))
 		aSpellInfoPanel.Percent:SetVal("Percentage", cachedFormatInt(aSpellInfoData.Percentage , "%d"))
 	else
 		if aTitle[anIndex] then
@@ -771,17 +752,17 @@ function TUMeterGUI:UpdateSpellDetailsList(spellIndex)
 		end
 		
 		if self.ActiveDetailMode == enumMode.Hps or self.ActiveDetailMode == enumMode.IHps then
-			self.DetailsPanel.DpsBuffHeaderText:SetVal("Desc", GetTextLocalized("HpsBuffHeaderText"))
-			self.DetailsPanel.DefBuffHeaderText:SetVal("Desc", GetTextLocalized("AntiHpsBuffHeaderText"))
-			self.DetailsPanel.ResistHeaderText:SetVal("Desc", GetTextLocalized("ResistHpsHeaderText"))
+			self.DetailsPanel.DpsBuffHeaderText:SetVal("Desc", StrHpsBuffHeader)
+			self.DetailsPanel.DefBuffHeaderText:SetVal("Desc", StrAntiHpsBuffHeader)
+			self.DetailsPanel.ResistHeaderText:SetVal("Desc", StrResistHpsBuffHeader)
 		elseif self.ActiveDetailMode == enumMode.Def then
-			self.DetailsPanel.DpsBuffHeaderText:SetVal("Desc", GetTextLocalized("DpsBuffHeaderText2"))
-			self.DetailsPanel.DefBuffHeaderText:SetVal("Desc", GetTextLocalized("DefBuffHeaderText2"))
-			self.DetailsPanel.ResistHeaderText:SetVal("Desc", GetTextLocalized("ResistDpsHeaderText2"))
+			self.DetailsPanel.DpsBuffHeaderText:SetVal("Desc", StrIncreaseDefBuffHeader)
+			self.DetailsPanel.DefBuffHeaderText:SetVal("Desc", StrDecreaseDefBuffHeader)
+			self.DetailsPanel.ResistHeaderText:SetVal("Desc", StrResistDefBuffHeader)
 		else
-			self.DetailsPanel.DpsBuffHeaderText:SetVal("Desc", GetTextLocalized("DpsBuffHeaderText"))
-			self.DetailsPanel.DefBuffHeaderText:SetVal("Desc", GetTextLocalized("DefBuffHeaderText"))
-			self.DetailsPanel.ResistHeaderText:SetVal("Desc", GetTextLocalized("ResistDpsHeaderText"))
+			self.DetailsPanel.DpsBuffHeaderText:SetVal("Desc", StrIncreaseDpsBuffHeader)
+			self.DetailsPanel.DefBuffHeaderText:SetVal("Desc", StrDecreaseDpsBuffHeader)
+			self.DetailsPanel.ResistHeaderText:SetVal("Desc", StrResistDefBuffHeader)
 		end
 		
 		self.DetailsPanel.DpsBuffHeaderText:Show()
@@ -815,15 +796,6 @@ function TUMeterGUI:UpdateSpellDetailsList(spellIndex)
 		self.DetailsPanel.DpsBuffHeaderText:SetPosition(spellDetailsOffsetX, spellDetailsOffsetY + (showedPanelsCnt+1)*spellDetailBarHeight)
 		spellDetailsOffsetY = spellDetailsOffsetY + 20
 		
-		local dpsBuffList = {}
-		--without defence and Weakness
-		local servBuffList = BuffList(spellData)
-		dpsBuffList[1] = servBuffList[enumBuff.Valor]
-		dpsBuffList[2] = servBuffList[enumBuff.Vulnerability]
-
-		showedPanelsCnt = showedPanelsCnt + self:DisplayGroupDetails(dpsBuffList, 2, self.DetailsPanel.SpellDpsBuffList, TitleBuffType, spellDetailsOffsetY + showedPanelsCnt*spellDetailBarHeight)
-		
-		--spellDetailsOffsetY = spellDetailsOffsetY + 5
 		local customDpsBuffList = {}
 		local list = CustomBuffList(spellData)
 		for i = 1, DPSHPSTYPES do
@@ -841,16 +813,6 @@ function TUMeterGUI:UpdateSpellDetailsList(spellIndex)
 		self.DetailsPanel.DefBuffHeaderText:SetPosition(spellDetailsOffsetX, spellDetailsOffsetY + (showedPanelsCnt+1)*spellDetailBarHeight)
 		spellDetailsOffsetY = spellDetailsOffsetY + 20
 		
-		--defence and Weakness
-		local defBuffList = {}
-		defBuffList[1] = servBuffList[enumBuff.Weakness]
-		defBuffList[2] = servBuffList[enumBuff.Defense]
-		local TitleDefBuffType = {}
-		TitleDefBuffType[1] = TitleBuffType[enumBuff.Weakness]
-		TitleDefBuffType[2] = TitleBuffType[enumBuff.Defense]
-		showedPanelsCnt = showedPanelsCnt + self:DisplayGroupDetails(defBuffList, 2, self.DetailsPanel.SpellDefBuffList, TitleDefBuffType, spellDetailsOffsetY + showedPanelsCnt*spellDetailBarHeight)
-		
-		--spellDetailsOffsetY = spellDetailsOffsetY + 5
 		local customDefBuffList = {}
 		for i = 1, DEFTYPES do
 			customDefBuffList[i] = list[DPSHPSTYPES + i]
@@ -874,12 +836,6 @@ function TUMeterGUI:HideAllSpellDetailsPanel()
 	end
 	for i = 1, MISSTYPES do
 		self.DetailsPanel.SpellMissList[i]:Hide()
-	end
-	for i = 1, 2 do
-		self.DetailsPanel.SpellDpsBuffList[i]:Hide()
-	end
-	for i = 1, 2 do
-		self.DetailsPanel.SpellDefBuffList[i]:Hide()
 	end
 	for i = 1, DEFTYPES do
 		self.DetailsPanel.SpellCustomDefBuffList[i]:Hide()
@@ -1016,7 +972,7 @@ function TUMeterGUI:HistorySelected(aList, anIndex)
 	self.ActiveHistoryFight = aList:getByNum(anIndex)
 	self.ActiveFightMode = enumFight.History
 	self.MainPanel.FightText:SetVal("Name", TitleFight[self.ActiveFightMode])
-	self.DetailsPanel:DnDHide()
+	self.DetailsPanel:Hide()
 	self:DetailsClosed()
 end
 
@@ -1036,6 +992,13 @@ function ScaleFontSpellDetailsPanelGUI(aSpellDetailsPanel)
 		aSpellDetailsPanel.DamageAvg:SetTextAttributes("Avg", nil, 13)
 		aSpellDetailsPanel.DamageMax:SetTextAttributes("Max", nil, 13)
 		aSpellDetailsPanel.Percent:SetTextAttributes("Percentage", nil, 13)
+	else
+		aSpellDetailsPanel.Name:SetPosition(nil, 1)
+		aSpellDetailsPanel.Count:SetPosition(nil, 1)
+		aSpellDetailsPanel.DamageMin:SetPosition(nil, 1)
+		aSpellDetailsPanel.DamageAvg:SetPosition(nil, 1)
+		aSpellDetailsPanel.DamageMax:SetPosition(nil, 1)
+		aSpellDetailsPanel.Percent:SetPosition(nil, 1)
 	end
 end
 
@@ -1047,6 +1010,7 @@ function TUMeterGUI:CreateNewSpellPanel()
 	local wtName = "SpellPanel" .. spellIndex
 	local newSpellPanel = TSpellPanelGUI:CreateNewObjectByDesc(wtName, GetDescFromResource("SpellPanel"), self.DetailsPanel)
 	newSpellPanel:SetWidth(self.DetailsPanel.SpellBarWidth)
+	newSpellPanel.Index:SetVal("Index", cachedFormatInt(spellIndex , "%d"))
 	self.DetailsPanel.SpellScrollList:PushBack(newSpellPanel.Widget)
 	
 	if Settings.ScaleFonts then
@@ -1073,74 +1037,8 @@ function TUMeterGUI:CreateNewSpellPanel()
 end
 
 function TUMeterGUI:Init()
-	-- Initialize localizations
-	StrTypePet = GetTextLocalized("TypePet")
-	StrTypeAbility = GetTextLocalized("TypeAbility")
-	StrTypeSpell = GetTextLocalized("TypeSpell")
-	StrTypeMap = GetTextLocalized("TypeMap")
-	StrTypeBuff = GetTextLocalized("TypeBuff")
-	
-	StrDamagePool = GetTextLocalized("DamagePool")
-	StrFromBarrier = GetTextLocalized("FromBarrier")
-	
-	StrNone = userMods.ToWString("")
-	StrWeakness = GetTextLocalized("Weakness")
-	StrDefense = GetTextLocalized("Defense")
-	StrVulnerability = GetTextLocalized("Vulnerability")
-	StrInsidiousness = GetTextLocalized("Insidiousness")
-	StrValor = GetTextLocalized("Valor")
-	StrMapModifier = GetTextLocalized("MapModifier")
-	StrExploit = GetTextLocalized("Exploit")
-	StrFall = GetTextLocalized("Fall")
-	
 
 
-	TitleMode[enumMode.Dps] = GetTextLocalized("DPS")
-	TitleMode[enumMode.Hps] = GetTextLocalized("HPS")
-	TitleMode[enumMode.IHps] = GetTextLocalized("IHPS")
-	TitleMode[enumMode.Def] = GetTextLocalized("DEF")
-	
-	
-
-	TitleFight[enumFight.Current] = GetTextLocalized("Current")
-	TitleFight[enumFight.Total] = GetTextLocalized("Overall")
-	TitleFight[enumFight.History] = GetTextLocalized("History")
-	
-
-	TitleDmgType[enumHit.Normal] = GetTextLocalized("Normal")
-	TitleDmgType[enumHit.Critical] = GetTextLocalized("Critical")
-	TitleDmgType[enumHit.Glancing] = GetTextLocalized("Glancing")
-
-	TitleBuffType[enumBuff.Weakness] = GetTextLocalized("Weakness")
-	TitleBuffType[enumBuff.Defense] = GetTextLocalized("Defense")
-	TitleBuffType[enumBuff.Vulnerability] = GetTextLocalized("Vulnerability")
-	TitleBuffType[enumBuff.Valor] = GetTextLocalized("Valor")
-		
-	TitleMissType[enumMiss.Dodge] = GetTextLocalized("Dodge")
-	TitleMissType[enumMiss.Miss] = GetTextLocalized("Miss")
-
-	TitleHitBlockType[enumHitBlock.Block] = GetTextLocalized("Blocked")
-	TitleHitBlockType[enumHitBlock.Parry] = GetTextLocalized("Parry")
-	TitleHitBlockType[enumHitBlock.Barrier] = GetTextLocalized("Barrier")
-	TitleHitBlockType[enumHitBlock.Resist] = GetTextLocalized("Resisted")
-	TitleHitBlockType[enumHitBlock.Absorb] = GetTextLocalized("Absorbed")
-	TitleHitBlockType[enumHitBlock.RunesAbsorb] = GetTextLocalized("Rune")
-	TitleHitBlockType[enumHitBlock.MultAbsorb] = GetTextLocalized("Multiplier")
-	TitleHitBlockType[enumHitBlock.Mount] = GetTextLocalized("Mount")
-	
-
-	TitleHealResistType[enumHealResist.Resisted] = GetTextLocalized("Resisted")
-	TitleHealResistType[enumHealResist.RuneResisted] = GetTextLocalized("HealRuneResisted")
-	TitleHealResistType[enumHealResist.Absorbed] = GetTextLocalized("Absorbed")
-	TitleHealResistType[enumHealResist.Overload] = GetTextLocalized("Overload")
-
-	TitleGlobalInfoType[enumGlobalInfo.Determination] = GetTextLocalized("Determination")
-	TitleGlobalInfoType[enumGlobalInfo.Critical] = GetTextLocalized("Critical")
-	TitleGlobalInfoType[enumGlobalInfo.Physical] = GetTextLocalized("Physical")
-	TitleGlobalInfoType[enumGlobalInfo.Elemental] = GetTextLocalized("Elemental")
-	TitleGlobalInfoType[enumGlobalInfo.Holy] = GetTextLocalized("Holy")
-	TitleGlobalInfoType[enumGlobalInfo.Natural] = GetTextLocalized("Natural")
-	
 	-- Default mode
 	self.ActiveMode = Settings.DefaultMode
 	self.ActiveFightMode = enumFight.Current
@@ -1209,10 +1107,11 @@ function TUMeterGUI:Init()
 	-- Main Panel
 	-------------------------------------------------------------------------------
 	if Settings.ScaleFonts then
-		self.BarWidth = 295
-		self.MainPanel:SetWidth(370)
+		self.BarWidth = 314
+		self.MainPanel:SetWidth(375)
 	else
-		self.MainPanel:SetWidth(330)
+		self.BarWidth = 270
+		self.MainPanel:SetWidth(335)
 	end
 	
 	-- Total panel
@@ -1226,23 +1125,29 @@ function TUMeterGUI:Init()
 		self.MainPanel.TotalPanel.Name:SetTextAttributes("Second", nil, 16)
 		self.MainPanel.TotalPanel.Value:SetTextAttributes("DamageDone", nil, 16)
 		self.MainPanel.TotalPanel.Value:SetTextAttributes("DPS", nil, 16)
-		self.MainPanel.TotalPanel.Value:SetPosition(175)
+		self.MainPanel.TotalPanel.Value:SetHighPosition(20)
 	end
 
 	-- Player list
 	for playerIndex = 1, Settings.MaxCombatants do
 		local wtName = "PlayerPanel" .. playerIndex
-		self.MainPanel.PlayerList[playerIndex] = TPlayerPanelGUI:CreateNewObjectByDesc(wtName, playerPanelDesc, self.MainPanel)
-		self.MainPanel.PlayerList[playerIndex]:SetPosition(20, 47 + playerIndex * 24)
-		self.MainPanel.PlayerList[playerIndex]:SetWidth(self.BarWidth + 26)
+		local playerPanel = TPlayerPanelGUI:CreateNewObjectByDesc(wtName, playerPanelDesc, self.MainPanel)
+		
+		playerPanel:SetPosition(20, 47 + playerIndex * 24)
+		playerPanel:SetWidth(self.BarWidth + 26)
+		
+		playerPanel.Name:SetVal("Index", cachedFormatInt(playerIndex , "%d"))
+		
 		if Settings.ScaleFonts then
-			self.MainPanel.PlayerList[playerIndex].Name:SetTextAttributes("Index", nil, 16)
-			self.MainPanel.PlayerList[playerIndex].Name:SetTextAttributes("Name", nil, 16)
-			self.MainPanel.PlayerList[playerIndex].Percent:SetTextAttributes("Percentage", nil, 16)
-			self.MainPanel.PlayerList[playerIndex].Value:SetTextAttributes("DamageDone", nil, 16)
-			self.MainPanel.PlayerList[playerIndex].Value:SetTextAttributes("DPS", nil, 16)
-			self.MainPanel.PlayerList[playerIndex].Value:SetPosition(175)
+			playerPanel.Name:SetTextAttributes("Index", nil, 16)
+			playerPanel.Name:SetTextAttributes("Name", nil, 16)
+			playerPanel.Percent:SetTextAttributes("Percentage", nil, 16)
+			playerPanel.Value:SetTextAttributes("DamageDone", nil, 16)
+			playerPanel.Value:SetTextAttributes("DPS", nil, 16)
+			playerPanel.Value:SetHighPosition(20)
 		end
+		
+		table.insert(self.MainPanel.PlayerList, playerPanel)
 	end
 
 	
@@ -1276,10 +1181,14 @@ function TUMeterGUI:Init()
 	local GlobalInfoOffset = globalInfoHeaderOffset + 18
 	for extraIndex = 1, EXTRATYPES do
 		local wtName = "GlobalInfoPanel" .. extraIndex
-		self.DetailsPanel.GlobalInfoList[extraIndex] = TSpellDetailsPanelGUI:CreateNewObjectByDesc(wtName, spellInfoPanelDesc, self.DetailsPanel)
-		self.DetailsPanel.GlobalInfoList[extraIndex]:SetWidth(self.DetailsPanel.SpellGlobalBarWidth)
-		self.DetailsPanel.GlobalInfoList[extraIndex]:SetPosition(spellOffsetX, GlobalInfoOffset + (extraIndex-1) * 18)
-		ScaleFontSpellDetailsPanelGUI(self.DetailsPanel.GlobalInfoList[extraIndex])
+		local globalInfoPanel = TSpellDetailsPanelGUI:CreateNewObjectByDesc(wtName, spellInfoPanelDesc, self.DetailsPanel)
+		globalInfoPanel:SetWidth(self.DetailsPanel.SpellGlobalBarWidth)
+		globalInfoPanel:SetPosition(spellOffsetX, GlobalInfoOffset + (extraIndex-1) * 18)
+		globalInfoPanel.Name:SetVal("Name", TitleGlobalInfoType[extraIndex])
+		globalInfoPanel.Bar:SetColor(GlobalInfoTypeColors[extraIndex])
+		ScaleFontSpellDetailsPanelGUI(globalInfoPanel)
+		
+		table.insert(self.DetailsPanel.GlobalInfoList, globalInfoPanel)
 	end
 
 	-- SpellHeader
@@ -1350,30 +1259,15 @@ function TUMeterGUI:Init()
 		ScaleFontSpellDetailsPanelGUI(self.DetailsPanel.SpellBlockList[blockIndex])
 	end
 	
-	--Spell buff
-	local buffOffset = blockDamageOffset + BLOCKDMGTYPES * spellDetailBarHeight + 5
-	for buffIndex = 1, 2 do
-		local wtName = "SpellDpsBuffPanel" .. buffIndex
-		self.DetailsPanel.SpellDpsBuffList[buffIndex] = TSpellDetailsPanelGUI:CreateNewObjectByDesc(wtName, spellInfoPanelDesc, self.DetailsPanel)
-		self.DetailsPanel.SpellDpsBuffList[buffIndex]:SetPosition(spellDetailsOffsetX, buffOffset + (buffIndex-1) * spellDetailBarHeight)
-		ScaleFontSpellDetailsPanelGUI(self.DetailsPanel.SpellDpsBuffList[buffIndex])
-	end
-	for buffIndex = 1, 2 do
-		local wtName = "SpellDefBuffPanel1" .. buffIndex
-		self.DetailsPanel.SpellDefBuffList[buffIndex] = TSpellDetailsPanelGUI:CreateNewObjectByDesc(wtName, spellInfoPanelDesc, self.DetailsPanel)
-		self.DetailsPanel.SpellDefBuffList[buffIndex]:SetPosition(spellDetailsOffsetX, buffOffset + (2 + buffIndex - 1) * spellDetailBarHeight)
-		ScaleFontSpellDetailsPanelGUI(self.DetailsPanel.SpellDefBuffList[buffIndex])
-	end
-	
 	--Spell custom buff
-	local customBuffOffset = buffOffset + BUFFTYPES * spellDetailBarHeight + 5
+	local customBuffOffset = blockDamageOffset + BLOCKDMGTYPES * spellDetailBarHeight + 5
 	for buffIndex = 1, DPSHPSTYPES do
 		local wtName = "SpellCustomDpsBuffPanel" .. buffIndex
 		self.DetailsPanel.SpellCustomDpsBuffList[buffIndex] = TSpellDetailsPanelGUI:CreateNewObjectByDesc(wtName, spellInfoPanelDesc, self.DetailsPanel)
 		self.DetailsPanel.SpellCustomDpsBuffList[buffIndex]:SetPosition(spellDetailsOffsetX, customBuffOffset + (buffIndex-1) * spellDetailBarHeight)
 		ScaleFontSpellDetailsPanelGUI(self.DetailsPanel.SpellCustomDpsBuffList[buffIndex])
 	end
-	customBuffOffset = buffOffset + DPSHPSTYPES * spellDetailBarHeight + 5
+	customBuffOffset = blockDamageOffset + DPSHPSTYPES * spellDetailBarHeight + 5
 	for buffIndex = 1, DEFTYPES do
 		local wtName = "SpellCustomDefBuffPanel" .. buffIndex
 		self.DetailsPanel.SpellCustomDefBuffList[buffIndex] = TSpellDetailsPanelGUI:CreateNewObjectByDesc(wtName, spellInfoPanelDesc, self.DetailsPanel)

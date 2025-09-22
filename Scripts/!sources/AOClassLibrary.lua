@@ -1,9 +1,12 @@
+local localeGroup = common.GetAddonRelatedTextGroup(common.GetLocalization(), true) or common.GetAddonRelatedTextGroup("eng")
+
 local tagFontName = userMods.ToWString("fontname")
 local tagAlignX = userMods.ToWString("alignx")
 local tagFontsize = userMods.ToWString("fontsize")
 local tagShadow = userMods.ToWString("shadow")
 local tagOutline = userMods.ToWString("outline")
 local tagColor = userMods.ToWString("color")
+
 
 ---------------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------------- HELPER FUNCTIONS -----------------------------------------------------
@@ -33,19 +36,23 @@ function UnRegisterEventHandlers( handlers)
 	end
 end
 
+function UnRegisterEventHandlerWithParams(anEvent, aHandler, aParamList)
+	for _, params in ipairs(aParamList) do 
+		common.UnRegisterEventHandler(aHandler, anEvent, params)
+	end
+end
+
+function RegisterEventHandlerWithParams(anEvent, aHandler, aParamList)
+	for _, params in ipairs(aParamList) do 
+		common.RegisterEventHandler(aHandler, anEvent, params)
+	end
+end
+
 ---------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------- MULTIPLE LOCALIZATIONS SUPPORT ----------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------
-function GetGameLocalization()
-	local loc = common.GetLocalization()
-	if loc == "rus" or loc == "eng" then
-		return loc
-	end
-	return "eng"
-end
---------------------------------------------------------------------------------
 function GetTextLocalized( strTextName )
-	return common.GetAddonRelatedTextGroup( localization ):GetText( strTextName )
+	return localeGroup:GetText( strTextName )
 end
 ---------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------ GLOBAL VARIABLES, CLASSES ------------------------------------------------
@@ -55,7 +62,7 @@ Global( "TWidget", {} )
 function TWidget:CreateNewObject( WidgetName )
 	return setmetatable( {
 			Widget = WidgetName and mainForm:GetChildUnchecked( WidgetName, true ),
-			LastTagValues = {},
+			LastValues = {},
 			bDraggable = false
 		}, { __index = self } )
 end
@@ -67,7 +74,7 @@ function TWidget:CreateNewObjectByDesc( WidgetName, Desc, Parent )
 	local Widget = Parent.Widget:CreateChildByDesc( Desc )
 	Widget:SetName( WidgetName )
 
-	return setmetatable( { Widget = Widget, LastTagValues = {}, bDraggable = false }, { __index = self } )
+	return setmetatable( { Widget = Widget, LastValues = {}, bDraggable = false }, { __index = self } )
 end
 --------------------------------------------------------------------------------
 function TWidget:GetDesc()
@@ -88,7 +95,7 @@ function TWidget:GetChildByName( Name )
 		local wtChild = self.Widget:GetChildUnchecked( Name, false )
 		
 		if wtChild then
-			return setmetatable( { Widget = wtChild, bDraggable = false }, { __index = self } )
+			return setmetatable( { Widget = wtChild, LastValues = {}, bDraggable = false }, { __index = self } )
 		end
 	end
 end
@@ -99,7 +106,7 @@ function TWidget:GetChildByIndex( Index )
 		local wtChild = wtChildren[ Index ]
 		
 		if wtChild then
-			return setmetatable( { Widget = wtChild, bDraggable = false }, { __index = self } )
+			return setmetatable( { Widget = wtChild, LastValues = {}, bDraggable = false }, { __index = self } )
 		end
 	end
 end
@@ -124,26 +131,39 @@ end
 --------------------------------------------------------------------------------
 function TWidget:SetPosition( newX, newY )
 	if self.Widget then
-		local Placement = self.Widget:GetPlacementPlain()
+		local Placement = {}
 		if newX then Placement.posX = math.ceil( newX ) end
 		if newY then Placement.posY = math.ceil( newY ) end
 		self.Widget:SetPlacementPlain( Placement )
 	end
 end
 --------------------------------------------------------------------------------
+function TWidget:SetHighPosition( newX, newY )
+	if self.Widget then
+		local Placement = {}
+		if newX then Placement.highPosX = math.ceil( newX ) end
+		if newY then Placement.highPosY = math.ceil( newY ) end
+		self.Widget:SetPlacementPlain( Placement )
+	end
+end
+--------------------------------------------------------------------------------
 function TWidget:SetWidth( newW )
 	if self.Widget then
-		local Placement = self.Widget:GetPlacementPlain()
-		Placement.sizeX = math.ceil( newW )
-		self.Widget:SetPlacementPlain( Placement )
+		if self.LastValues.width == newW then
+			return
+		end
+		self.LastValues.width = newW
+		self.Widget:SetPlacementPlain( { sizeX = math.ceil(newW) } )
 	end
 end
 --------------------------------------------------------------------------------
 function TWidget:SetHeight( newH )
 	if self.Widget then
-		local Placement = self.Widget:GetPlacementPlain()
-		Placement.sizeY = math.ceil( newH )
-		self.Widget:SetPlacementPlain( Placement )
+		if self.LastValues.height == newH then
+			return
+		end
+		self.LastValues.height = newH
+		self.Widget:SetPlacementPlain( { sizeY = math.ceil( newH ) } )
 	end
 end
 --------------------------------------------------------------------------------
@@ -171,6 +191,11 @@ function TWidget:SetColor( Color, Alpha )
 		if Alpha then
 			Color.a = Alpha
 		end
+		if CompareColor(self.LastValues.color, Color) then
+			return
+		end
+		self.LastValues.color = table.sclone(Color)
+		
 		self.Widget:SetBackgroundColor( Color )
 	end
 end
@@ -192,18 +217,6 @@ end
 function TWidget:Hide()
 	if self.Widget and self.Widget:IsVisible() then
 		self.Widget:Show( false )
-	end
-end
---------------------------------------------------------------------------------
-function TWidget:DnDShow()
-	if self.Widget then
-		DnD.ShowWdg(self.Widget)
-	end
-end
---------------------------------------------------------------------------------
-function TWidget:DnDHide()
-	if self.Widget then
-		DnD.HideWdg(self.Widget)
 	end
 end
 --------------------------------------------------------------------------------
@@ -245,12 +258,6 @@ end
 function TWidget:SetVal(aTag, aValue)
 	if self.Widget then
 		self.Widget:SetVal(aTag, aValue)
-	end
-end
-
-function TWidget:SetFormat(aValue)
-	if self.Widget then
-		self.Widget:SetFormat(aValue)
 	end
 end
 
@@ -297,12 +304,3 @@ function TWidget:ClearScrollList()
 		containerWdg:DestroyWidget()
 	end
 end
-
-
----------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------ INITIALIZATION ------------------------------------------------------
----------------------------------------------------------------------------------------------------------------------------
-Global( "localization", "eng" ) -- "eng" is default.
----------------------------------------------------------------------------------------------------------------------------
----------------------------------------------------------------------------------------------------------------------------
----------------------------------------------------------------------------------------------------------------------------

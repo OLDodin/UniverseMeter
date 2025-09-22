@@ -3,6 +3,7 @@ local cachedGetBuffInfo = object.GetBuffInfo
 local cachedGetBuffDynamicInfo = object.GetBuffDynamicInfo
 local cachedGetBuffs = object.GetBuffs
 local cachedGetBuffsInfo = object.GetBuffsInfo
+local cachedIsValidBuff = object.IsValidBuff
 
 function PlayerBuffs:Init(anID)
 	self.playerID = anID
@@ -90,22 +91,20 @@ function PlayerBuffs:GetDelEventFunc()
 end
 
 function PlayerBuffs:GetChangedEventFunc()
-	return function(aParams)
-		local passedInfo = self.passedBuffsID[aParams.buffId]
-		if self.base.guiListener and passedInfo then
-			self.base.guiListener.listenerChangeBuff(self.playerID, cachedGetBuffDynamicInfo(aParams.buffId), passedInfo)
+	return function(aBuffID)
+		local passedInfo = self.passedBuffsID[aBuffID]
+		if self.base.guiListener and passedInfo and cachedIsValidBuff(aBuffID) then
+			self.base.guiListener.listenerChangeBuff(self.playerID, cachedGetBuffDynamicInfo(aBuffID), passedInfo)
 		end
 	end
 end
 
 function PlayerBuffs:RegisterEvent(anID)
 	common.EnablePersonalEvent('EVENT_OBJECT_BUFF_ADDED', anID)
-	common.EnablePersonalEvent('EVENT_OBJECT_BUFF_CHANGED', anID)
 	common.EnablePersonalEvent('EVENT_OBJECT_BUFF_REMOVED', anID)
 end
 
 function PlayerBuffs:UnRegisterEvent(anID)
 	common.DisablePersonalEvent('EVENT_OBJECT_BUFF_ADDED', anID)
-	common.DisablePersonalEvent('EVENT_OBJECT_BUFF_CHANGED', anID)
 	common.DisablePersonalEvent('EVENT_OBJECT_BUFF_REMOVED', anID)
 end

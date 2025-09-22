@@ -1,3 +1,9 @@
+local m_paramsListForDps = {}
+local m_paramsListForDef = {}
+local m_paramsListForHps = {}
+local m_paramsListForIHps = {}
+local m_paramsListForPets = {}
+
 local m_mustUpdateGUI = true
 local m_buffListener = {}
 local m_isBtnInAOPanelNow = false
@@ -10,30 +16,30 @@ local m_detailPanelWasVisible = false
 --------------------------------------------------------------------------------
 -- Register UniverseMeter
 --------------------------------------------------------------------------------
-onGenEvent["AOPANEL_START"] = function(params)
+onMyEvent["AOPANEL_START"] = function(params)
 	local SetVal = { val = StrMainBtn } 
 	local params = { header =  SetVal , ptype =  "button" , size =  Settings.ShowPositionOnBtn and 50 or 30 } 
 	userMods.SendEvent("AOPANEL_SEND_ADDON", { name = "UniverseMeter" , sysName = "UniverseMeter" , param = params } )
 	AoPanelDetected = true
 	m_isBtnInAOPanelNow = true
-	DPSMeterGUI.ShowHideBtn:DnDHide()
+	DPSMeterGUI.ShowHideBtn:Hide()
 	CurrentScoreOnMainBtn = 0
 end
 
-onGenEvent["EVENT_ADDON_LOAD_STATE_CHANGED"] = function(params)
+onMyEvent["EVENT_ADDON_LOAD_STATE_CHANGED"] = function(params)
 	if params.state == ADDON_STATE_NOT_LOADED and string.find(params.name, "AOPanel") then
-		DPSMeterGUI.ShowHideBtn:DnDShow()
+		DPSMeterGUI.ShowHideBtn:Show()
 		m_isBtnInAOPanelNow = false
 	end
 end
 
-onGenEvent["EVENT_INTERFACE_TOGGLE"] = function(params)
+onMyEvent["EVENT_INTERFACE_TOGGLE"] = function(params)
 	if params.toggleTarget == ENUM_InterfaceToggle_Target_All then
 		if not m_isBtnInAOPanelNow then
 			if params.hide then
-				DPSMeterGUI.ShowHideBtn:DnDHide()
+				DPSMeterGUI.ShowHideBtn:Hide()
 			else
-				DPSMeterGUI.ShowHideBtn:DnDShow()
+				DPSMeterGUI.ShowHideBtn:Show()
 			end
 		end
 		if params.hide then
@@ -41,14 +47,14 @@ onGenEvent["EVENT_INTERFACE_TOGGLE"] = function(params)
 			m_detailPanelWasVisible = DPSMeterGUI.DetailsPanel:IsVisible()
 		end
 		if params.hide then			
-			DPSMeterGUI.MainPanel:DnDHide()
-			DPSMeterGUI.DetailsPanel:DnDHide()
+			DPSMeterGUI.MainPanel:Hide()
+			DPSMeterGUI.DetailsPanel:Hide()
 		else
 			if m_mainPanelWasVisible then
-				DPSMeterGUI.MainPanel:DnDShow()
+				DPSMeterGUI.MainPanel:Show()
 			end
 			if m_detailPanelWasVisible then
-				DPSMeterGUI.DetailsPanel:DnDShow()
+				DPSMeterGUI.DetailsPanel:Show()
 			end
 		end
 	end
@@ -110,11 +116,13 @@ end
 --------------------------------------------------------------------------------
 onReaction["SpellPanelOnPointing"] = function (reaction)
 	if reaction.active then
-		DPSMeterGUI:SetSelectedSpellIndex(GetSpellPanelIndex(reaction))		
+		local spellInd = GetSpellPanelIndex(reaction)
+		DPSMeterGUI:SetSelectedSpellIndex(spellInd)
+		DPSMeterGUI:UpdateSpellDetailsList(spellInd)		
 	else
 		DPSMeterGUI:SetSelectedSpellIndex(nil)
+		DPSMeterGUI:UpdateSpellDetailsList(nil)
 	end
-	DPSMeterGUI:UpdateValues()
 end
 --------------------------------------------------------------------------------
 -- occurred when the player press the reset button
@@ -126,27 +134,27 @@ end
 
 onReaction["OnConfigPressed"] = function(reaction)
 	if DPSMeterGUI.SettingsPanel:IsVisible() then
-		DPSMeterGUI.SettingsPanel:DnDHide()
+		DPSMeterGUI.SettingsPanel:Hide()
 	else
-		DPSMeterGUI.SettingsPanel:DnDShow()
+		DPSMeterGUI.SettingsPanel:Show()
 	end
 end
 
 onReaction["OnHistoryPressed"] = function(reaction)
 	if DPSMeterGUI.HistoryPanel:IsVisible() then
-		DPSMeterGUI.HistoryPanel:DnDHide()
+		DPSMeterGUI.HistoryPanel:Hide()
 	else
 		DPSMeterGUI:UpdateHistory()
-		DPSMeterGUI.HistoryPanel:DnDShow()
+		DPSMeterGUI.HistoryPanel:Show()
 	end
 end
 
 onReaction["CloseHistoryPanelBtnReaction"] = function(reaction)
-	DPSMeterGUI.HistoryPanel:DnDHide()
+	DPSMeterGUI.HistoryPanel:Hide()
 end
 
 onReaction["CloseSettingsPanelBtnReaction"] = function(reaction)
-	DPSMeterGUI.SettingsPanel:DnDHide()
+	DPSMeterGUI.SettingsPanel:Hide()
 end
 
 onReaction["SettingsCheckBoxPressed"] = function(reaction)
@@ -176,15 +184,15 @@ onReaction["SavePressed"] = function(reaction)
 	userMods.SetGlobalConfigSection( "UniverseMeterSettings", savedData )
 	common.StateReloadManagedAddon(common.GetAddonSysName())
 	
-	DPSMeterGUI.SettingsPanel:DnDHide()
+	DPSMeterGUI.SettingsPanel:Hide()
 end
 
 --------------------------------------------------------------------------------
 -- occurred when the player press the close button in the main panel
 --------------------------------------------------------------------------------
 onReaction["CloseMainPanelBtnReaction"] = function(reaction)
-	DPSMeterGUI.MainPanel:DnDHide()
-	DPSMeterGUI.DetailsPanel:DnDHide()
+	DPSMeterGUI.MainPanel:Hide()
+	DPSMeterGUI.DetailsPanel:Hide()
 	DPSMeterGUI:DetailsClosed()
 end
 --------------------------------------------------------------------------------
@@ -194,7 +202,7 @@ onReaction["PlayerInfoButtonDown"] = function(reaction)
 	local playerIndex = GetPlayerPanelIndex(reaction)
 	if playerIndex then
 		DPSMeterGUI:PrepareShowDetails(playerIndex)
-		DPSMeterGUI.DetailsPanel:DnDShow()
+		DPSMeterGUI.DetailsPanel:Show()
 		DPSMeterGUI:UpdateValues()
 	end
 end
@@ -229,7 +237,7 @@ end
 -- occurred when the player press the close button of the spell panel
 --------------------------------------------------------------------------------
 onReaction["CloseSpellInfoPanelBtnReaction"] = function(reaction)
-	DPSMeterGUI.DetailsPanel:DnDHide()
+	DPSMeterGUI.DetailsPanel:Hide()
 	DPSMeterGUI:DetailsClosed()
 end
 --------------------------------------------------------------------------------
@@ -260,11 +268,11 @@ end
 onReaction["ShowHideBtnReaction"] = function(reaction)
 	if DnD:IsDragging() then return end
 	if DPSMeterGUI.MainPanel:IsVisible() then
-		DPSMeterGUI.MainPanel:DnDHide()
-		DPSMeterGUI.DetailsPanel:DnDHide()
+		DPSMeterGUI.MainPanel:Hide()
+		DPSMeterGUI.DetailsPanel:Hide()
 		DPSMeterGUI:DetailsClosed()
 	else
-		DPSMeterGUI.MainPanel:DnDShow()
+		DPSMeterGUI.MainPanel:Show()
 		DPSMeterGUI:UpdateValues()
 	end
 end
@@ -297,8 +305,8 @@ onMyEvent["EVENT_OBJECT_BUFF_REMOVED"] = function(aParams)
 	BuffRemoved(aParams)
 end
 
-onMyEvent["EVENT_OBJECT_BUFF_CHANGED"] = function(aParams)
-	BuffChanged(aParams)
+onMyEvent["EVENT_OBJECT_BUFFS_ELEMENT_CHANGED"] = function(aParams)
+	BuffsChanged(aParams)
 end
 
 onMyEvent["EVENT_UNIT_RAGE_CHANGED"] = function(aParams)
@@ -413,188 +421,10 @@ function IHpsEventReceived(aParams)
 	DPSMeterGUI.DPSMeter:CollectHealDataIN(aParams)
 end 
 
-function ReloadPet(aParams)
-	ReRegisterEvents()
-end
-
---------------------------------------------------------------------------------
--- Event: EVENT_AVATAR_CREATED
---------------------------------------------------------------------------------
-onGenEvent["EVENT_AVATAR_CREATED"] = function(params)
-	GlobalReset()
-end
-
-
-
-
-
-
-local m_paramsListForDps = {}
-local m_paramsListForDef = {}
-local m_paramsListForHps = {}
-local m_paramsListForIHps = {}
-local m_paramsListForPets = {}
-
-function ReRegisterEvents()
-	UnRegisterEventHandlersNew("EVENT_HEALING_RECEIVED", HpsEventReceived, m_paramsListForHps)
-	UnRegisterEventHandlersNew("EVENT_HEALING_RECEIVED", IHpsEventReceived, m_paramsListForIHps)
-	UnRegisterEventHandlersNew("EVENT_UNIT_DAMAGE_RECEIVED", DpsEventReceived, m_paramsListForDps)
-	UnRegisterEventHandlersNew("EVENT_UNIT_DAMAGE_RECEIVED", DefEventReceived , m_paramsListForDef)
-	UnRegisterEventHandlersNew("EVENT_UNIT_FOLLOWERS_LIST_CHANGED", ReloadPet, m_paramsListForPets)
-
-
-	local unitList = GetPartyMembers()
-	BuildEventParamsForDef(unitList)
-	BuildEventParamsForIHps(unitList)
-	BuildEventParamsForPetChanged(unitList)
-	--наймы на островах одновременно члены группы и петы
-	local unitListWithPets = GetListWithPets(unitList)
-	BuildEventParamsForDps(unitListWithPets)
-	BuildEventParamsForHps(unitListWithPets)
-
-	RegisterEventHandlersNew("EVENT_HEALING_RECEIVED", HpsEventReceived, m_paramsListForHps)
-	RegisterEventHandlersNew("EVENT_HEALING_RECEIVED", IHpsEventReceived, m_paramsListForIHps)
-	RegisterEventHandlersNew("EVENT_UNIT_DAMAGE_RECEIVED", DpsEventReceived, m_paramsListForDps)
-	RegisterEventHandlersNew("EVENT_UNIT_DAMAGE_RECEIVED", DefEventReceived , m_paramsListForDef)
-	RegisterEventHandlersNew("EVENT_UNIT_FOLLOWERS_LIST_CHANGED", ReloadPet, m_paramsListForPets)
-end
-
-function GetListWithPets(anUnitList)
-	local unitListWithPets = {}
-	for _, member in pairs(anUnitList) do
-		if member.id then
-			unitListWithPets[member.id] = true
-			local followers = unit.GetFollowers(member.id)
-			if followers then
-				for _, followerID in pairs(followers) do
-					unitListWithPets[followerID] = true
-				end
-			end
-		end
+onMyEvent["EVENT_UNIT_FOLLOWERS_LIST_CHANGED"] = function(aParams)
+	if m_paramsListForPets[aParams.id] then
+		ReloadPet(aParams)
 	end
-	return unitListWithPets
-end
-
-function BuildEventParamsForDps(anUnitList)
-	m_paramsListForDps = {}
-	for unitID, _ in pairs(anUnitList) do	
-		table.insert(m_paramsListForDps, {source = unitID})
-	end
-end
-
-function BuildEventParamsForHps(anUnitList)
-	m_paramsListForHps = {}
-	for unitID, _ in pairs(anUnitList) do	
-		table.insert(m_paramsListForHps, {healerId = unitID})
-	end
-end
-
-function BuildEventParamsForDef(anUnitList)
-	m_paramsListForDef = {}
-	for _, member in pairs(anUnitList) do
-		if member.id then
-			table.insert(m_paramsListForDef, {target = member.id})
-		end
-	end
-end
-
-function BuildEventParamsForIHps(anUnitList)
-	m_paramsListForIHps = {}
-	for _, member in pairs(anUnitList) do
-		if member.id then
-			table.insert(m_paramsListForIHps, {unitId = member.id})
-		end
-	end
-end
-
-function BuildEventParamsForPetChanged(anUnitList)
-	m_paramsListForPets = {}
-	for _, member in pairs(anUnitList) do
-		if member.id then
-			table.insert(m_paramsListForPets, {id = member.id})
-		end
-	end
-end
-
-function UnRegisterEventHandlersNew(anEvent, aHandler, aParamList)
-	if aParamList then 
-		for _, params in ipairs(aParamList) do 
-			common.UnRegisterEventHandler(aHandler, anEvent, params)
-		end
-	else 
-		common.UnRegisterEventHandler(aHandler, anEvent)
-	end
-end
-
-function RegisterEventHandlersNew(anEvent, aHandler, aParamList)
-	if aParamList then 
-		for _, params in ipairs(aParamList) do 
-			common.RegisterEventHandler(aHandler, anEvent, params)
-		end
-	else 
-		common.RegisterEventHandler(aHandler, anEvent)
-	end
-end
-
-
-function GlobalReset()
-	localization = GetGameLocalization()
-	if not common.GetAddonRelatedTextGroup(localization, true) then
-		localization = "eng"
-	end
-	
-	local savedData = userMods.GetGlobalConfigSection("UniverseMeterSettings")
-	if savedData then
-		Settings.ModeDPS  = savedData.dps
-		Settings.ModeHPS  = savedData.hps
-		Settings.ModeDEF  = savedData.def
-		Settings.ModeIHPS = savedData.ihps
-		Settings.SkipDmgAndHpsOnPet = savedData.skipDmgAndHpsOnPet
-		Settings.SkipDmgYourselfIn = savedData.skipDmgYourselfIn
-		Settings.StartHided = savedData.startHided
-		Settings.CollectTotalTimelapse = savedData.сollectTotalTimelapse
-		Settings.ShowPositionOnBtn = savedData.showPositionOnBtn
-		Settings.ScaleFonts = savedData.scaleFonts
-		if savedData.maxCombatants then
-			Settings.MaxCombatants = savedData.maxCombatants
-		end
-	end
-
-	StrAllTime = GetTextLocalized("StrAllTime")
-	
-	FillBuffCheckList()
-	InitBuffConditionMgr()
-	
-	-- Create the DPSMeter here
-	DPSMeterGUI = TUMeterGUI:CreateNewObject(TUMeter:CreateNewObject())
-	DPSMeterGUI:Init()
-	
-	
-	m_buffListener.listenerAddBuff = PlayerAddBuff
-	m_buffListener.listenerRemoveBuff = PlayerRemoveBuff
-	m_buffListener.listenerChangeBuff = PlayerChangeBuff
-	m_buffListener.listenerRage = PlayerRageChanged
-	
-	local unitList = avatar.GetUnitList()
-	table.insert(unitList, avatar.GetId())
-	for _, unitID in ipairs(unitList) do
-		FabricMakePlayerInfo(unitID, m_buffListener)
-	end
-
-	if AoPanelDetected then DPSMeterGUI.ShowHideBtn:DnDHide() end
-	
-	if Settings.StartHided then
-		DPSMeterGUI.MainPanel:DnDHide()
-	end
-
-	-- Register now the other events & reactions
-	ReRegisterEvents()
-	RegisterEventHandlers(onMyEvent)
-	RegisterReactionHandlers(onReaction)
-
-	
-	
-	StartTimer(FastUpdate, Settings.FastUpdateInterval)
 end
 
 function PlayerAddBuff(aBuffDynamicInfo, aPlayerID, aFindedObj)
@@ -626,47 +456,197 @@ function PlayerChangeBuff(aPlayerID, aBuffDynamicInfo, aFindedObj)
 		}
 end
 
-
-
 function PlayerRageChanged(aPlayerID, aRage)
 	DPSMeterGUI.DPSMeter:UpdateUnitRage(aPlayerID, aRage)
 end
 
-function FillBuffCheckList()
-	local index = 1
-	for i = 1, 3 do
-		table.insert(BuffCheckList, {name = GetTextLocalized("HpsBuff"..i), ind = index, forSrc = true, forHps = true})
-		index = index + 1
+
+
+
+function ReloadPet(aParams)
+	local unitList = GetPartyMembers()
+	
+	local unitListWithPets = GetListWithPets(unitList)
+	local paramsListForDps = BuildEventParamsForDps(unitListWithPets)
+	local paramsListForHps = BuildEventParamsForHps(unitListWithPets)
+
+	local deleteParams, newParams = CompareArrays(m_paramsListForDps, paramsListForDps)
+	UnRegisterEventHandlerWithParams("EVENT_UNIT_DAMAGE_RECEIVED", DpsEventReceived, deleteParams)
+	RegisterEventHandlerWithParams("EVENT_UNIT_DAMAGE_RECEIVED", DpsEventReceived, newParams)
+	
+	deleteParams, newParams = CompareArrays(m_paramsListForHps, paramsListForHps)
+	UnRegisterEventHandlerWithParams("EVENT_HEALING_RECEIVED", HpsEventReceived, deleteParams)
+	RegisterEventHandlerWithParams("EVENT_HEALING_RECEIVED", HpsEventReceived, newParams)
+
+	m_paramsListForDps = paramsListForDps
+	m_paramsListForHps = paramsListForHps
+end
+
+function ReRegisterEvents()
+	local unitList = GetPartyMembers()
+	
+	m_paramsListForPets = BuildEventParamsForPetChanged(unitList)
+	
+	local paramsListForDef = BuildEventParamsForDef(unitList)
+	local paramsListForIHps = BuildEventParamsForIHps(unitList)
+	local unitListWithPets = GetListWithPets(unitList)
+	local paramsListForDps = BuildEventParamsForDps(unitListWithPets)
+	local paramsListForHps = BuildEventParamsForHps(unitListWithPets)
+
+	local deleteParams, newParams = CompareArrays(m_paramsListForDef, paramsListForDef)
+	UnRegisterEventHandlerWithParams("EVENT_UNIT_DAMAGE_RECEIVED", DefEventReceived, deleteParams)
+	RegisterEventHandlerWithParams("EVENT_UNIT_DAMAGE_RECEIVED", DefEventReceived, newParams)
+
+	deleteParams, newParams = CompareArrays(m_paramsListForIHps, paramsListForIHps)
+	UnRegisterEventHandlerWithParams("EVENT_HEALING_RECEIVED", IHpsEventReceived, deleteParams)
+	RegisterEventHandlerWithParams("EVENT_HEALING_RECEIVED", IHpsEventReceived, newParams)
+
+	deleteParams, newParams = CompareArrays(m_paramsListForDps, paramsListForDps)
+	UnRegisterEventHandlerWithParams("EVENT_UNIT_DAMAGE_RECEIVED", DpsEventReceived, deleteParams)
+	RegisterEventHandlerWithParams("EVENT_UNIT_DAMAGE_RECEIVED", DpsEventReceived, newParams)
+	
+	deleteParams, newParams = CompareArrays(m_paramsListForHps, paramsListForHps)
+	UnRegisterEventHandlerWithParams("EVENT_HEALING_RECEIVED", HpsEventReceived, deleteParams)
+	RegisterEventHandlerWithParams("EVENT_HEALING_RECEIVED", HpsEventReceived, newParams)
+
+	m_paramsListForDef = paramsListForDef
+	m_paramsListForIHps = paramsListForIHps
+	m_paramsListForDps = paramsListForDps
+	m_paramsListForHps = paramsListForHps
+end
+
+local function GetFilterID(aFilter)
+	for _, v in pairs(aFilter) do
+		return v
 	end
-	for i = 1, 3 do
-		table.insert(BuffCheckList, {name = GetTextLocalized("DpsHpsBuff"..i), ind = index, forSrc = true, forHps = true, forDps = true})
-		index = index + 1
+end
+
+local function IsFilterExist(anArr, aFilter)
+	local searchFilterID = GetFilterID(aFilter)
+	for _, filter in ipairs(anArr) do
+		if searchFilterID == GetFilterID(filter) then
+			return true
+		end
 	end
-	for i = 1, 1 do
-		table.insert(BuffCheckList, {name = GetTextLocalized("DpsBuff"..i), ind = index, forSrc = true, forDps = true})
-		index = index + 1
-	end
-	DPSHPSTYPES = 7
-	DEFTYPES = 25
-	for i = 1, 1 do
-		table.insert(BuffCheckList, {name = GetTextLocalized("IHpsBuff"..i), ind = index, forTarget = true, forHps = true})
-		index = index + 1
-	end
-	for i = 1, 24 do
-		table.insert(BuffCheckList, {name = GetTextLocalized("DefBuff"..i), ind = index, forTarget = true, forDps = true})
-		index = index + 1
+	return false
+end
+
+function CompareArrays(anArrOld, anArrNew)
+	local deleted = {}
+	for _, filter in ipairs(anArrOld) do
+		if not IsFilterExist(anArrNew, filter) then
+			table.insert(deleted, filter)
+		end
 	end
 	
+	local new = {}
+	for _, filter in ipairs(anArrNew) do
+		if not IsFilterExist(anArrOld, filter) then
+			table.insert(new, filter)
+		end
+	end
 	
-	for i = 1, DPSHPSTYPES do
-		TitleCustomDpsBuffType[i] = BuffCheckList[i].name
+	return deleted, new
+end
+
+function GetListWithPets(anUnitList)
+--наймы на островах одновременно члены группы и петы
+	local unitListWithPets = {}
+	for _, member in ipairs(anUnitList) do
+		if member.id then
+			unitListWithPets[member.id] = true
+			local followers = unit.GetFollowers(member.id)
+			if followers then
+				for _, followerID in ipairs(followers) do
+					unitListWithPets[followerID] = true
+				end
+			end
+		end
 	end
-	for i = 1, DEFTYPES do
-		TitleCustomDefBuffType[i] = BuffCheckList[DPSHPSTYPES + i].name
+	return unitListWithPets
+end
+
+function BuildEventParamsForDps(anUnitList)
+	local paramsListForDps = {}
+	for unitID, _ in pairs(anUnitList) do	
+		table.insert(paramsListForDps, {source = unitID})
+	end
+	return paramsListForDps
+end
+
+function BuildEventParamsForHps(anUnitList)
+	local paramsListForHps = {}
+	for unitID, _ in pairs(anUnitList) do	
+		table.insert(paramsListForHps, {healerId = unitID})
+	end
+	return paramsListForHps
+end
+
+function BuildEventParamsForDef(anUnitList)
+	local paramsListForDef = {}
+	for _, member in ipairs(anUnitList) do
+		if member.id then
+			table.insert(paramsListForDef, {target = member.id})
+		end
+	end
+	return paramsListForDef
+end
+
+function BuildEventParamsForIHps(anUnitList)
+	local paramsListForIHps = {}
+	for _, member in ipairs(anUnitList) do
+		if member.id then
+			table.insert(paramsListForIHps, {unitId = member.id})
+		end
+	end
+	return paramsListForIHps
+end
+
+function BuildEventParamsForPetChanged(anUnitList)
+	local paramsListForPets = {}
+	for _, member in ipairs(anUnitList) do
+		if member.id then
+			paramsListForPets[member.id] = true
+		end
+	end
+	return paramsListForPets
+end
+
+
+
+
+
+
+function GlobalInit()
+	-- Create the DPSMeter here
+	DPSMeterGUI = TUMeterGUI:CreateNewObject(TUMeter:CreateNewObject())
+	DPSMeterGUI:Init()
+	
+	
+	m_buffListener.listenerAddBuff = PlayerAddBuff
+	m_buffListener.listenerRemoveBuff = PlayerRemoveBuff
+	m_buffListener.listenerChangeBuff = PlayerChangeBuff
+	m_buffListener.listenerRage = PlayerRageChanged
+	
+	local unitList = avatar.GetUnitList()
+	table.insert(unitList, avatar.GetId())
+	for _, unitID in ipairs(unitList) do
+		FabricMakePlayerInfo(unitID, m_buffListener)
+	end
+
+	if AoPanelDetected then 
+		DPSMeterGUI.ShowHideBtn:Hide()
 	end
 	
-	for i = 1, index-1 do
-		CurrentBuffsState[i] = {}
-		CurrentBuffsStateByTime[i] = {}
+	if Settings.StartHided then
+		DPSMeterGUI.MainPanel:Hide()
 	end
+
+	-- Register now the other events & reactions
+	RegisterEventHandlers(onMyEvent)
+	RegisterReactionHandlers(onReaction)
+	ReRegisterEvents()
+	
+	
+	StartTimer(FastUpdate, Settings.FastUpdateInterval)
 end

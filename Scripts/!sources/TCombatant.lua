@@ -3,6 +3,12 @@ local m_isWasDeadMask = 2 --0010 b
 local m_isWasKillMask = 4 --0100 b
 local m_classColorIndexMask = 240 --1111 0000 b
 local m_rangeMask = 65280 --1111 1111 0000 0000 b
+
+-- хранят последнее посчитанное значение глобально
+local m_physicalDamagePercent = nil
+local m_elementalDamagePercent = nil
+local m_holyDamagePercent = nil
+local m_naturalDamagePercent = nil
 --------------------------------------------------------------------------------
 -- Type TCombatantData
 Global("TCombatantData", {})
@@ -88,39 +94,43 @@ end
 --------------------------------------------------------------------------------
 -- Get extra info by index
 --------------------------------------------------------------------------------
-function TCombatant:CalculateDamageTypePercent(aType, aMode)
-	local typeAmount = 0
+function TCombatant:CalculateDamageTypePercent(aMode)
+	local physicalAmount = 0
+	local elementalAmount = 0
+	local holyAmount = 0
+	local naturalAmount = 0
+
+	local physicalCnt = 0
+	local elementalCnt = 0
+	local holyCnt = 0
+	local naturalCnt = 0
+	
 	local totalAmount = 0
-	local typeCnt = 0
+	
 	for _, spellData in ipairs( self.Data[aMode] ) do
 		if not spellData.FromBarrier then
-			if (aType == enumGlobalInfo.Physical and spellData.Element == "ENUM_SubElement_PHYSICAL")
-			
-			or  (aType == enumGlobalInfo.Elemental and 
-				(spellData.Element == "ENUM_SubElement_FIRE" 
-				or spellData.Element == "ENUM_SubElement_COLD" 
-				or spellData.Element == "ENUM_SubElement_LIGHTNING"))
-					
-			or (aType == enumGlobalInfo.Holy and 
-				(spellData.Element == "ENUM_SubElement_HOLY" 
-				or spellData.Element == "ENUM_SubElement_SHADOW" 
-				or spellData.Element == "ENUM_SubElement_ASTRAL"))
-
-			or (aType == enumGlobalInfo.Natural and 
-				(spellData.Element == "ENUM_SubElement_POISON" 
-				or spellData.Element == "ENUM_SubElement_DISEASE" 
-				or spellData.Element == "ENUM_SubElement_ACID")) 
-			
-			then	
-				typeAmount = typeAmount + spellData.Amount
-				typeCnt = typeCnt + spellData.Count
+			if spellData.Element == "ENUM_SubElement_PHYSICAL" then
+				physicalCnt = physicalCnt + spellData.Count
+				physicalAmount = physicalAmount + spellData.Amount
+			elseif spellData.Element == "ENUM_SubElement_FIRE" or spellData.Element == "ENUM_SubElement_COLD" or spellData.Element == "ENUM_SubElement_LIGHTNING" then
+				elementalCnt = elementalCnt + spellData.Count
+				elementalAmount = elementalAmount + spellData.Amount
+			elseif spellData.Element == "ENUM_SubElement_HOLY" or spellData.Element == "ENUM_SubElement_SHADOW" or spellData.Element == "ENUM_SubElement_ASTRAL" then
+				holyCnt = holyCnt + spellData.Count
+				holyAmount = holyAmount + spellData.Amount
+			elseif spellData.Element == "ENUM_SubElement_POISON" or spellData.Element == "ENUM_SubElement_DISEASE" or spellData.Element == "ENUM_SubElement_ACID" then
+				naturalCnt = naturalCnt + spellData.Count
+				naturalAmount = naturalAmount + spellData.Amount
 			end
 			
 			totalAmount = totalAmount + spellData.Amount
 		end
 	end
-
-	return TValueDetails:CreateNewObjectOneValue(GetPercentageAt(typeAmount, totalAmount), typeCnt)
+	
+	m_physicalDamagePercent = TValueDetails:CreateNewObjectOneValue(GetPercentageAt(physicalAmount, totalAmount), physicalCnt)
+	m_elementalDamagePercent = TValueDetails:CreateNewObjectOneValue(GetPercentageAt(elementalAmount, totalAmount), elementalCnt)
+	m_holyDamagePercent = TValueDetails:CreateNewObjectOneValue(GetPercentageAt(holyAmount, totalAmount), holyCnt)
+	m_naturalDamagePercent = TValueDetails:CreateNewObjectOneValue(GetPercentageAt(naturalAmount, totalAmount), naturalCnt)
 end
 
 function TCombatant:GetGlobalInfoByIndex(anIndex, aMode)
@@ -142,8 +152,14 @@ function TCombatant:GetGlobalInfoByIndex(anIndex, aMode)
 			end
 		end
 		return TValueDetails:CreateNewObjectOneValue(GetPercentageAt(critCnt, totalCnt), critCnt)
-	elseif anIndex == enumGlobalInfo.Physical or anIndex == enumGlobalInfo.Elemental or anIndex == enumGlobalInfo.Holy or anIndex == enumGlobalInfo.Natural then
-		return self:CalculateDamageTypePercent(anIndex, aMode)
+	elseif anIndex == enumGlobalInfo.Physical then
+		return m_physicalDamagePercent
+	elseif anIndex == enumGlobalInfo.Elemental then 
+		return m_elementalDamagePercent
+	elseif anIndex == enumGlobalInfo.Holy then
+		return m_holyDamagePercent
+	elseif anIndex == enumGlobalInfo.Natural then
+		return m_naturalDamagePercent
 	end
 end
 --------------------------------------------------------------------------------
@@ -301,7 +317,7 @@ end
 --------------------------------------------------------------------------------
 -- Calculate the damage, DPS, HPS, according to the fight time
 --------------------------------------------------------------------------------
-function TCombatant:CalculateSpell(aFightTime, aMode)
+function TCombatant:CalculateSpells(aFightTime, aMode)
 	if not (aFightTime > 0) then aFightTime = 1 end
 	local combatantData = self.Data[aMode]
 	if not combatantData then
@@ -311,6 +327,8 @@ function TCombatant:CalculateSpell(aFightTime, aMode)
 		CalculateSpellDetailsPercentage(spellData, aFightTime, combatantData.Amount, aMode == enumMode.Dps or aMode == enumMode.Def)
 	end
 	table.sort(combatantData, CompareSpells)
+	
+	self:CalculateDamageTypePercent(aMode)
 end
 --------------------------------------------------------------------------------
 -- Update information of a combatant

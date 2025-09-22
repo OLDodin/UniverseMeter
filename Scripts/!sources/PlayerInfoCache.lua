@@ -1,4 +1,3 @@
-local cachedIsValidBuff = object.IsValidBuff
 local cachedGetName = object.GetName
 local m_players = {}
 
@@ -80,11 +79,15 @@ function BuffAdded(aParams)
 	end
 end
 
-function BuffChanged(aParams)
-	local playerInfo = m_players[aParams.objectId]
-	if playerInfo then
-		playerInfo.buffs.changeEventFunc(aParams)
-	end
+function BuffsChanged(aParams)
+	for objId, buffs in pairs( aParams.objects ) do
+		local playerInfo = m_players[objId]
+		if playerInfo then
+			for buffID, _ in pairs( buffs ) do
+				playerInfo.buffs.changeEventFunc(buffID)
+			end
+		end
+	end 
 end
 
 function BuffRemoved(aParams)

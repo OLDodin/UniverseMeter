@@ -278,6 +278,14 @@
       <resource href="DpsBuff1.txt" />
     </Item>
 	<Item>
+      <name>DpsBuff2</name>
+      <resource href="DpsBuff2.txt" />
+    </Item>
+	<Item>
+      <name>DpsBuff3</name>
+      <resource href="DpsBuff3.txt" />
+    </Item>
+	<Item>
       <name>DpsHpsBuff1</name>
       <resource href="DpsHpsBuff1.txt" />
     </Item>
@@ -384,6 +392,14 @@
 	<Item>
       <name>DefBuff24</name>
       <resource href="DefBuff24.txt" />
+    </Item>
+	<Item>
+      <name>DefBuff25</name>
+      <resource href="DefBuff25.txt" />
+    </Item>
+	<Item>
+      <name>DefBuff26</name>
+      <resource href="DefBuff26.txt" />
     </Item>
 	<Item>
       <name>ShowScoreCheckBoxText</name>

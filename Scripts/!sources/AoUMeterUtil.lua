@@ -69,7 +69,7 @@ end
 --------------------------------------------------------------------------------
 -- Get pourcentage from ratio Value / ValueAt
 function GetPercentageAt( Value, ValueAt )
-	return math.floor( ( ValueAt ~= 0 and Value / ValueAt or 0 ) * 100 )
+	return ( ValueAt ~= 0 and Value / ValueAt or 0 ) * 100
 end
 --------------------------------------------------------------------------------
 
@@ -150,8 +150,8 @@ function GetPartyMembers()
 	
 	if raid.IsExist() then
 		local raidGroups = raid.GetMembers()
-		for i, group in pairs(raidGroups) do
-			for _, member in pairs(group) do
+		for i, group in ipairs(raidGroups) do
+			for _, member in ipairs(group) do
 				table.insert(partyMembersInfoList, member)
 			end
 		end
@@ -185,6 +185,16 @@ end
 function round(aTime)
 	if not aTime then return nil end
 	return math.floor(aTime+0.5)
+end
+
+function CompareColor(aColor1, aColor2)
+	if not aColor1 or not aColor2 then
+		return false
+	end
+	if aColor1.r ~= aColor2.r or aColor1.g ~= aColor2.g or aColor1.b ~= aColor2.b or aColor1.a ~= aColor2.a then
+		return false
+	end
+	return true
 end
 
 function GetTimeString(aSeconds)

@@ -18,9 +18,9 @@ end
 
 local m_buffCondition = nil
 
-function InitBuffConditionMgr()
+function InitBuffConditionMgr(aBuffList)
 	m_buffCondition = table.sclone(BuffCondition)
-	m_buffCondition:Init(BuffCheckList)
+	m_buffCondition:Init(aBuffList)
 end
 
 function GetBuffCondition()
