@@ -4,18 +4,18 @@
 	<Priority>6</Priority>
 	<Children>
 		<Item href="HeaderTotal.(WidgetTextView).xdb" />
-		<Item href="..\SpellInfoPanel\TimeLapsePanel\ScrollVertical\ScrollableContainer.(WidgetPanel).xdb"/>
+		<Item href="..\..\SpellInfoPanel\TimeLapsePanel\ScrollVertical\ScrollableContainer.(WidgetPanel).xdb"/>
 	</Children>
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Size>150</Size>
-			<Pos>200</Pos>
+			<Size>146</Size>
+			<Pos>148</Pos>
 		</X>
 		<Y>
-			<Align>WIDGET_ALIGN_LOW</Align>
-			<Size>270</Size>
-			<Pos>35</Pos>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<HighPos>5</HighPos>
+			<Pos>30</Pos>
 		</Y>
 	</Placement>
 	<Visible>true</Visible>

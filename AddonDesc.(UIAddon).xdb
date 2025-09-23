@@ -52,4 +52,10 @@
 			<widgets href="Widgets/Resources/meter/WidgetTemplates.xdb" />
 		</Item>
 	</widgetGroups>
+	<texturesGroups>
+		<Item>
+			<groupName>common</groupName>
+			<textures href="Widgets/Resources/Textures/Textures.xdb"/>
+		</Item>
+	</texturesGroups>
 </UIAddon>

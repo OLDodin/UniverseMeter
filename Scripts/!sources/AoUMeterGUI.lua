@@ -19,9 +19,12 @@ function TMainPanelGUI:CreateNewObject(name)
 			FightBtn = widget:GetChildByName("FightPanel"),
 			FightText = widget:GetChildByName("FightPanel"):GetChildByName("FightNameTextView").Widget, -- Button to switch the active fight
 			ModeBtn = widget:GetChildByName("ModePanel"),
-			ModeText = widget:GetChildByName("ModePanel"):GetChildByName("ModeNameTextView").Widget, -- Button to switch the active mode       
+			ModeText = widget:GetChildByName("ModePanel"):GetChildByName("ModeNameTextView").Widget, -- Button to switch the active mode   
+			HistoryBtn = widget:GetChildByName("HistoryButton"),
+			HistoryPanel = widget:GetChildByName("HistoryPanel"),
 			TotalPanel = nil, -- Panel to display the total
 			PlayerList = {}, -- Panel player list
+			HistoryPanelHeight = 250,
 		}, { __index = widget })
 end
 
@@ -89,8 +92,8 @@ function TDetailsPanelGUI:CreateNewObject(name)
 			SpellCurrTimeText = widget:GetChildByName("SpellCurrTimeTextView"),
 			DescText = widget:GetChildByName("DescTextView"),
 			
-			SpellGlobalBarWidth = 456, 
-			SpellBarWidth = 434, 
+			SpellGlobalBarWidth = 302, 
+			SpellBarWidth = 449, 
 			SpellDetailBarWidth = 370, 
 			DetailsPanelHeight = 480,
 		}, { __index = widget })
@@ -187,6 +190,7 @@ function TSpellPanelGUI:CreateNewObjectByDesc(name, desc, owner)
 			DmgBlock = widget:GetChildByName("SpellTextViewDmgBlock"),
 			Percent = widget:GetChildByName("SpellTextViewPercentage"),
 			DeadImg = widget:GetChildByName("DeadImg"),
+			SpellImg = widget:GetChildByName("SpellImg"),
 		}, { __index = widget })
 end
 --------------------------------------------------------------------------------
@@ -359,6 +363,17 @@ function TUMeterGUI:DisplayPlayer(aCurrFight, aPlayerIndex)
 	local combatant = aCurrFight:GetCombatantByIndex(aPlayerIndex)
 	local playerPanel = self.MainPanel.PlayerList[aPlayerIndex]
 	if not combatant or not playerPanel then return end
+	
+	if Settings.ShowPositionOnBtn and combatant.ID == avatar.GetId() then
+		if CurrentScoreOnMainBtn ~= aPlayerIndex then
+			if AoPanelDetected then
+				local SetVal = { val = StrMainBtn..StrSpace..cachedFormatInt(aPlayerIndex , "%d") }
+				userMods.SendEvent( "AOPANEL_UPDATE_ADDON", { sysName = "UniverseMeter", header = SetVal } )
+			end
+			self.ShowHideBtn:SetVal( 'button_label', cachedFormatInt(aPlayerIndex , "%d") )
+			CurrentScoreOnMainBtn = aPlayerIndex
+		end
+	end
 
 	playerPanel:Show()
 	
@@ -383,12 +398,17 @@ end
 --------------------------------------------------------------------------------
 function TUMeterGUI:UpdatePlayerList()
 	local currentFight = self:GetActiveFight()
-	if not self.MainPanel.Widget:IsVisible() or not currentFight then return end
+	if not currentFight then return end
+	if not self.MainPanel.Widget:IsVisible() then 
+		self:UpdateScoreOnMainBtn(currentFight)
+		return 
+	end
+	
 	currentFight:RecalculateCombatantsData(self.ActiveMode) -- Important
 
 	local combatantCount = math.min(currentFight:GetCombatantCount(), Settings.MaxCombatants)
 
-	self.MainPanel:SetHeight(47 + (combatantCount + 1) * 24)
+	self.MainPanel:SetHeight(math.max((47 + (combatantCount + 1) * 24), self.MainPanel.HistoryPanelHeight + 30))
 
 	self:DisplayTotal()
 	for playerIndex = 1, combatantCount do
@@ -400,17 +420,15 @@ function TUMeterGUI:UpdatePlayerList()
 	end
 end
 
-function TUMeterGUI:UpdateScoreOnMainBtn()
-	local currentFight = self:GetActiveFight()
-	if not Settings.ShowPositionOnBtn or not currentFight then return end
-	currentFight:RecalculateCombatantsData(self.ActiveMode)
+function TUMeterGUI:UpdateScoreOnMainBtn(aCurrentFight)
+	if not Settings.ShowPositionOnBtn then return end
+	aCurrentFight:RecalculateCombatantsData(self.ActiveMode)
 
-	local combatantCount = math.min(currentFight:GetCombatantCount(), Settings.MaxCombatants)
+	local combatantCount = math.min(aCurrentFight:GetCombatantCount(), Settings.MaxCombatants)
 	
 	for playerIndex = 1, combatantCount do
-		local combatant = currentFight:GetCombatantByIndex(playerIndex)
-		local myID = avatar.GetId()
-		if combatant and combatant.ID == myID then
+		local combatant = aCurrentFight:GetCombatantByIndex(playerIndex)
+		if combatant and combatant.ID == avatar.GetId() then
 			if CurrentScoreOnMainBtn ~= playerIndex then
 				if AoPanelDetected then
 					local SetVal = { val = StrMainBtn..StrSpace..cachedFormatInt(playerIndex , "%d") }
@@ -422,7 +440,6 @@ function TUMeterGUI:UpdateScoreOnMainBtn()
 		end
 	end
 end
-
 --==============================================================================
 --================= SPELL PANEL - Spell list ===================================
 --==============================================================================
@@ -443,9 +460,11 @@ function TUMeterGUI:DisplayGlobalInfo(aGlobalInfoIndex, aSelectedCombatant)
 		globalInfoPanel.Bar:SetWidth(math.max(self.DetailsPanel.SpellGlobalBarWidth * (globalInfoData.Percentage / 100), 1))
 
 		globalInfoPanel.Count:SetVal("Count", cachedFormatInt(globalInfoData.Count , "%d"))
-		globalInfoPanel.DamageMin:SetVal("Min", cachedFormatFloat(globalInfoData.Min , "%.1f"))
+		if aGlobalInfoIndex == enumGlobalInfo.Determination then
+			globalInfoPanel.DamageMin:SetVal("Min", cachedFormatFloat(globalInfoData.Min , "%.1f"))
+			globalInfoPanel.DamageMax:SetVal("Max", cachedFormatFloat(globalInfoData.Max , "%.1f"))
+		end
 		globalInfoPanel.DamageAvg:SetVal("Avg", cachedFormatFloat(TValueDetails.GetAvg(globalInfoData) , "%.1f"))
-		globalInfoPanel.DamageMax:SetVal("Max", cachedFormatFloat(globalInfoData.Max , "%.1f"))
 		globalInfoPanel.Percent:SetVal("Percentage", cachedFormatFloat(globalInfoData.Percentage , "%.1f"))
 	else
 		globalInfoPanel:Hide()
@@ -498,9 +517,20 @@ function TUMeterGUI:DisplaySpell(aSpellIndex, aSelectedCombatant)
 	if spellData then
 		spellPanel:Show()
 		
-		spellPanel.Bar:SetColor(DamageTypeColors[spellData.Element] or { r = 1.0; g = 1.0; b = 1.0; a = 1 } )
 		spellPanel.Bar:SetWidth(math.max(self.DetailsPanel.SpellBarWidth * (spellData.Percentage / 100), 1))
+		
+		if spellData.InfoID == nil or spellData.InfoID ~= spellPanel.LastValues.infoID then
+			spellPanel.LastValues.infoID = spellData.InfoID
 
+			local spellTexture = self.DPSMeter:GetTextureFromID(spellData.InfoID)
+			if spellTexture then
+				spellPanel.SpellImg:SetBackgroundTexture(spellTexture)
+			else
+				spellPanel.SpellImg:SetBackgroundTexture(UnknownTex)
+			end
+		end
+		
+		spellPanel.Bar:SetColor(DamageTypeColors[spellData.Element] or { r = 0.1; g = 0.0; b = 0.5; a = 1 } )
 		spellPanel.Type:SetVal("Type",  self:GetTypeHeader(spellData))
 		spellPanel.Name:SetVal("PetName", spellData.PetName and spellData.PetName or StrNone)
 		spellPanel.Name:SetVal("Name", spellData.Name)
@@ -512,10 +542,14 @@ function TUMeterGUI:DisplaySpell(aSpellIndex, aSelectedCombatant)
 		spellPanel.Percent:SetVal("Percentage", cachedFormatFloat(spellData.Percentage , "%.1f"))
 		
 		if spellData.WasDead then
+			spellPanel.DeadImg:SetBackgroundTexture(DeadTex)
+			spellPanel.DeadImg:Show()
+		elseif spellData.WasKill then
+			spellPanel.DeadImg:SetBackgroundTexture(KillTex)
 			spellPanel.DeadImg:Show()
 		else
 			spellPanel.DeadImg:Hide()
-		end
+		end	
 	else
 		spellPanel:Hide()
 	end
@@ -553,7 +587,8 @@ end
 function TUMeterGUI:CreateTimeLapse()
 	local timeLapse = self:GetActiveDetailTimeLapse()
 	local fightTime = GetTableSize(timeLapse)
-	self.DetailsPanel.TimeLapseScroll.Widget:RemoveItems()
+	local timelapseScroll = self.DetailsPanel.TimeLapseScroll.Widget
+	timelapseScroll:RemoveItems()
 	local maxAmount = 1
 	for i = 1, fightTime do 
 		local selectedCombatant = timeLapse[i]:GetCombatant(self.SelectedCombatantInfo.id, self.SelectedCombatantInfo.name)
@@ -564,13 +599,19 @@ function TUMeterGUI:CreateTimeLapse()
 		timeLapse[i].selectedCombatant = selectedCombatant
 		maxAmount = math.max(amount, maxAmount)
 	end
-	local btnWidth = 5
+	local btnWidth = 6
 	self.DetailsPanel.BigPanel:DestroyAllChild()
 	self.DetailsPanel.BigPanel:SetWidth(btnWidth*fightTime+50)
 	self.DetailsPanel.BigPanel:Show()
 	
-	local maxBtnHeight = 230
+	local imgPanelDesc = GetDescFromResource("ImageBox")
+	
+	local startPosShift = 10
+	local lastDpsBtn = nil
+	local maxBtnHeight = 200 - 34
 	local minBtnHeight = 6
+	local infoImgWidth = btnWidth*2
+	local infoImgHeight = infoImgWidth + 2
 	
 	for i = 1, fightTime do 
 		local amount = 0
@@ -582,23 +623,35 @@ function TUMeterGUI:CreateTimeLapse()
 			
 			if amount > 0 then
 				local dpsBtn = TWidget:CreateNewObjectByDesc(wtName, self.DetailsPanel.DpsTemplateBtnDesc, self.DetailsPanel.BigPanel)	
-				dpsBtn:SetPosition(btnWidth*(i-1))
+				local btnPosX = startPosShift + btnWidth*(i-1)
+				dpsBtn:SetPosition(btnPosX)
 
 				local wasDead = timeLapseCombatant:GetWasDead()
 				local wasKill = timeLapseCombatant:GetWasKill()
+				local infoTexture = nil
 				if wasDead and wasKill then	
 					dpsBtn.Widget:SetVariant(3)
+					infoTexture = DeadKillTex
 				elseif wasKill then
 					dpsBtn.Widget:SetVariant(2)
+					infoTexture = KillTex
 				elseif wasDead then
 					dpsBtn.Widget:SetVariant(1)
+					infoTexture = DeadTex
+				end
+				if infoTexture then
+					local infoImg = TWidget:CreateNewObjectByDesc("deadImg"..i, imgPanelDesc, self.DetailsPanel.BigPanel)
+					infoImg:SetPosition(btnPosX - (infoImgWidth - btnWidth)/2, maxBtnHeight-18)
+					infoImg:SetBackgroundTexture(infoTexture)
+					infoImg:SetWidth(infoImgWidth)
+					infoImg:SetHeight(infoImgHeight)
 				end
 				if self.ActiveDetailMode == enumMode.Def then
 					local barrierAmount = timeLapseCombatant:GetBarrierAmount(enumMode.Def)
 					if barrierAmount > 0 then
 						local wtBarrierName = "BarrierBtn" .. i
 						local barrierBtn = TWidget:CreateNewObjectByDesc(wtBarrierName, self.DetailsPanel.BarrierTemplateBtn, self.DetailsPanel.BigPanel)	
-						barrierBtn:SetPosition(btnWidth*(i-1))
+						barrierBtn:SetPosition(btnPosX)
 						barrierBtn:SetHeight(math.max(math.min(barrierAmount/maxAmount, 1.0)*maxBtnHeight, minBtnHeight+6))
 						barrierBtn:SetWidth(btnWidth)
 					end
@@ -608,18 +661,26 @@ function TUMeterGUI:CreateTimeLapse()
 				
 				dpsBtn:SetWidth(btnWidth)
 				dpsBtn:SetHeight(btnHeight)
+				
+				lastDpsBtn = dpsBtn
 			end
 		end
-		--Settings.TimeLapsInterval
+		
 		if math.fmod(i, 10) == 0 or i == 1 then
 			local dpsLineIndicator = TWidget:CreateNewObjectByDesc(wtName, self.DetailsPanel.DpsTemplateLineDesc, self.DetailsPanel.BigPanel)
-			dpsLineIndicator:SetPosition(btnWidth*(i-1)+btnWidth/2)
+			dpsLineIndicator:SetPosition(startPosShift + btnWidth*(i-1)+btnWidth/2)
 			local dpsBtnTxt = TWidget:CreateNewObjectByDesc(wtName, self.DetailsPanel.DpsTemplateTxtDesc, self.DetailsPanel.BigPanel)
-			dpsBtnTxt:SetPosition(btnWidth*(i-1) - 12)
+			dpsBtnTxt:SetPosition(startPosShift + btnWidth*(i-1) - 12)
 			dpsBtnTxt.Widget:SetVal("Time", cachedToWString(GetTimeString(i*1)))
+			if Settings.ScaleFonts then
+				dpsBtnTxt:SetTextAttributes("Time", nil, 12)
+			end
 		end
 	end
-	self.DetailsPanel.TimeLapseScroll.Widget:PushBack(self.DetailsPanel.BigPanel.Widget)
+	timelapseScroll:PushBack(self.DetailsPanel.BigPanel.Widget)
+	if lastDpsBtn then
+		timelapseScroll:EnsureVisible(lastDpsBtn.Widget)
+	end
 end
 
 function TUMeterGUI:SetSelectedSpellIndex(anIndex)
@@ -631,12 +692,12 @@ end
 
 function TUMeterGUI:SwitchToTimeLapseElement(anIndex)
 	self.TimelapseIndex = anIndex
-	--Settings.TimeLapsInterval
 	
 	self.DetailsPanel.SpellScrollList:SetContainerOffset(0)
 	self.DetailsPanel.SpellScrollList:ForceReposition()
 	
 	self.DetailsPanel.SpellCurrTimeText:SetVal("Time", cachedToWString(GetTimeString(self.TimelapseIndex*1)))
+	self.DetailsPanel.SpellCurrTimeText.Widget:PlayTextScaleEffect( 1.0, 1.2, 800, EA_SYMMETRIC_FLASH )
 	
 	self:UpdateValues()
 end
@@ -649,6 +710,7 @@ function TUMeterGUI:SwitchToAll()
 	self.DetailsPanel.SpellScrollList:ForceReposition()
 	
 	self.DetailsPanel.SpellCurrTimeText:SetVal("Time", StrAllTime)
+	self.DetailsPanel.SpellCurrTimeText.Widget:PlayTextScaleEffect( 1.0, 1.2, 800, EA_SYMMETRIC_FLASH )
 	self:UpdateValues()
 end
 
@@ -737,19 +799,7 @@ function TUMeterGUI:UpdateSpellDetailsList(spellIndex)
 	local spellData = selectedCombatant:GetSpellByIndex(spellIndex, self.ActiveDetailMode)
 
 	if spellData then
-		local someInfo = self.DPSMeter:GetInfoFromID(spellData.InfoID)
-		if someInfo and someInfo.description then
-			if not someInfo.cachedDesc then
-				if apitype( someInfo.description ) == "ValuedText" then
-					someInfo.cachedDesc = someInfo.description:ToWString()
-				else
-					someInfo.cachedDesc = someInfo.description
-				end
-			end
-			self.DetailsPanel.DescText:SetVal("Desc", someInfo.cachedDesc)
-		else
-			self.DetailsPanel.DescText:SetVal("Desc", StrUnknown)
-		end
+		self.DetailsPanel.DescText:SetVal("Desc", self.DPSMeter:GetDescriptionFromID(spellData.InfoID))
 		
 		if self.ActiveDetailMode == enumMode.Hps or self.ActiveDetailMode == enumMode.IHps then
 			self.DetailsPanel.DpsBuffHeaderText:SetVal("Desc", StrHpsBuffHeader)
@@ -954,7 +1004,10 @@ function TUMeterGUI:FillHistoryScroll(aList, aBtnSysName, aBtnShowName, aScrollL
 	end
 end
 
-function TUMeterGUI:UpdateHistory()
+function TUMeterGUI:UpdateHistory(anUpadteOnlyVisible)
+	if anUpadteOnlyVisible and not self.HistoryPanel:IsVisible() then
+		return
+	end
 	self.ActiveHistoryTotalList = self.DPSMeter.HistoryTotalFights:copy()
 	self.ActiveHistoryCurrentList = self.DPSMeter.HistoryCurrentFights:copy()
 	
@@ -1037,8 +1090,6 @@ function TUMeterGUI:CreateNewSpellPanel()
 end
 
 function TUMeterGUI:Init()
-
-
 	-- Default mode
 	self.ActiveMode = Settings.DefaultMode
 	self.ActiveFightMode = enumFight.Current
@@ -1082,8 +1133,16 @@ function TUMeterGUI:Init()
 	SetCheckedForCheckBox(self.SettingsPanel.ScaleFontsCheckBox, Settings.ScaleFonts)
 		
 	
-	self.HistoryPanel = THistoryPanelGUI:CreateNewObject("HistoryPanel")
-	self.HistoryPanel:DragNDrop(true, true)
+	self.HistoryPanel = self.MainPanel.HistoryPanel
+	self.HistoryPanel.CurrentScrollList = self.HistoryPanel:GetChildByName("ScrollCurrentPanel"):GetChildByName("ScrollableContainerV")
+	self.HistoryPanel.TotalScrollList = self.HistoryPanel:GetChildByName("ScrollTotalPanel"):GetChildByName("ScrollableContainerV")
+	self.HistoryPanel.HeaderText = self.HistoryPanel:GetChildByName("HeaderText")
+	self.HistoryPanel.HeaderCurrentText = self.HistoryPanel:GetChildByName("ScrollCurrentPanel"):GetChildByName("HeaderCurrentText")
+	self.HistoryPanel.HeaderTotalText = self.HistoryPanel:GetChildByName("ScrollTotalPanel"):GetChildByName("HeaderTotalText")
+	self.HistoryPanel.HistoryBtnDesc = GetDescFromResource("HistoryBtn")
+	
+	
+	self.HistoryPanel:SetHeight(self.MainPanel.HistoryPanelHeight)
 	self.HistoryPanel.HeaderCurrentText:SetVal("Name", GetTextLocalized("HeaderCurrent"))
 	self.HistoryPanel.HeaderTotalText:SetVal("Name", GetTextLocalized("HeaderTotal"))
 	self.HistoryPanel.HeaderText:SetVal("Name", GetTextLocalized("History"))
@@ -1160,7 +1219,8 @@ function TUMeterGUI:Init()
 	self.DetailsPanel.UpdateTimeLapseBtn:SetVal("button_label", GetTextLocalized("StrUpdateTimeLapse"))
 	
 	
-	local spellOffsetX = 407
+	local spellOffsetX = 330
+	local globalOffsetX = 20
 
 	self.DetailsPanel.PlayerNameText:Show(true)
 	self.DetailsPanel.SpellScrollList:Show(true)
@@ -1174,8 +1234,12 @@ function TUMeterGUI:Init()
 	-- GlobalInfoHeader
 	local globalInfoHeaderOffset = 55
 	self.DetailsPanel.GlobalInfoHeaderPanel:SetWidth(self.DetailsPanel.SpellGlobalBarWidth)
-	self.DetailsPanel.GlobalInfoHeaderPanel:SetPosition(spellOffsetX, globalInfoHeaderOffset)
+	self.DetailsPanel.GlobalInfoHeaderPanel:SetPosition(globalOffsetX, globalInfoHeaderOffset)
 	self.DetailsPanel.GlobalInfoHeaderPanel:Show()
+	
+	if Settings.ScaleFonts then
+		self.DetailsPanel.DescText:SetTextAttributes("Desc", nil, 14)
+	end
 
 	-- GlobalInfo list
 	local GlobalInfoOffset = globalInfoHeaderOffset + 18
@@ -1183,7 +1247,7 @@ function TUMeterGUI:Init()
 		local wtName = "GlobalInfoPanel" .. extraIndex
 		local globalInfoPanel = TSpellDetailsPanelGUI:CreateNewObjectByDesc(wtName, spellInfoPanelDesc, self.DetailsPanel)
 		globalInfoPanel:SetWidth(self.DetailsPanel.SpellGlobalBarWidth)
-		globalInfoPanel:SetPosition(spellOffsetX, GlobalInfoOffset + (extraIndex-1) * 18)
+		globalInfoPanel:SetPosition(globalOffsetX, GlobalInfoOffset + (extraIndex-1) * 18)
 		globalInfoPanel.Name:SetVal("Name", TitleGlobalInfoType[extraIndex])
 		globalInfoPanel.Bar:SetColor(GlobalInfoTypeColors[extraIndex])
 		ScaleFontSpellDetailsPanelGUI(globalInfoPanel)
@@ -1192,7 +1256,7 @@ function TUMeterGUI:Init()
 	end
 
 	-- SpellHeader
-	local spellHeaderOffset = GlobalInfoOffset + EXTRATYPES * 18 + 7
+	local spellHeaderOffset = 55
 	self.DetailsPanel.SpellHeaderPanel:SetPosition(spellOffsetX, spellHeaderOffset)
 	self.DetailsPanel.SpellHeaderPanel:SetWidth(self.DetailsPanel.SpellBarWidth)
 	self.DetailsPanel.SpellHeaderPanel:Show()
@@ -1203,7 +1267,7 @@ function TUMeterGUI:Init()
 	local spellScrollListPos = self.DetailsPanel.SpellScrollList:GetPlacementPlain()
 	spellScrollListPos.posX = spellOffsetX - 4
 	spellScrollListPos.posY = spellListOffset
-	spellScrollListPos.sizeY = 250
+	spellScrollListPos.sizeY = 310
 	spellScrollListPos.sizeX = self.DetailsPanel.SpellBarWidth + 26
 	spellScrollListPos.alignX = WIDGET_ALIGN_LOW
 	spellScrollListPos.alignY = WIDGET_ALIGN_LOW
@@ -1216,7 +1280,7 @@ function TUMeterGUI:Init()
 	
 	-- SpellDetailsHeader
 	local spellDetailsOffsetY = 55
-	local spellDetailsOffsetX = 867
+	local spellDetailsOffsetX = 807
 	local spellDetailBarHeight = 16
 
 	self.DetailsPanel.SpellDetailsHeaderPanel:SetPosition(spellDetailsOffsetX, spellDetailsOffsetY)
@@ -1274,10 +1338,6 @@ function TUMeterGUI:Init()
 		self.DetailsPanel.SpellCustomDefBuffList[buffIndex]:SetPosition(spellDetailsOffsetX, customBuffOffset + (buffIndex-1) * spellDetailBarHeight)
 		ScaleFontSpellDetailsPanelGUI(self.DetailsPanel.SpellCustomDefBuffList[buffIndex])
 	end
-
-	
-	self.DetailsPanel.AllTimeBtn:SetPosition(20, 350)
-	self.DetailsPanel.UpdateTimeLapseBtn:SetPosition(110, 350)
 	
 	self.DetailsPanel.ModeBtn:SetPosition(480, 28)
 	self.DetailsPanel.FightBtn:SetPosition(550, 28)

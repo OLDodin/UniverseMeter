@@ -261,6 +261,12 @@ function TWidget:SetVal(aTag, aValue)
 	end
 end
 
+function TWidget:SetBackgroundTexture(aTexture)
+	if self.Widget then
+		self.Widget:SetBackgroundTexture(aTexture)
+	end
+end
+
 function TWidget:SetTextAttributes(aTagTextValue, aFontName, aFontSize, anAlign, aShadow, anOutline, aColor)
 	if self.Widget then
 		local attributes = {}

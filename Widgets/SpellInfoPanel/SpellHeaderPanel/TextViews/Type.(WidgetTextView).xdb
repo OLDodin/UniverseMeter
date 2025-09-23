@@ -5,7 +5,7 @@
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Pos>20</Pos>
+			<Pos>35</Pos>
 			<HighPos>0</HighPos>
 			<Size>60</Size>
 		</X>

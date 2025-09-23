@@ -9,13 +9,13 @@
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Size>380</Size>
+			<Size>300</Size>
 			<Pos>15</Pos>
 		</X>
 		<Y>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Size>270</Size>
-			<Pos>55</Pos>
+			<Size>200</Size>
+			<Pos>185</Pos>
 		</Y>
 	</Placement>
 	<Visible>true</Visible>

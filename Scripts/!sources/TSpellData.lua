@@ -273,6 +273,7 @@ function TDamageSpellData:AddValuesFromSpellData(aSpellData, aLastHitTime)
 	self.Amount = self.Amount + aSpellData.Amount;
 	self.Hits = self.Hits + aSpellData.Hits;
 	self.WasDead = self.WasDead or aSpellData.WasDead
+	self.WasKill = self.WasKill or aSpellData.WasKill
 
 	CreateAndMergeDetails(self, self, aSpellData, enumMiss.Miss*m_enumMissMult)
 	CreateAndMergeDetails(self, self, aSpellData, enumMiss.Dodge*m_enumMissMult)

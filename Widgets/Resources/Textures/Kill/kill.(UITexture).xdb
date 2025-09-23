@@ -10,12 +10,12 @@
 	<realHeight>128</realHeight>
 	<disableLODControl>false</disableLODControl>
 	<alphaTex>true</alphaTex>
-	<binaryFileSize>2636</binaryFileSize>
-	<binaryFile href="dead.(UITexture).bin" />
+	<binaryFileSize>1646</binaryFileSize>
+	<binaryFile href="kill.(UITexture).bin" />
 	<binaryFileSize2>0</binaryFileSize2>
 	<binaryFile2 href="" />
-	<sourceFile href="dead.tga" />
-	<sourceFileCRC>1529507378</sourceFileCRC>
+	<sourceFile href="kill.tga" />
+	<sourceFileCRC>-1497324219</sourceFileCRC>
 	<wrap>false</wrap>
 	<atlasPart>true</atlasPart>
 	<isRealTimeLoading>false</isRealTimeLoading>

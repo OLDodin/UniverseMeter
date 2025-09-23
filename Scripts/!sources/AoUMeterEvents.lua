@@ -17,13 +17,15 @@ local m_detailPanelWasVisible = false
 -- Register UniverseMeter
 --------------------------------------------------------------------------------
 onMyEvent["AOPANEL_START"] = function(params)
-	local SetVal = { val = StrMainBtn } 
+	local SetVal = { val = StrMainBtn }
+	if Settings.ShowPositionOnBtn then
+		SetVal = { val = StrMainBtn..StrSpace..tostring(CurrentScoreOnMainBtn) }
+	end
 	local params = { header =  SetVal , ptype =  "button" , size =  Settings.ShowPositionOnBtn and 50 or 30 } 
 	userMods.SendEvent("AOPANEL_SEND_ADDON", { name = "UniverseMeter" , sysName = "UniverseMeter" , param = params } )
 	AoPanelDetected = true
 	m_isBtnInAOPanelNow = true
 	DPSMeterGUI.ShowHideBtn:Hide()
-	CurrentScoreOnMainBtn = 0
 end
 
 onMyEvent["EVENT_ADDON_LOAD_STATE_CHANGED"] = function(params)
@@ -149,10 +151,6 @@ onReaction["OnHistoryPressed"] = function(reaction)
 	end
 end
 
-onReaction["CloseHistoryPanelBtnReaction"] = function(reaction)
-	DPSMeterGUI.HistoryPanel:Hide()
-end
-
 onReaction["CloseSettingsPanelBtnReaction"] = function(reaction)
 	DPSMeterGUI.SettingsPanel:Hide()
 end
@@ -231,6 +229,7 @@ onReaction["historyElementClicked"] = function(reaction)
 		DPSMeterGUI:HistoryTotalSelected(tonumber(wdgNum))
 	end
 	DPSMeterGUI:UpdateValues()
+	DPSMeterGUI.HistoryPanel:Hide()
 end
 
 --------------------------------------------------------------------------------
@@ -368,7 +367,10 @@ onMyEvent["EVENT_SECOND_TIMER"] = function(aParams)
 	DPSMeterGUI.DPSMeter:SecondTick()
 	DPSMeterGUI.DPSMeter:UpdateCombatantPos()
 
-	DPSMeterGUI:UpdateScoreOnMainBtn()
+	if DPSMeterGUI.DPSMeter.bHistoryChanged then
+		DPSMeterGUI:UpdateHistory(true)
+		DPSMeterGUI.DPSMeter.bHistoryChanged = false
+	end
 	
 	if DPSMeterGUI.DPSMeter.bCollectData then
 		if DPSMeterGUI.DPSMeter:ShouldCollectData() then

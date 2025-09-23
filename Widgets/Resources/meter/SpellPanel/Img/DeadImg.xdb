@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <WidgetPanel>
-	<Priority>160</Priority>
+	<Priority>151</Priority>
 	<Name>DeadImg</Name>
-	<BackLayer href="dead.(WidgetLayerSimpleTexture).xdb" />
+	<BackLayer href="Textures/iconTexture.xdb" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_LOW</Align>

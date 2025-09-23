@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetPanel>
+	<Priority>151</Priority>
+	<Name>SpellImg</Name>
+	<BackLayer href="Textures/iconTexture.xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Size>15</Size>
+			<Pos>19</Pos>
+			<HighPos>0</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Size>15</Size>
+			<Pos>2</Pos>
+			<HighPos>0</HighPos>
+		</Y>
+	</Placement>
+
+	<Visible>true</Visible>
+	<TransparentInput>true</TransparentInput>
+</WidgetPanel>

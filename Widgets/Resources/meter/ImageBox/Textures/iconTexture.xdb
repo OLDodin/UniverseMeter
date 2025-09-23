@@ -5,7 +5,5 @@
 	<BlendEffect>BLEND_EFFECT_ALPHABLND</BlendEffect>
 	<flatPlacement>false</flatPlacement>
 	<lazyLoad>false</lazyLoad>
-	<textureItem href="dead.(UITextureElement).xdb#xpointer(/UITextureElement)" />
-	<textureMask href="" />
 	<Scaling>true</Scaling>
 </WidgetLayerSimpleTexture>

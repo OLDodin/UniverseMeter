@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<UITextureElement>
+<UISingleTexture>
 	<singleTexture href="dead.(UITexture).xdb#xpointer(/UITexture)" />
 	<permanentCache>0</permanentCache>
 	<sourceFile href="dead.tga" />
-	<sourceFileCRC>1529507378</sourceFileCRC>
-</UITextureElement>
+	<sourceFileCRC>-1080530188</sourceFileCRC>
+</UISingleTexture>

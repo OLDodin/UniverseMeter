@@ -251,6 +251,7 @@ function TCombatant:AddNewSpell(aSpellInfo, aMode)
 		end
 		if aSpellInfo.lethal and aMode == enumMode.Dps then
 			self:SetWasKill(true)
+			SpellData.WasKill = true
 		elseif aSpellInfo.lethal and aMode == enumMode.Def then
 			self:SetWasDead(true)
 			SpellData.WasDead = true
@@ -284,6 +285,7 @@ end
 function TCombatant:UpdateSpellDataByInfo(aSpellInfo, aSpellData, aMode)
 	if aSpellInfo.lethal and aMode == enumMode.Dps then
 		self:SetWasKill(true)
+		aSpellData.WasKill = true
 	elseif aSpellInfo.lethal and aMode == enumMode.Def then
 		self:SetWasDead(true)
 		aSpellData.WasDead = true

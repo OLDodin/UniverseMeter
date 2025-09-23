@@ -134,6 +134,12 @@ local function Init()
 	TitleGlobalInfoType[enumGlobalInfo.Elemental] = GetTextLocalized("Elemental")
 	TitleGlobalInfoType[enumGlobalInfo.Holy] = GetTextLocalized("Holy")
 	TitleGlobalInfoType[enumGlobalInfo.Natural] = GetTextLocalized("Natural")
+	
+	local textureGroup = common.GetAddonRelatedTextureGroup("common")
+	UnknownTex = textureGroup:GetTexture("Unknown")
+	DeadTex = textureGroup:GetTexture("Dead")
+	KillTex = textureGroup:GetTexture("Kill")
+	DeadKillTex = textureGroup:GetTexture("DeadKill")
 
 	local savedData = userMods.GetGlobalConfigSection("UniverseMeterSettings")
 	if savedData then

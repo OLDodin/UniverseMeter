@@ -10,7 +10,8 @@
 		<Item href="TextViews/CPS.(WidgetTextView).xdb" />
 		<Item href="TextViews/DamageBlock.(WidgetTextView).xdb" />
 		<Item href="TextViews/DamagePercentage.(WidgetTextView).xdb" />
-		<Item href="Img/DeadImg.(WidgetPanel).xdb" />
+		<Item href="Img/DeadImg.xdb" />
+		<Item href="Img/SpellImg.xdb" />
 	</Children>
 	<BackLayer href="" />
 	<Placement>

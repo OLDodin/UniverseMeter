@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<UIRelatedTextures>
+	<Items>
+		<Item>
+			<name>Unknown</name>
+			<textureItem href="Unknown/Unknown.(UISingleTexture).xdb" />
+		</Item>
+		<Item>
+			<name>Dead</name>
+			<textureItem href="Dead/Dead.(UISingleTexture).xdb" />
+		</Item>
+		<Item>
+			<name>Kill</name>
+			<textureItem href="Kill/Kill.(UISingleTexture).xdb" />
+		</Item>
+		<Item>
+			<name>DeadKill</name>
+			<textureItem href="DeadKill/DeadKill.(UISingleTexture).xdb" />
+		</Item>
+	</Items>
+</UIRelatedTextures>

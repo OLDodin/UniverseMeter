@@ -5,13 +5,13 @@
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Pos>18</Pos>
-			<Size>750</Size>
+			<Pos>250</Pos>
+			<Size>530</Size>
 		</X>
 		<Y>
 			<Align>WIDGET_ALIGN_HIGH</Align>
 			<HighPos>20</HighPos>
-			<Size>64</Size>
+			<Size>74</Size>
 		</Y>
 	</Placement>
 	<TransparentInput>true</TransparentInput>

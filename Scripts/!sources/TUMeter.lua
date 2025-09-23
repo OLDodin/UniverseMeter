@@ -30,6 +30,7 @@ function TUMeter:CreateNewObject()
 			CheckMemoryCnt = 0,
 			ClearCacheCnt = 0,
 			bHistoryIncresed = false,
+			bHistoryChanged = false,
 			
 			BuffInfoCache = {},
 			SpellDescCache = {},
@@ -192,12 +193,47 @@ local function GetInfoFromCache(anID, aCache, aGetInfoFunc)
 		storeInfo.meterInfoID = anID
 		storeInfo.name = info.name
 		storeInfo.description = info.description
-		--storeInfo.texture = info.texture
-		--spellLib.GetIcon( anID )
-		--image
+		storeInfo.texture = info.texture or info.image
+		
 		table.insert(aCache, storeInfo)
 	end
 	return storeInfo
+end
+
+function TUMeter:GetTextureFromID(anID)
+	local someInfo = self:GetInfoFromID(anID)
+	if not someInfo then
+		return nil
+	end
+	if not someInfo.texture and not someInfo.textureSearched then
+		local typeOfID = apitype(anID)
+		--BuffId AbilityId MapModifierId уже запрашивались в GetInfoFromCache
+		if typeOfID == "SpellId" then
+			someInfo.texture = spellLib.GetIcon( anID )
+			someInfo.textureSearched = true
+		else
+			someInfo.textureSearched = true
+		end
+	end
+	return someInfo.texture
+end
+
+function TUMeter:GetDescriptionFromID(anID)
+	local someInfo = self:GetInfoFromID(anID)
+	if not someInfo then
+		return StrUnknown
+	end
+	if someInfo.description then
+		if not someInfo.cachedDesc then
+			if apitype( someInfo.description ) == "ValuedText" then
+				someInfo.cachedDesc = someInfo.description:ToWString()
+			else
+				someInfo.cachedDesc = someInfo.description
+			end
+		end
+		return someInfo.cachedDesc
+	end
+	return StrUnknown
 end
 
 function TUMeter:GetInfoFromID(anID)
@@ -279,7 +315,11 @@ function TUMeter:GetSpellInfoFromParams(aParams, anIsPet, aMode)
 	
 	spellInfo.Determination = self:GetUnitRage(aParams.source or aParams.healerId)
 	
-	spellInfo.sysSubElement = aParams.sysSubElement
+	if aMode == enumMode.Hps or aMode == enumMode.IHps then
+		spellInfo.sysSubElement = "ENUM_SubElement_HOLY"
+	else
+		spellInfo.sysSubElement = aParams.sysSubElement
+	end
 	
 	--dd event
 	spellInfo.amount = aParams.amount or aParams.heal
@@ -540,6 +580,7 @@ function TUMeter:PushFightFromTotalToHistory()
 	ResizeListByMaxSize(self.HistoryTotalFights, Settings.HistoryTotalLimit, false)
 	self.Fight.Total = nil
 	self.bHistoryIncresed = true
+	self.bHistoryChanged = true
 end
 
 function TUMeter:PushFightFromCurrentToHistory()
@@ -547,6 +588,7 @@ function TUMeter:PushFightFromCurrentToHistory()
 	ResizeListByMaxSize(self.HistoryCurrentFights, Settings.HistoryCurrentLimit, false)
 	self.Fight.Current = nil
 	self.bHistoryIncresed = true
+	self.bHistoryChanged = true
 end
 
 function TUMeter:PushFightToHistory(aFight, aHistory)

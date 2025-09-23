@@ -44,7 +44,7 @@ Global("Settings", {
 		CollectTotalTimelapse = false,		-- memory consumption optimization
 		ShowPositionOnBtn = false,			-- show active mode position on btn
 		ScaleFonts = false,
-		MemoryUsageLimit = common.GetClientArch() == CLIENT_ARCH_WIN64 and 300*1024 or 50*1024,	
+		MemoryUsageLimit = common.GetClientArch() == CLIENT_ARCH_WIN64 and 512*1024 or 50*1024,	
 		HistoryTotalLimit = 3,
 		HistoryCurrentLimit = 10,
 		WaitBuffAfterDeathTime = 500,		-- time in ms
@@ -94,6 +94,11 @@ Global( "TitleHealResistType", {})
 Global( "TitleGlobalInfoType", {})
 Global( "TitleCustomDpsBuffType", {})
 Global( "TitleCustomDefBuffType", {})
+
+Global("UnknownTex", {})
+Global("DeadTex", {})
+Global("KillTex", {})
+Global("DeadKillTex", {})
 --------------------------------------------------------------------------------
 -- Events
 --------------------------------------------------------------------------------
@@ -183,4 +188,4 @@ Global("DPSMeterGUI", {})
 Global( "CurrentBuffsState", {})
 Global( "CurrentBuffsStateByTime", {})
 
-Global( "CurrentScoreOnMainBtn", 0)
+Global( "CurrentScoreOnMainBtn", 1)

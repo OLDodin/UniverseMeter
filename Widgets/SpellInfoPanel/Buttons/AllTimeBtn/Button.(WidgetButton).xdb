@@ -7,12 +7,12 @@
   <Placement>
     <X>
       <Align>WIDGET_ALIGN_LOW</Align>
-      <Pos>320</Pos>
+      <Pos>60</Pos>
       <Size>80</Size>
     </X>
     <Y>
       <Align>WIDGET_ALIGN_LOW</Align>
-      <Pos>80</Pos>
+      <Pos>420</Pos>
       <Size>25</Size>
     </Y>
   </Placement>

@@ -37,6 +37,10 @@
 			<name>SpellPanel</name>
 			<widget href="SpellPanel/SpellPanel.(WidgetPanel).xdb" />
 		</Item>
+		<Item>
+			<name>ImageBox</name>
+			<widget href="ImageBox/ImageBox.xdb" />
+		</Item>
 	</items>
 </UIRelatedWidgets>
 
