@@ -607,7 +607,7 @@ function TUMeterGUI:CreateTimeLapse()
 	local imgPanelDesc = GetDescFromResource("ImageBox")
 	
 	local startPosShift = 10
-	local lastDpsBtn = nil
+	local lastScrollWdg = nil
 	local maxBtnHeight = 200 - 34
 	local minBtnHeight = 6
 	local infoImgWidth = btnWidth*2
@@ -616,60 +616,73 @@ function TUMeterGUI:CreateTimeLapse()
 	for i = 1, fightTime do 
 		local amount = 0
 		local timeLapseCombatant = timeLapse[i].selectedCombatant
-		local wtName = "DpsBtn" .. i
+		local btnHeight = 0
 		
 		if timeLapseCombatant then
 			amount = timeLapseCombatant:GetAmount(self.ActiveDetailMode)
+			local btnPosX = startPosShift + btnWidth*(i-1)
+			local infoTexture = nil
+			
+			local wasDead = timeLapseCombatant:GetWasDead()
+			local wasKill = timeLapseCombatant:GetWasKill()
 			
 			if amount > 0 then
-				local dpsBtn = TWidget:CreateNewObjectByDesc(wtName, self.DetailsPanel.DpsTemplateBtnDesc, self.DetailsPanel.BigPanel)	
-				local btnPosX = startPosShift + btnWidth*(i-1)
+				local dpsBtn = TWidget:CreateNewObjectByDesc("DpsBtn" .. i, self.DetailsPanel.DpsTemplateBtnDesc, self.DetailsPanel.BigPanel)	
 				dpsBtn:SetPosition(btnPosX)
 
-				local wasDead = timeLapseCombatant:GetWasDead()
-				local wasKill = timeLapseCombatant:GetWasKill()
-				local infoTexture = nil
 				if wasDead and wasKill then	
 					dpsBtn.Widget:SetVariant(3)
-					infoTexture = DeadKillTex
 				elseif wasKill then
 					dpsBtn.Widget:SetVariant(2)
-					infoTexture = KillTex
 				elseif wasDead then
 					dpsBtn.Widget:SetVariant(1)
-					infoTexture = DeadTex
-				end
-				if infoTexture then
-					local infoImg = TWidget:CreateNewObjectByDesc("deadImg"..i, imgPanelDesc, self.DetailsPanel.BigPanel)
-					infoImg:SetPosition(btnPosX - (infoImgWidth - btnWidth)/2, maxBtnHeight-18)
-					infoImg:SetBackgroundTexture(infoTexture)
-					infoImg:SetWidth(infoImgWidth)
-					infoImg:SetHeight(infoImgHeight)
-				end
-				if self.ActiveDetailMode == enumMode.Def then
-					local barrierAmount = timeLapseCombatant:GetBarrierAmount(enumMode.Def)
-					if barrierAmount > 0 then
-						local wtBarrierName = "BarrierBtn" .. i
-						local barrierBtn = TWidget:CreateNewObjectByDesc(wtBarrierName, self.DetailsPanel.BarrierTemplateBtn, self.DetailsPanel.BigPanel)	
-						barrierBtn:SetPosition(btnPosX)
-						barrierBtn:SetHeight(math.max(math.min(barrierAmount/maxAmount, 1.0)*maxBtnHeight, minBtnHeight+6))
-						barrierBtn:SetWidth(btnWidth)
-					end
 				end
 		
-				local btnHeight = (amount / maxAmount)*maxBtnHeight + minBtnHeight
+				btnHeight = (amount / maxAmount)*maxBtnHeight + minBtnHeight
 				
 				dpsBtn:SetWidth(btnWidth)
 				dpsBtn:SetHeight(btnHeight)
-				
-				lastDpsBtn = dpsBtn
+
+				lastScrollWdg = dpsBtn
 			end
+			
+			if wasDead and wasKill then	
+				infoTexture = DeadKillTex
+			elseif wasKill then
+				if self.ActiveDetailMode == enumMode.Dps then
+					infoTexture = KillTex
+				end
+			elseif wasDead then
+				infoTexture = DeadTex
+			end
+			if infoTexture then
+				local infoImg = TWidget:CreateNewObjectByDesc("deadImg"..i, imgPanelDesc, self.DetailsPanel.BigPanel)
+				infoImg:SetPosition(btnPosX - (infoImgWidth - btnWidth)/2, math.max((maxBtnHeight - btnHeight)-18, 0))
+				infoImg:SetBackgroundTexture(infoTexture)
+				infoImg:SetWidth(infoImgWidth)
+				infoImg:SetHeight(infoImgHeight)
+				
+				lastScrollWdg = infoImg
+			end
+				
+			if self.ActiveDetailMode == enumMode.Def then
+				local barrierAmount = timeLapseCombatant:GetBarrierAmount(enumMode.Def)
+				if barrierAmount > 0 then
+					local barrierBtn = TWidget:CreateNewObjectByDesc("BarrierBtn"..i, self.DetailsPanel.BarrierTemplateBtn, self.DetailsPanel.BigPanel)	
+					barrierBtn:SetPosition(btnPosX)
+					barrierBtn:SetHeight(math.max(math.min(barrierAmount/maxAmount, 1.0)*maxBtnHeight, minBtnHeight+6))
+					barrierBtn:SetWidth(btnWidth)
+					
+					lastScrollWdg = infoImg
+				end
+			end
+			
 		end
 		
 		if math.fmod(i, 10) == 0 or i == 1 then
-			local dpsLineIndicator = TWidget:CreateNewObjectByDesc(wtName, self.DetailsPanel.DpsTemplateLineDesc, self.DetailsPanel.BigPanel)
+			local dpsLineIndicator = TWidget:CreateNewObjectByDesc("ind"..i, self.DetailsPanel.DpsTemplateLineDesc, self.DetailsPanel.BigPanel)
 			dpsLineIndicator:SetPosition(startPosShift + btnWidth*(i-1)+btnWidth/2)
-			local dpsBtnTxt = TWidget:CreateNewObjectByDesc(wtName, self.DetailsPanel.DpsTemplateTxtDesc, self.DetailsPanel.BigPanel)
+			local dpsBtnTxt = TWidget:CreateNewObjectByDesc("indTime"..i, self.DetailsPanel.DpsTemplateTxtDesc, self.DetailsPanel.BigPanel)
 			dpsBtnTxt:SetPosition(startPosShift + btnWidth*(i-1) - 12)
 			dpsBtnTxt.Widget:SetVal("Time", cachedToWString(GetTimeString(i*1)))
 			if Settings.ScaleFonts then
@@ -678,8 +691,8 @@ function TUMeterGUI:CreateTimeLapse()
 		end
 	end
 	timelapseScroll:PushBack(self.DetailsPanel.BigPanel.Widget)
-	if lastDpsBtn then
-		timelapseScroll:EnsureVisible(lastDpsBtn.Widget)
+	if lastScrollWdg then
+		timelapseScroll:EnsureVisible(lastScrollWdg.Widget)
 	end
 end
 
