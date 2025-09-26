@@ -47,7 +47,7 @@ Global("Settings", {
 		MemoryUsageLimit = common.GetClientArch() == CLIENT_ARCH_WIN64 and 512*1024 or 50*1024,	
 		HistoryTotalLimit = common.GetClientArch() == CLIENT_ARCH_WIN64 and 10 or 3,
 		HistoryCurrentLimit = common.GetClientArch() == CLIENT_ARCH_WIN64 and 30 or 10,
-		WaitBuffAfterDeathTime = 500,		-- time in ms
+		WaitBuffAfterDeathTime = 600,		-- time in ms
 	})
 --------------------------------------------------------------------------------
 -- Localization

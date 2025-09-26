@@ -130,6 +130,7 @@ end
 -- occurred when the player press the reset button
 --------------------------------------------------------------------------------
 onReaction["ResetBtnReaction"] = function(reaction)
+	DPSMeterGUI.HistoryPanel:Hide()
 	DPSMeterGUI:Reset(true)
 	m_mustUpdateGUI = true
 end
@@ -189,6 +190,7 @@ end
 -- occurred when the player press the close button in the main panel
 --------------------------------------------------------------------------------
 onReaction["CloseMainPanelBtnReaction"] = function(reaction)
+	DPSMeterGUI.HistoryPanel:Hide()
 	DPSMeterGUI.MainPanel:Hide()
 	DPSMeterGUI.DetailsPanel:Hide()
 	DPSMeterGUI:DetailsClosed()
@@ -243,6 +245,7 @@ end
 -- occurred when the player click on the fight dropdown button in the main panel
 --------------------------------------------------------------------------------
 onReaction["GetFightBtnReaction"] = function(reaction)
+	DPSMeterGUI.HistoryPanel:Hide()
 	local wtParent = reaction.widget:GetParent()
 	if wtParent:IsEqual(DPSMeterGUI.MainPanel.FightBtn.Widget) then
 		DPSMeterGUI:SwapFight()
@@ -254,6 +257,7 @@ end
 -- occurred when the player click on the mode dropdown button in the main panel
 --------------------------------------------------------------------------------
 onReaction["GetModeBtnReaction"] = function(reaction)
+	DPSMeterGUI.HistoryPanel:Hide()
 	local wtParent = reaction.widget:GetParent()
 	if wtParent:IsEqual(DPSMeterGUI.MainPanel.ModeBtn.Widget) then
 		DPSMeterGUI:SwapMode()
@@ -267,6 +271,7 @@ end
 onReaction["ShowHideBtnReaction"] = function(reaction)
 	if DnD:IsDragging() then return end
 	if DPSMeterGUI.MainPanel:IsVisible() then
+		DPSMeterGUI.HistoryPanel:Hide()
 		DPSMeterGUI.MainPanel:Hide()
 		DPSMeterGUI.DetailsPanel:Hide()
 		DPSMeterGUI:DetailsClosed()
