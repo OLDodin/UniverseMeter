@@ -173,7 +173,7 @@ function UpdateBuffsStateByTime()
 	local currTime = common.GetLocalDateTimeMs()
 	for i, value in ipairs(CurrentBuffsStateByTime) do
 		for playerID, buffState in pairs(value) do
-			if currTime - buffState.buffFinishedTime_h  > Settings.WaitBuffAfterDeathTime then
+			if buffState.removeTime > 0 and currTime - buffState.removeTime  > Settings.WaitBuffAfterDeathTime then
 				CurrentBuffsStateByTime[i][playerID] = nil
 			end
 		end

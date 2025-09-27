@@ -47,12 +47,12 @@ function PlayerBuffs:UpdateValueIfNeeded()
 
 end
 
-function PlayerBuffs:CallAddListenerIfNeeded(aBuffID, aBuffName, aListener, aCondition, aBuffInfo)
+function PlayerBuffs:CallAddListenerIfNeeded(aBuffID, aBuffName, aListener, aCondition)
 	if aListener and aBuffName and not self.ignoreBuffsID[aBuffID] then
 		local searchResult, findedObj = aCondition:Check( { name = aBuffName } )
 		if searchResult then
 			self.passedBuffsID[aBuffID] = findedObj
-			aListener.listenerAddBuff(aBuffInfo and aBuffInfo or cachedGetBuffDynamicInfo(aBuffID), self.playerID, findedObj)
+			aListener.listenerAddBuff(self.playerID, findedObj)
 		else
 			self.ignoreBuffsID[aBuffID] = true
 		end
@@ -64,7 +64,7 @@ function PlayerBuffs:GetReadAllEventFunc()
 		local unitBuffs = cachedGetBuffs(aParams.unitId, true)
 		if next(unitBuffs) then
 			for buffID, buffInfo in pairs(cachedGetBuffsInfo(unitBuffs) or {}) do
-				self:CallAddListenerIfNeeded(buffID, buffInfo.name, self.base.guiListener, GetBuffCondition(), buffInfo)
+				self:CallAddListenerIfNeeded(buffID, buffInfo.name, self.base.guiListener, GetBuffCondition())
 			end
 		end
 	end
@@ -83,7 +83,7 @@ function PlayerBuffs:GetDelEventFunc()
 	return function(aParams)
 		local passedInfo = self.passedBuffsID[aParams.buffId]
 		if self.base.guiListener and passedInfo then
-			self.base.guiListener.listenerRemoveBuff(aParams.buffId, self.playerID, passedInfo)
+			self.base.guiListener.listenerRemoveBuff(self.playerID, passedInfo)
 		end
 		self.passedBuffsID[aParams.buffId] = nil
 		self.ignoreBuffsID[aParams.buffId] = nil

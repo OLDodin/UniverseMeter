@@ -309,10 +309,6 @@ onMyEvent["EVENT_OBJECT_BUFF_REMOVED"] = function(aParams)
 	BuffRemoved(aParams)
 end
 
-onMyEvent["EVENT_OBJECT_BUFFS_ELEMENT_CHANGED"] = function(aParams)
-	BuffsChanged(aParams)
-end
-
 onMyEvent["EVENT_UNIT_RAGE_CHANGED"] = function(aParams)
 	RageChanged(aParams)
 end
@@ -434,33 +430,23 @@ onMyEvent["EVENT_UNIT_FOLLOWERS_LIST_CHANGED"] = function(aParams)
 	end
 end
 
-function PlayerAddBuff(aBuffDynamicInfo, aPlayerID, aFindedObj)
+function PlayerAddBuff(aPlayerID, aFindedObj)
 	CurrentBuffsState[aFindedObj.ind][aPlayerID] = aFindedObj
 	CurrentBuffsStateByTime[aFindedObj.ind][aPlayerID] = {
 		info = aFindedObj, 
-		buffFinishedTime_h = aBuffDynamicInfo.remainingMs + common.GetLocalDateTimeMs(), 
+		removeTime = 0,
 		removeAfterDeath = false
 		}
 end
 
-function PlayerRemoveBuff(aBuffID, aPlayerID, aFindedObj)
+function PlayerRemoveBuff(aPlayerID, aFindedObj)
 	CurrentBuffsState[aFindedObj.ind][aPlayerID] = nil
 	
-	if not object.IsExist(aPlayerID) or object.IsDead(aPlayerID) then
-		local buffState = CurrentBuffsStateByTime[aFindedObj.ind][aPlayerID]
-		if buffState then
-			buffState.removeAfterDeath = true
-			buffState.removeTime = common.GetLocalDateTimeMs()
-		end
+	local buffState = CurrentBuffsStateByTime[aFindedObj.ind][aPlayerID]
+	if buffState then
+		buffState.removeTime = common.GetLocalDateTimeMs()
+		buffState.removeAfterDeath =  not object.IsExist(aPlayerID) or object.IsDead(aPlayerID)
 	end
-end
-
-function PlayerChangeBuff(aPlayerID, aBuffDynamicInfo, aFindedObj)
-	CurrentBuffsStateByTime[aFindedObj.ind][aPlayerID] = {
-		info = aFindedObj, 
-		buffFinishedTime_h = aBuffDynamicInfo.remainingMs + common.GetLocalDateTimeMs(), 
-		removeAfterDeath = false
-		}
 end
 
 function PlayerRageChanged(aPlayerID, aRage)
@@ -632,7 +618,6 @@ function GlobalInit()
 	
 	m_buffListener.listenerAddBuff = PlayerAddBuff
 	m_buffListener.listenerRemoveBuff = PlayerRemoveBuff
-	m_buffListener.listenerChangeBuff = PlayerChangeBuff
 	m_buffListener.listenerRage = PlayerRageChanged
 	
 	local unitList = avatar.GetUnitList()
