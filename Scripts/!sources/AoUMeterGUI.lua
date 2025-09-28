@@ -673,7 +673,7 @@ function TUMeterGUI:CreateTimeLapse()
 					barrierBtn:SetHeight(math.max(math.min(barrierAmount/maxAmount, 1.0)*maxBtnHeight, minBtnHeight+6))
 					barrierBtn:SetWidth(btnWidth)
 					
-					lastScrollWdg = infoImg
+					lastScrollWdg = barrierBtn
 				end
 			end
 			

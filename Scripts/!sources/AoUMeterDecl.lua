@@ -44,9 +44,9 @@ Global("Settings", {
 		CollectTotalTimelapse = false,		-- memory consumption optimization
 		ShowPositionOnBtn = false,			-- show active mode position on btn
 		ScaleFonts = false,
-		MemoryUsageLimit = common.GetClientArch() == CLIENT_ARCH_WIN64 and 512*1024 or 50*1024,	
-		HistoryTotalLimit = common.GetClientArch() == CLIENT_ARCH_WIN64 and 10 or 3,
-		HistoryCurrentLimit = common.GetClientArch() == CLIENT_ARCH_WIN64 and 30 or 10,
+		MemoryUsageLimit = common.GetClientArch() == CLIENT_ARCH_WIN64 and 350*1024 or 50*1024,	
+		HistoryTotalLimit = common.GetClientArch() == CLIENT_ARCH_WIN64 and 10 or 7,
+		HistoryCurrentLimit = common.GetClientArch() == CLIENT_ARCH_WIN64 and 20 or 10,
 		WaitBuffAfterDeathTime = 600,		-- time in ms
 	})
 --------------------------------------------------------------------------------
