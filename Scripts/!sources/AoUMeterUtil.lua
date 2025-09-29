@@ -157,6 +157,14 @@ function GetPartyMembers()
 		end
 	elseif group.IsExist() then
 		partyMembersInfoList = group.GetMembers()
+		for _, member in ipairs(partyMembersInfoList) do
+			if member.id and member.state == GROUP_MEMBER_STATE_MERC then
+				local masterID = unit.GetFollowerMaster(member.id)
+				if masterID and object.IsExist(masterID) then
+					member.name = member.name..StrDash..object.GetName(masterID)
+				end
+			end
+		end
 	end
 	if not partyMembersInfoList then
 		partyMembersInfoList = {}
