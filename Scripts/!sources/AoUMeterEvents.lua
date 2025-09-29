@@ -166,6 +166,11 @@ onReaction["SavePressed"] = function(reaction)
 	savedData.dps = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.DpsCheckBox)
 	savedData.hps = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.HpsCheckBox)
 	savedData.ihps = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.IhpsCheckBox)
+	
+	if not savedData.dps and not savedData.def and not savedData.hps and not savedData.ihps then
+		savedData.dps = true
+	end
+	
 	savedData.skipDmgAndHpsOnPet = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.SkipPetCheckBox)
 	savedData.skipDmgYourselfIn = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.SkipYourselfCheckBox)
 	savedData.startHided = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.StartHidedCheckBox)
@@ -402,25 +407,20 @@ end
 -- Event: EVENT_UNIT_DAMAGE_RECEIVED
 --------------------------------------------------------------------------------
 function DpsEventReceived(aParams)
-	if not Settings.ModeDPS then return end
 	DPSMeterGUI.DPSMeter:CollectDamageDealedData(aParams)
 end
 
 function DefEventReceived(aParams)
-	if not Settings.ModeDEF then return end
-
 	DPSMeterGUI.DPSMeter:CollectDamageReceivedData(aParams)
 end
 --------------------------------------------------------------------------------
 -- Event: EVENT_HEALING_RECEIVED
 --------------------------------------------------------------------------------
 function HpsEventReceived(aParams)
-	if not Settings.ModeHPS then return end
 	DPSMeterGUI.DPSMeter:CollectHealData(aParams)
 end 
 
 function IHpsEventReceived(aParams)
-	if not Settings.ModeIHPS then return end
 	DPSMeterGUI.DPSMeter:CollectHealDataIN(aParams)
 end 
 
@@ -431,8 +431,7 @@ onMyEvent["EVENT_UNIT_FOLLOWERS_LIST_CHANGED"] = function(aParams)
 end
 
 function PlayerAddBuff(aPlayerID, aFindedObj)
-	CurrentBuffsState[aFindedObj.ind][aPlayerID] = aFindedObj
-	CurrentBuffsStateByTime[aFindedObj.ind][aPlayerID] = {
+	CurrentBuffsState[aFindedObj.ind][aPlayerID] = {
 		info = aFindedObj, 
 		removeTime = 0,
 		removeAfterDeath = false
@@ -440,12 +439,10 @@ function PlayerAddBuff(aPlayerID, aFindedObj)
 end
 
 function PlayerRemoveBuff(aPlayerID, aFindedObj)
-	CurrentBuffsState[aFindedObj.ind][aPlayerID] = nil
-	
-	local buffState = CurrentBuffsStateByTime[aFindedObj.ind][aPlayerID]
+	local buffState = CurrentBuffsState[aFindedObj.ind][aPlayerID]
 	if buffState then
 		buffState.removeTime = common.GetLocalDateTimeMs()
-		buffState.removeAfterDeath =  not object.IsExist(aPlayerID) or object.IsDead(aPlayerID)
+		buffState.removeAfterDeath = not object.IsExist(aPlayerID) or object.IsDead(aPlayerID)
 	end
 end
 
@@ -460,52 +457,65 @@ function ReloadPet(aParams)
 	local unitList = GetPartyMembers()
 	
 	local unitListWithPets = GetListWithPets(unitList)
-	local paramsListForDps = BuildEventParamsForDps(unitListWithPets)
-	local paramsListForHps = BuildEventParamsForHps(unitListWithPets)
-
-	local deleteParams, newParams = CompareArrays(m_paramsListForDps, paramsListForDps)
-	UnRegisterEventHandlerWithParams("EVENT_UNIT_DAMAGE_RECEIVED", DpsEventReceived, deleteParams)
-	RegisterEventHandlerWithParams("EVENT_UNIT_DAMAGE_RECEIVED", DpsEventReceived, newParams)
+	local deleteParams = nil
+	local newParams = nil
 	
-	deleteParams, newParams = CompareArrays(m_paramsListForHps, paramsListForHps)
-	UnRegisterEventHandlerWithParams("EVENT_HEALING_RECEIVED", HpsEventReceived, deleteParams)
-	RegisterEventHandlerWithParams("EVENT_HEALING_RECEIVED", HpsEventReceived, newParams)
+	if Settings.ModeDPS then 
+		local paramsListForDps = BuildEventParamsForDps(unitListWithPets)
+		deleteParams, newParams = CompareArrays(m_paramsListForDps, paramsListForDps)
+		UnRegisterEventHandlerWithParams("EVENT_UNIT_DAMAGE_RECEIVED", DpsEventReceived, deleteParams)
+		RegisterEventHandlerWithParams("EVENT_UNIT_DAMAGE_RECEIVED", DpsEventReceived, newParams)
+		
+		m_paramsListForDps = paramsListForDps
+	end
+	
+	if Settings.ModeHPS then
+		local paramsListForHps = BuildEventParamsForHps(unitListWithPets)
+		deleteParams, newParams = CompareArrays(m_paramsListForHps, paramsListForHps)
+		UnRegisterEventHandlerWithParams("EVENT_HEALING_RECEIVED", HpsEventReceived, deleteParams)
+		RegisterEventHandlerWithParams("EVENT_HEALING_RECEIVED", HpsEventReceived, newParams)
 
-	m_paramsListForDps = paramsListForDps
-	m_paramsListForHps = paramsListForHps
+		m_paramsListForHps = paramsListForHps
+	end
 end
 
 function ReRegisterEvents()
 	local unitList = GetPartyMembers()
+	local deleteParams = nil
+	local newParams = nil
 	
 	m_paramsListForPets = BuildEventParamsForPetChanged(unitList)
 	
-	local paramsListForDef = BuildEventParamsForDef(unitList)
-	local paramsListForIHps = BuildEventParamsForIHps(unitList)
 	local unitListWithPets = GetListWithPets(unitList)
-	local paramsListForDps = BuildEventParamsForDps(unitListWithPets)
-	local paramsListForHps = BuildEventParamsForHps(unitListWithPets)
-
-	local deleteParams, newParams = CompareArrays(m_paramsListForDef, paramsListForDef)
-	UnRegisterEventHandlerWithParams("EVENT_UNIT_DAMAGE_RECEIVED", DefEventReceived, deleteParams)
-	RegisterEventHandlerWithParams("EVENT_UNIT_DAMAGE_RECEIVED", DefEventReceived, newParams)
-
-	deleteParams, newParams = CompareArrays(m_paramsListForIHps, paramsListForIHps)
-	UnRegisterEventHandlerWithParams("EVENT_HEALING_RECEIVED", IHpsEventReceived, deleteParams)
-	RegisterEventHandlerWithParams("EVENT_HEALING_RECEIVED", IHpsEventReceived, newParams)
-
-	deleteParams, newParams = CompareArrays(m_paramsListForDps, paramsListForDps)
-	UnRegisterEventHandlerWithParams("EVENT_UNIT_DAMAGE_RECEIVED", DpsEventReceived, deleteParams)
-	RegisterEventHandlerWithParams("EVENT_UNIT_DAMAGE_RECEIVED", DpsEventReceived, newParams)
-	
-	deleteParams, newParams = CompareArrays(m_paramsListForHps, paramsListForHps)
-	UnRegisterEventHandlerWithParams("EVENT_HEALING_RECEIVED", HpsEventReceived, deleteParams)
-	RegisterEventHandlerWithParams("EVENT_HEALING_RECEIVED", HpsEventReceived, newParams)
-
-	m_paramsListForDef = paramsListForDef
-	m_paramsListForIHps = paramsListForIHps
-	m_paramsListForDps = paramsListForDps
-	m_paramsListForHps = paramsListForHps
+		
+	if Settings.ModeDEF then 
+		local paramsListForDef = BuildEventParamsForDef(unitList)
+		deleteParams, newParams = CompareArrays(m_paramsListForDef, paramsListForDef)
+		UnRegisterEventHandlerWithParams("EVENT_UNIT_DAMAGE_RECEIVED", DefEventReceived, deleteParams)
+		RegisterEventHandlerWithParams("EVENT_UNIT_DAMAGE_RECEIVED", DefEventReceived, newParams)
+		m_paramsListForDef = paramsListForDef
+	end
+	if Settings.ModeIHPS then 
+		local paramsListForIHps = BuildEventParamsForIHps(unitList)
+		deleteParams, newParams = CompareArrays(m_paramsListForIHps, paramsListForIHps)
+		UnRegisterEventHandlerWithParams("EVENT_HEALING_RECEIVED", IHpsEventReceived, deleteParams)
+		RegisterEventHandlerWithParams("EVENT_HEALING_RECEIVED", IHpsEventReceived, newParams)
+		m_paramsListForIHps = paramsListForIHps
+	end
+	if Settings.ModeDPS then 
+		local paramsListForDps = BuildEventParamsForDps(unitListWithPets)
+		deleteParams, newParams = CompareArrays(m_paramsListForDps, paramsListForDps)
+		UnRegisterEventHandlerWithParams("EVENT_UNIT_DAMAGE_RECEIVED", DpsEventReceived, deleteParams)
+		RegisterEventHandlerWithParams("EVENT_UNIT_DAMAGE_RECEIVED", DpsEventReceived, newParams)
+		m_paramsListForDps = paramsListForDps
+	end
+	if Settings.ModeHPS then 
+		local paramsListForHps = BuildEventParamsForHps(unitListWithPets)
+		deleteParams, newParams = CompareArrays(m_paramsListForHps, paramsListForHps)
+		UnRegisterEventHandlerWithParams("EVENT_HEALING_RECEIVED", HpsEventReceived, deleteParams)
+		RegisterEventHandlerWithParams("EVENT_HEALING_RECEIVED", HpsEventReceived, newParams)
+		m_paramsListForHps = paramsListForHps
+	end
 end
 
 local function GetFilterID(aFilter)

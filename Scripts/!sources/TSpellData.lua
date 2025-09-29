@@ -159,10 +159,14 @@ end
 
 -- при смерти игрока событие об уроне получим уже после спадания баффов из-за смерти
 -- то при летальном уроне учитываем баффы, спавшие после смерти плюс 0.5с на запаздывания событий об уроне
-function AdditionalBuffCheckLethal(aParams, anObjID, anIndex, aCurrTime)
-	local buffState = CurrentBuffsStateByTime[anIndex][anObjID]
-	if buffState and buffState.removeAfterDeath then
-		if aCurrTime - buffState.removeTime <= Settings.WaitBuffAfterDeathTime  then
+local function AdditionalBuffCheckLethal(aParams, anObjID, aStatesArr, aCurrTime)
+	local buffState = aStatesArr[anObjID]
+	if buffState then
+		if buffState.removeAfterDeath then
+			if aCurrTime - buffState.removeTime <= Settings.WaitBuffAfterDeathTime  then
+				return buffState.info
+			end
+		elseif buffState.removeTime == 0 then
 			return buffState.info
 		end
 	end
@@ -171,10 +175,10 @@ end
 
 function UpdateBuffsStateByTime()
 	local currTime = common.GetLocalDateTimeMs()
-	for i, value in ipairs(CurrentBuffsStateByTime) do
+	for i, value in ipairs(CurrentBuffsState) do
 		for playerID, buffState in pairs(value) do
-			if buffState.removeTime > 0 and currTime - buffState.removeTime  > Settings.WaitBuffAfterDeathTime then
-				CurrentBuffsStateByTime[i][playerID] = nil
+			if buffState.removeTime > 0 and currTime - buffState.removeTime > Settings.WaitBuffAfterDeathTime then
+				CurrentBuffsState[i][playerID] = nil
 			end
 		end
 	end
@@ -238,24 +242,24 @@ function TDamageSpellData:ReceiveValuesFromParams(aParams)
 		local targetBuff
 		--для баффов, указываемых в событии об уроне, это серверное указание в приоритете
 		if i == ServerBuffIndex.Valor then
-			if aParams.Valor or AdditionalBuffCheckLethal(aParams, aParams.sourceID, i, currTime) then
+			if aParams.Valor or AdditionalBuffCheckLethal(aParams, aParams.sourceID, value, currTime) then
 				CreateAndRecalcDetails(self, self,  ServerBuffIndex.Valor*m_customBuffMult, aParams.amount)
 			end
 		elseif i == ServerBuffIndex.Vulnerability then
-			if aParams.Vulnerability or AdditionalBuffCheckLethal(aParams, aParams.targetID, i, currTime) then
+			if aParams.Vulnerability or AdditionalBuffCheckLethal(aParams, aParams.targetID, value, currTime) then
 				CreateAndRecalcDetails(self, self,  ServerBuffIndex.Vulnerability*m_customBuffMult, aParams.amount)
 			end
 		elseif i == ServerBuffIndex.Defense then
-			if aParams.Defense or AdditionalBuffCheckLethal(aParams, aParams.targetID, i, currTime) then
+			if aParams.Defense or AdditionalBuffCheckLethal(aParams, aParams.targetID, value, currTime) then
 				CreateAndRecalcDetails(self, self,  ServerBuffIndex.Defense*m_customBuffMult, aParams.amount)
 			end
 		elseif i == ServerBuffIndex.Weakness then
-			if aParams.Weakness or AdditionalBuffCheckLethal(aParams, aParams.sourceID, i, currTime) then
+			if aParams.Weakness or AdditionalBuffCheckLethal(aParams, aParams.sourceID, value, currTime) then
 				CreateAndRecalcDetails(self, self,  ServerBuffIndex.Weakness*m_customBuffMult, aParams.amount)
 			end
 		else
-			srcBuff = value[aParams.sourceID] or AdditionalBuffCheckLethal(aParams, aParams.sourceID, i, currTime)
-			targetBuff = value[aParams.targetID] or AdditionalBuffCheckLethal(aParams, aParams.targetID, i, currTime)
+			srcBuff = AdditionalBuffCheckLethal(aParams, aParams.sourceID, value, currTime)
+			targetBuff = AdditionalBuffCheckLethal(aParams, aParams.targetID, value, currTime)
 		end
 		
 		if srcBuff and srcBuff.forDps and srcBuff.forSrc then
@@ -369,9 +373,10 @@ function THealSpellData:ReceiveValuesFromParams(aParams)
 	-- The amount of the wounds
 	--if aParams.lethality > 0 then CreateAndRecalcDetails(self.GlobalInfoList, enumGlobalInfo.Lethality, aParams.lethality) end
 	
+	local currTime = common.GetLocalDateTimeMs()
 	for i, value in ipairs(CurrentBuffsState) do
-		local srcBuff = value[aParams.sourceID]
-		local targetBuff = value[aParams.targetID]
+		local srcBuff = AdditionalBuffCheckLethal(aParams, aParams.sourceID, value, currTime)
+		local targetBuff = AdditionalBuffCheckLethal(aParams, aParams.targetID, value, currTime)
 		if srcBuff and srcBuff.forHps and srcBuff.forSrc then
 			CreateAndRecalcDetails(self, self, srcBuff.ind*m_customBuffMult, aParams.heal)
 		end
@@ -394,7 +399,7 @@ function THealSpellData:AddValuesFromSpellData(aSpellData, aLastHitTime)
 	CreateAndMergeDetails(self, self, aSpellData, enumHealResist.Absorbed*m_enumHealResist)
 	CreateAndMergeDetails(self, self, aSpellData, enumHealResist.Overload*m_enumHealResist)
 	
-	for i, value in ipairs(CurrentBuffsState) do
+	for i, _ in ipairs(CurrentBuffsState) do
 		CreateAndMergeDetails(self, self, aSpellData, i*m_customBuffMult)
 	end
 

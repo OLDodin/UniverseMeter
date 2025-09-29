@@ -6,7 +6,6 @@ Global( "enumMiss", { Dodge = 1, Miss = 2 } )
 Global( "enumHitBlock", { Block = 1, Parry = 2, Barrier = 3, Resist = 4, Absorb = 5, RunesAbsorb = 6, MultAbsorb = 7, Mount = 8 } )
 Global( "enumHealResist", { Resisted = 1, RuneResisted = 2, Absorbed = 3, Overload = 4 } )
 Global( "enumGlobalInfo", { Determination = 1,  Critical = 2, Physical = 3, Elemental = 4, Holy = 5, Natural = 6 } )
-Global( "enumState", { Idle = 0, Attacked = 1, Killed = 2, Lost = 3 } )
 Global( "enumMode", { Dps = 1, Hps = 2, Def = 3, IHps = 4 } )
 Global( "enumFight", { Current = 0, Total = 1, History = 3 } )
 
@@ -186,6 +185,5 @@ Global("AoPanelDetected", false)
 Global("DPSMeterGUI", {})
 
 Global( "CurrentBuffsState", {})
-Global( "CurrentBuffsStateByTime", {})
 
 Global( "CurrentScoreOnMainBtn", 1)

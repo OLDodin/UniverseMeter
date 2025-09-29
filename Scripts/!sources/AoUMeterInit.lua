@@ -57,7 +57,6 @@ local function FillBuffCheckList()
 	
 	for i = 1, index-1 do
 		CurrentBuffsState[i] = {}
-		CurrentBuffsStateByTime[i] = {}
 	end
 	
 	return buffCheckList
@@ -147,6 +146,7 @@ local function Init()
 		Settings.ModeHPS  = savedData.hps
 		Settings.ModeDEF  = savedData.def
 		Settings.ModeIHPS = savedData.ihps
+		Settings.DefaultMode = Settings.ModeDPS and enumMode.Dps or Settings.ModeHPS and enumMode.Hps or Settings.ModeDEF and enumMode.Def or enumMode.IHps
 		Settings.SkipDmgAndHpsOnPet = savedData.skipDmgAndHpsOnPet
 		Settings.SkipDmgYourselfIn = savedData.skipDmgYourselfIn
 		Settings.StartHided = savedData.startHided
