@@ -129,6 +129,7 @@ function TFightPeriod:GetCombatant(anID, aName)
 		end
 	end
 	--если перезаходил и у него сменился id ищем по имени
+	--в UpdateCombatant обновим его ид
 	if aName then
 		for i, combatant in pairs( self.CombatantsList ) do
 			if combatant.Name == aName then

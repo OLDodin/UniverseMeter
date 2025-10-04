@@ -2,10 +2,10 @@ local cachedGetBuffTooltipInfo = object.GetBuffTooltipInfo
 local cachedGetDescription = spellLib.GetDescription
 local cachedGetAbilityInfo = avatar.GetAbilityInfo
 local cachedGetMapModifierInfo = cartographer.GetMapModifierInfo
-local cachedIsPet = unit.IsPet
 local cachedGetRage = unit.GetRage
 local cachedGetName = object.GetName
 local cachedIsExist = object.IsExist
+local cachedGetFollowerMaster = unit.GetFollowerMaster
 
 --------------------------------------------------------------------------------
 -- Type TUMeter
@@ -77,7 +77,7 @@ end
 -- Regen (add or update) combatant list
 --------------------------------------------------------------------------------
 function TUMeter:RegenCombatantList()
-	local partyMembersInfoList = GetPartyMembers()
+	local partyMembersInfoList = GetPartyMembers(true)
 	for i, member in pairs( partyMembersInfoList ) do
 		self:UpdateOrAddCombatant(member)
 	end
@@ -87,9 +87,9 @@ end
 --------------------------------------------------------------------------------
 function TUMeter:UpdateCombatantPos()
 	local currentFight = self:GetLastFightPeriod()
-	for i, member in pairs(GetPartyMembers()) do
+	for i, member in pairs(GetPartyMembers(false)) do
 		if member.id then
-			local combatant = currentFight:GetCombatant(member.id, member.name)
+			local combatant = currentFight:GetCombatant(member.id)
 			if combatant then
 				combatant:UpdateRange()
 			end
@@ -170,7 +170,7 @@ function TUMeter:GetFightCombatant(anID)
 	if combatant then
 		return combatant, false
 	else
-		local masterID = unit.GetFollowerMaster(anID)
+		local masterID = cachedGetFollowerMaster(anID)
 		combatant = self:GetLastFightPeriod():GetCombatant(masterID)
 		return combatant, true
 	end
@@ -441,7 +441,7 @@ function TUMeter:CollectDamageReceivedData(aParams)
 		self:Start()
 	end
 
-	return self:CollectData(enumMode.Def, currFightCombatant, aParams.source and unit.GetFollowerMaster(aParams.source) ~= nil or false, aParams)
+	return self:CollectData(enumMode.Def, currFightCombatant, aParams.source and cachedGetFollowerMaster(aParams.source) ~= nil or false, aParams)
 end
 
 --------------------------------------------------------------------------------
@@ -477,7 +477,7 @@ function TUMeter:CollectHealDataIN(aParams)
 		self:Start()
 	end
 
-	return self:CollectData(enumMode.IHps, currFightCombatant, aParams.healerId and unit.GetFollowerMaster(aParams.healerId) ~= nil or false, aParams)
+	return self:CollectData(enumMode.IHps, currFightCombatant, aParams.healerId and cachedGetFollowerMaster(aParams.healerId) ~= nil or false, aParams)
 end
 --------------------------------------------------------------------------------
 -- Update the data in the given mode

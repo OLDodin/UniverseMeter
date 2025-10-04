@@ -219,7 +219,6 @@ Global("TUMeterGUI", {})
 function TUMeterGUI:CreateNewObject(dpsMeter)
 	return setmetatable({
 			DPSMeter = dpsMeter,   -- the data object
-			AoPanelDetected = false, -- true if AoPanel is also installed
 
 			ActiveFightMode = enumFight.Current,
 			ActiveMode = enumMode.Dps,          -- Active mode
@@ -1179,11 +1178,11 @@ function TUMeterGUI:Init()
 	-- Main Panel
 	-------------------------------------------------------------------------------
 	if Settings.ScaleFonts then
-		self.BarWidth = 314
-		self.MainPanel:SetWidth(375)
+		self.BarWidth = 324
+		self.MainPanel:SetWidth(385)
 	else
-		self.BarWidth = 270
-		self.MainPanel:SetWidth(335)
+		self.BarWidth = 280
+		self.MainPanel:SetWidth(345)
 	end
 	
 	-- Total panel
@@ -1390,8 +1389,6 @@ function TUMeterGUI:Init()
 	-- Update the mode in the header of the spell panel
 	self.DetailsPanel.SpellHeaderStatsText:SetVal("DPS", TitleMode[self.ActiveMode])
 
-	self:Reset()
-	
 	-- Update the fight in the fight panel (at the top of the player list)
 	self.MainPanel.FightText:SetVal("Name", TitleFight[self.ActiveFightMode])
 

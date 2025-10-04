@@ -159,6 +159,14 @@ local function Init()
 	end
 	
 	InitBuffConditionMgr(FillBuffCheckList())
+	
+	-- Create the DPSMeter here
+	DPSMeterGUI = TUMeterGUI:CreateNewObject(TUMeter:CreateNewObject())
+	DPSMeterGUI:Init()
+	
+	if Settings.StartHided then
+		DPSMeterGUI.MainPanel:Hide()
+	end
 end
 
 --можно и до аватара

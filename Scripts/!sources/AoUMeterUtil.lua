@@ -8,6 +8,11 @@ local cachedIsUnit = object.IsUnit
 local cachedIsPet = unit.IsPet
 local cachedIsPlayer = unit.IsPlayer
 local cachedGetDistance = object.GetDistance
+local cachedRaidIsExist = raid.IsExist
+local cachedGroupIsExist = group.IsExist
+local cachedGroupGetMembers = group.GetMembers
+local cachedRaidGetMembers = raid.GetMembers
+local cachedGetFollowerMaster = unit.GetFollowerMaster
 
 --------------------------------------------------------------------------------
 -- Functions
@@ -142,26 +147,84 @@ function GetDistanceToTarget(anID)
 	return res
 end
 
+
+local m_myAvatarInfo
+
+
+local function GetShardName(aPlayerID)
+	local shardName = nil
+	if IsExistPlayer(aPlayerID) then
+		shardName = unit.GetPlayerShardName(aPlayerID)
+		if shardName then 
+			shardName = shardName:ToAbbr()
+		end
+	end
+	return shardName
+end
+
+local function AddShardName(aName, aPlayerID, aMyShardName)
+	local shardName = GetShardName(aPlayerID)
+	if shardName then
+		if aMyShardName ~= shardName then
+			return StrShardBegin..shardName..StrShardEnd..StrSpace..aName
+		else
+			return aName
+		end
+	end
+	return nil
+end
+
+function InitMyAvatarInfo()
+	local myID = avatar.GetId()
+	m_myAvatarInfo = {}
+	m_myAvatarInfo.shardName = GetShardName(myID)
+	m_myAvatarInfo.id = myID
+	m_myAvatarInfo.name = object.GetName(myID)
+	m_myAvatarInfo.className = avatar.GetClass()
+end
+
+
 --------------------------------------------------------------------------------
 -- Get member list
 --------------------------------------------------------------------------------
-function GetPartyMembers()
+function GetPartyMembers(aNeedCorrectNames)
 	local partyMembersInfoList = {}
 	
-	if raid.IsExist() then
-		local raidGroups = raid.GetMembers()
-		for i, group in ipairs(raidGroups) do
+	if cachedRaidIsExist() then
+		for _, group in ipairs(cachedRaidGetMembers()) do
 			for _, member in ipairs(group) do
-				table.insert(partyMembersInfoList, member)
+				if aNeedCorrectNames then
+					local shardName = AddShardName(member.name, member.id, m_myAvatarInfo.shardName)
+					if shardName then
+						member.name = shardName
+						table.insert(partyMembersInfoList, member)
+					end
+				elseif member.id then
+					table.insert(partyMembersInfoList, member)
+				end
 			end
 		end
-	elseif group.IsExist() then
-		partyMembersInfoList = group.GetMembers()
-		for _, member in ipairs(partyMembersInfoList) do
-			if member.id and member.state == GROUP_MEMBER_STATE_MERC then
-				local masterID = unit.GetFollowerMaster(member.id)
-				if masterID and object.IsExist(masterID) then
-					member.name = member.name..StrDash..object.GetName(masterID)
+	elseif cachedGroupIsExist() then
+		for _, member in ipairs(cachedGroupGetMembers()) do
+			if member.id then
+				if member.state == GROUP_MEMBER_STATE_MERC then
+					--можно и вместо имени member.uniqueId:GetInstanceId()
+					--но сейчас даже если игрок вне сети в группе на острове то его id и имя доступны
+					local masterID = cachedGetFollowerMaster(member.id)
+					if masterID and cachedIsExist(masterID) then
+						member.name = member.name..StrSpace..object.GetName(masterID)
+						table.insert(partyMembersInfoList, member)
+					end
+				else
+					if aNeedCorrectNames then
+						local shardName = AddShardName(member.name, member.id, m_myAvatarInfo.shardName)
+						if shardName then
+							member.name = shardName
+							table.insert(partyMembersInfoList, member)
+						end
+					else
+						table.insert(partyMembersInfoList, member)
+					end
 				end
 			end
 		end
@@ -170,12 +233,7 @@ function GetPartyMembers()
 		partyMembersInfoList = {}
 	end
 	if GetTableSize(partyMembersInfoList) == 0 then
-		local member = {}
-		member.id = avatar.GetId()
-		member.name = object.GetName(member.id)
-		member.className = avatar.GetClass()
-		
-		table.insert(partyMembersInfoList, member)
+		table.insert(partyMembersInfoList, m_myAvatarInfo)
 	end
 	
 	return partyMembersInfoList

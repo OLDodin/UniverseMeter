@@ -331,6 +331,7 @@ end
 onMyEvent["EVENT_RAID_APPEARED"] = onMyEvent["EVENT_GROUP_APPEARED"]
 onMyEvent["EVENT_RAID_DISAPPEARED"] = onMyEvent["EVENT_GROUP_APPEARED"]
 onMyEvent["EVENT_GROUP_DISAPPEARED"] = onMyEvent["EVENT_GROUP_APPEARED"]
+onMyEvent["EVENT_GROUP_CONVERTED"] = onMyEvent["EVENT_GROUP_APPEARED"]
 --------------------------------------------------------------------------------
 -- Event: Member removed
 --------------------------------------------------------------------------------
@@ -356,6 +357,7 @@ end
 onMyEvent["EVENT_RAID_MEMBER_ADDED"] = onMyEvent["EVENT_GROUP_MEMBER_ADDED"]
 onMyEvent["EVENT_GROUP_MEMBER_CHANGED"] = onMyEvent["EVENT_GROUP_MEMBER_ADDED"]
 onMyEvent["EVENT_RAID_MEMBER_CHANGED"] = onMyEvent["EVENT_GROUP_MEMBER_ADDED"]
+onMyEvent["EVENT_RAID_CHANGED"] = onMyEvent["EVENT_GROUP_MEMBER_ADDED"]
 
 onMyEvent["EVENT_OBJECT_COMBAT_STATUS_CHANGED"] = function(aParams)
 	if aParams.inCombat and not DPSMeterGUI.DPSMeter.bCollectData then
@@ -454,7 +456,7 @@ end
 
 
 function ReloadPet(aParams)
-	local unitList = GetPartyMembers()
+	local unitList = GetPartyMembers(false)
 	
 	local unitListWithPets = GetListWithPets(unitList)
 	local deleteParams = nil
@@ -480,7 +482,7 @@ function ReloadPet(aParams)
 end
 
 function ReRegisterEvents()
-	local unitList = GetPartyMembers()
+	local unitList = GetPartyMembers(false)
 	local deleteParams = nil
 	local newParams = nil
 	
@@ -621,11 +623,13 @@ end
 
 
 function GlobalInit()
-	-- Create the DPSMeter here
-	DPSMeterGUI = TUMeterGUI:CreateNewObject(TUMeter:CreateNewObject())
-	DPSMeterGUI:Init()
+	InitMyAvatarInfo()
+	DPSMeterGUI:Reset()
 	
-	
+	if AoPanelDetected then 
+		DPSMeterGUI.ShowHideBtn:Hide()
+	end
+
 	m_buffListener.listenerAddBuff = PlayerAddBuff
 	m_buffListener.listenerRemoveBuff = PlayerRemoveBuff
 	m_buffListener.listenerRage = PlayerRageChanged
@@ -634,14 +638,6 @@ function GlobalInit()
 	table.insert(unitList, avatar.GetId())
 	for _, unitID in ipairs(unitList) do
 		FabricMakePlayerInfo(unitID, m_buffListener)
-	end
-
-	if AoPanelDetected then 
-		DPSMeterGUI.ShowHideBtn:Hide()
-	end
-	
-	if Settings.StartHided then
-		DPSMeterGUI.MainPanel:Hide()
 	end
 
 	-- Register now the other events & reactions
