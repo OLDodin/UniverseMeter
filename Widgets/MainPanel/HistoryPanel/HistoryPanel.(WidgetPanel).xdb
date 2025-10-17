@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <WidgetPanel>
 	<Name>HistoryPanel</Name>
-	<Priority>2</Priority>
+	<Priority>3</Priority>
 	<Children>
 		<Item href="ScrollCurrentPanel.(WidgetPanel).xdb" />
 		<Item href="ScrollTotalPanel.(WidgetPanel).xdb" />
 		<Item href="Header.(WidgetTextView).xdb" />
 	</Children>
-	<BackLayer href="../../SettingsPanel/SettingsPanel.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
+	<BackLayer href="../SettingsPanel/SettingsPanel.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
 	<Placement>
 		<X>
 			<Align>WIDGET_ALIGN_HIGH</Align>
@@ -21,4 +21,6 @@
 		</Y>
 	</Placement>
 	<Visible>false</Visible>
+	<PickChildrenOnly>false</PickChildrenOnly>
+	<TransparentInput>false</TransparentInput>
 </WidgetPanel>

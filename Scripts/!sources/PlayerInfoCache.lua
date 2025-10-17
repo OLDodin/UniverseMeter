@@ -107,7 +107,7 @@ end
 function OnEventSecondZatichka()
 	-- затычка №1 - бывает что не приходит событие что юнит исчез, проверяем актуальность персонажей 
 	local unitList = avatar.GetUnitList()
-	table.insert(unitList, avatar.GetId())
+	table.insert(unitList, MyAvatarID)
 
 	for playerID, _ in pairs(m_players) do
 		local reallyExist = false

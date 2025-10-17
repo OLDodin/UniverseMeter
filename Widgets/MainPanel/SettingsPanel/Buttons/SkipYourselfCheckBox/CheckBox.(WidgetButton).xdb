@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetButton>
+	<Header>
+		<Prototype href="../CheckBoxTemp/CheckBoxStone.Prototype.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+	</Header>
+  <Name>SkipYourselfCheckBox</Name>
+  <Priority>1</Priority>
+  <Placement>
+    <X>
+      <Align>WIDGET_ALIGN_LOW</Align>
+      <Pos>15</Pos>
+      <Size>270</Size>
+    </X>
+    <Y>
+      <Align>WIDGET_ALIGN_LOW</Align>
+      <Pos>170</Pos>
+      <Size>25</Size>
+    </Y>
+  </Placement>
+</WidgetButton>

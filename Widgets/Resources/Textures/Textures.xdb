@@ -17,5 +17,17 @@
 			<name>DeadKill</name>
 			<textureItem href="DeadKill/DeadKill.(UISingleTexture).xdb" />
 		</Item>
+		<Item>
+			<name>Defence</name>
+			<textureItem href="Defence/Defence.(UISingleTexture).xdb" />
+		</Item>
+		<Item>
+			<name>Might</name>
+			<textureItem href="Might/Might.(UISingleTexture).xdb" />
+		</Item>
+		<Item>
+			<name>Valor</name>
+			<textureItem href="Valor/Valor.(UISingleTexture).xdb" />
+		</Item>
 	</Items>
 </UIRelatedTextures>

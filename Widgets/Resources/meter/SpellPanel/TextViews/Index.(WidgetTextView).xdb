@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <WidgetTextView>
-	<Priority>150</Priority>
+	<Priority>152</Priority>
 	<Name>SpellTextViewIndex</Name>
 	<Placement>
 		<X>

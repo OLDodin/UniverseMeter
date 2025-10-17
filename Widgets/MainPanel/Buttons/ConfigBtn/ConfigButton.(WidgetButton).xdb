@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <WidgetButton>
 	<Name>ConfigButton</Name>
+	<Priority>1</Priority>
 	<IgnoreDblClick>true</IgnoreDblClick>
 	<Children>
 	</Children>

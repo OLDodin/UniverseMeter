@@ -5,6 +5,8 @@
 	<Children>
 		<Item href="ScrollHorizontal\ScrollableContainer.(WidgetPanel).xdb"/>
 		<Item href="BigPanel.(WidgetPanel).xdb" />
+		<Item href="PlusBtn\Button.(WidgetButton).xdb" />
+		<Item href="MinusBtn\Button.(WidgetButton).xdb" />
 	</Children>
 	<Placement>
 		<X>
@@ -14,7 +16,7 @@
 		</X>
 		<Y>
 			<Align>WIDGET_ALIGN_LOW</Align>
-			<Size>200</Size>
+			<Size>220</Size>
 			<Pos>185</Pos>
 		</Y>
 	</Placement>

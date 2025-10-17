@@ -4,9 +4,8 @@
 	<Priority>5501</Priority>
 	<Children>
 		<Item href="ShowHideBtn/ShowHideBtn.(WidgetButton).xdb#xpointer(/WidgetButton)" />
-		<Item href="MainPanel/MainPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
+		<Item href="MainPanel/MainPanel.xdb" />
 		<Item href="SpellInfoPanel/SpellInfoPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
-		<Item href="SettingsPanel/SettingsPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
 		
 		<Item href="Timer.xdb" />
 	</Children>

@@ -12,7 +12,7 @@
 		<Y>
 			<Align>WIDGET_ALIGN_HIGH</Align>
 			<Size>4</Size>
-			<HighPos>22</HighPos>
+			<HighPos>26</HighPos>
 		</Y>
 	</Placement>
 	<TransparentInput>true</TransparentInput>

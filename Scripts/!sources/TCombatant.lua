@@ -1,8 +1,24 @@
-local m_isNearMask = 1 --0001 b
-local m_isWasDeadMask = 2 --0010 b
-local m_isWasKillMask = 4 --0100 b
-local m_classColorIndexMask = 240 --1111 0000 b
-local m_rangeMask = 65280 --1111 1111 0000 0000 b
+local enumCount = enumSpellInfo.Count
+local enumAmount = enumSpellInfo.Amount
+local enumName = enumSpellInfo.Name
+local enumHits = enumSpellInfo.Hits
+
+local enumHitCritical = enumHit.Critical
+
+local enumHitBarrier = enumHitBlock.Barrier
+
+local enumCombatantID = enumCombatantInfo.ID
+local enumCombatantName = enumCombatantInfo.Name
+local enumCombatantPacked = enumCombatantInfo.BitPackedValue
+local enumCombatantData = enumCombatantInfo.Data
+
+local m_isNearMask = { mask = 1, shift = 0 } --0b 0001 b
+local m_isAbsentMask = { mask = 2, shift = 1 } --0b 0010 b
+local m_classColorIndexMask = { mask = 240, shift = 4 }  --0b 1111 0000 b
+local m_rangeMask = { mask = 65280, shift = 8 } --0b 1111 1111 0000 0000 b
+
+-- c 1 начнется уже массив spell-ов self[enumCombatantData][aMode]
+local DetermInd = 0
 
 -- хранят последнее посчитанное значение глобально
 local m_physicalDamagePercent = nil
@@ -16,7 +32,8 @@ Global("TCombatantData", {})
 function TCombatantData:CreateNewObject()
 	return 
 	{
-		Amount = 0						-- Total amount
+		--[0] - DetermInd -решимость, а далее с [1] массив spellData
+		--Amount = 0 -только для TFight, в TFightPeriod вычисляем 
 	}
 end
 
@@ -25,40 +42,36 @@ end
 Global("TCombatant", {})
 --------------------------------------------------------------------------------
 function TCombatant:CreateNewObject(anID, aName, aClassName, anIsNear)
-	local obj = setmetatable({
-			ID = anID,				-- ID of the combatant
-			Name = aName,			-- Name of the combatant
-			Data = {					-- Data (Dps, Hps, Def)
-			},
-			BitPackedValue = 0
-		}, { __index = self })
+	local obj = {
+			[enumCombatantID] = anID,
+			[enumCombatantName] = aName,
+			[enumCombatantPacked] = 0,
+			[enumCombatantData] = {}			-- Data (Dps, Hps, Def)
+		}
 		
-	obj:SetIsNear(anIsNear)
-	obj:SetClassColor(aClassName)
+	TCombatant.SetIsNear(obj, anIsNear)
+	TCombatant.SetClassColor(obj, aClassName)
 	
 	return obj
 end
 
 function TCombatant:MakeCleanCopy()
-	return TCombatant:CreateNewObject(self.ID, self.Name, self:GetClassColor(), self:GetIsNear())
+	return TCombatant:CreateNewObject(self[enumCombatantID], self[enumCombatantName], TCombatant.GetClassColor(self), TCombatant.IsNear(self))
 end
 
 function TCombatant:CreateCombatantData(aMode)
-	if not self.Data[aMode] then
-		self.Data[aMode] = TCombatantData:CreateNewObject()
+	local modeData = self[enumCombatantData][aMode]
+	if not modeData then
+		modeData = TCombatantData:CreateNewObject()
+		self[enumCombatantData][aMode] = modeData
 	end
 	
-	return self.Data[aMode]
+	return modeData
 end
 
--- increase Amount in one second TFightPeriod
-function TCombatant:IncreaseCombatantAmount(aValue, aMode)
-	local combatantData = self:CreateCombatantData(aMode)
-	combatantData.Amount = combatantData.Amount + aValue
-end
 -- update Amount in TFight
 function TCombatant:RecalculateAmount(aValue, aMode, anUpdateLast)
-	local combatantData = self:CreateCombatantData(aMode)
+	local combatantData = TCombatant.CreateCombatantData(self, aMode)
 	if combatantData.LastAmount == nil then
 		combatantData.LastAmount = 0
 	end
@@ -69,11 +82,12 @@ function TCombatant:RecalculateAmount(aValue, aMode, anUpdateLast)
 end
 
 function TCombatant:CalculateCombatantsData(aMode, aFightTime, aFightAmount, aLeaderAmount)
-	local currData = self.Data[aMode]
+	local currData = self[enumCombatantData][aMode]
 	if currData then
-		currData.AmountPerSec = currData.Amount / aFightTime
-		currData.Percentage = GetPercentageAt(currData.Amount, aFightAmount)
-		currData.LeaderPercentage = GetPercentageAt(currData.Amount, aLeaderAmount)
+		local modeAmount = TCombatant.GetAmount(self, aMode)
+		currData.AmountPerSec = modeAmount / aFightTime
+		currData.Percentage = GetPercentageAt(modeAmount, aFightAmount)
+		currData.LeaderPercentage = GetPercentageAt(modeAmount, aLeaderAmount)
 	end
 end
 
@@ -81,11 +95,12 @@ end
 -- Get spell by identifier 
 --------------------------------------------------------------------------------
 function TCombatant:GetSpellByIdentifier(aMode, anIsPet, aSysSubElement, aName)
-	if not self.Data[aMode] then 
+	local modeData = self[enumCombatantData][aMode]
+	if not modeData then 
 		return
 	end
-	for _, spellData in ipairs( self.Data[aMode] ) do
-		if IsPetData(spellData) == anIsPet and spellData.Element == aSysSubElement and spellData.Name == aName then
+	for _, spellData in ipairs( modeData ) do
+		if IsPetData(spellData) == anIsPet and GetSpellDataElement(spellData) == aSysSubElement and spellData[enumName] == aName then
 			return spellData
 		end
 	end
@@ -107,23 +122,23 @@ function TCombatant:CalculateDamageTypePercent(aMode)
 	
 	local totalAmount = 0
 	
-	for _, spellData in ipairs( self.Data[aMode] ) do
-		if not spellData.FromBarrier then
-			if spellData.Element == "ENUM_SubElement_PHYSICAL" then
-				physicalCnt = physicalCnt + spellData.Count
-				physicalAmount = physicalAmount + spellData.Amount
-			elseif spellData.Element == "ENUM_SubElement_FIRE" or spellData.Element == "ENUM_SubElement_COLD" or spellData.Element == "ENUM_SubElement_LIGHTNING" then
-				elementalCnt = elementalCnt + spellData.Count
-				elementalAmount = elementalAmount + spellData.Amount
-			elseif spellData.Element == "ENUM_SubElement_HOLY" or spellData.Element == "ENUM_SubElement_SHADOW" or spellData.Element == "ENUM_SubElement_ASTRAL" then
-				holyCnt = holyCnt + spellData.Count
-				holyAmount = holyAmount + spellData.Amount
-			elseif spellData.Element == "ENUM_SubElement_POISON" or spellData.Element == "ENUM_SubElement_DISEASE" or spellData.Element == "ENUM_SubElement_ACID" then
-				naturalCnt = naturalCnt + spellData.Count
-				naturalAmount = naturalAmount + spellData.Amount
+	for _, spellData in ipairs( self[enumCombatantData][aMode] ) do
+		if not IsSpellDataFromBarrier(spellData) then
+			if GetSpellDataElement(spellData) == enumDmgTypes.Physical then
+				physicalCnt = physicalCnt + spellData[enumCount]
+				physicalAmount = physicalAmount + spellData[enumAmount]
+			elseif GetSpellDataElement(spellData) == enumDmgTypes.Elemental then
+				elementalCnt = elementalCnt + spellData[enumCount]
+				elementalAmount = elementalAmount + spellData[enumAmount]
+			elseif GetSpellDataElement(spellData) == enumDmgTypes.Holy then
+				holyCnt = holyCnt + spellData[enumCount]
+				holyAmount = holyAmount + spellData[enumAmount]
+			elseif GetSpellDataElement(spellData) == enumDmgTypes.Natural then
+				naturalCnt = naturalCnt + spellData[enumCount]
+				naturalAmount = naturalAmount + spellData[enumAmount]
 			end
 			
-			totalAmount = totalAmount + spellData.Amount
+			totalAmount = totalAmount + spellData[enumAmount]
 		end
 	end
 	
@@ -134,21 +149,22 @@ function TCombatant:CalculateDamageTypePercent(aMode)
 end
 
 function TCombatant:GetGlobalInfoByIndex(anIndex, aMode)
-	if not self.Data[aMode] then 
+	local modeData = self[enumCombatantData][aMode]
+	if not modeData then 
 		return
 	end
 	if anIndex == enumGlobalInfo.Determination then
-		return self.Data[aMode].Determination
+		return modeData[DetermInd]
 	elseif anIndex == enumGlobalInfo.Critical then
 		local critCnt = 0
 		local totalCnt = 0
-		for _, spellData in ipairs( self.Data[aMode] ) do
-			local critSpellData = DetailsList(spellData)[enumHit.Critical]
-			critCnt = critCnt + (critSpellData and critSpellData.Count or 0)
+		for _, spellData in ipairs( modeData ) do
+			local critSpellData = DetailsList(spellData)[enumHitCritical]
+			critCnt = critCnt + (critSpellData and TValueDetails.GetCount(critSpellData) or 0)
 			if aMode == enumMode.Dps or aMode == enumMode.Def then
-				totalCnt = totalCnt + spellData.Hits
-			elseif aMode == enumMode.Hps or aMode == enumMode.IHps  then
-				totalCnt = totalCnt + spellData.Count
+				totalCnt = totalCnt + spellData[enumHits]
+			else
+				totalCnt = totalCnt + spellData[enumCount]
 			end
 		end
 		return TValueDetails:CreateNewObjectOneValue(GetPercentageAt(critCnt, totalCnt), critCnt)
@@ -166,75 +182,91 @@ end
 -- Get spell by index
 --------------------------------------------------------------------------------
 function TCombatant:GetSpellByIndex(anIndex, aMode)
-	if not self.Data[aMode] then 
+	local modeData = self[enumCombatantData][aMode]
+	if not modeData then 
 		return
 	end
-	return self.Data[aMode][anIndex]
+
+	return modeData[anIndex]
 end
 
 function TCombatant:GetSpellCount(aMode)
---self.Data[aMode] содержит и буквенные ключи
-	if not self.Data[aMode] then 
+	local modeData = self[enumCombatantData][aMode]
+--self[enumCombatantData][aMode] содержит и буквенные ключи
+	if not modeData then 
 		return 0
 	end
 	
-	local cnt = 0
-	for _, _ in ipairs( self.Data[aMode] ) do
-		cnt = cnt + 1
-	end
-	return cnt
+	return #modeData
+end
+
+function TCombatant:GetCombatantData(aMode)
+	return self[enumCombatantData][aMode]
+end
+
+function TCombatant:HasData(aMode)
+	local dataByModes = self[enumCombatantData]
+	return dataByModes[enumMode.Dps] or dataByModes[enumMode.Def] or dataByModes[enumMode.Hps] or dataByModes[enumMode.IHps]
 end
 
 function TCombatant:GetAmount(aMode)
-	if not self.Data[aMode] then 
+	local modeData = self[enumCombatantData][aMode]
+	if not modeData then 
 		return 0
 	end
-	return self.Data[aMode].Amount
+	-- for TFight Combatant
+	if modeData.Amount then
+		return modeData.Amount
+	end
+	local amount = 0
+	-- for TFightPeriod Combatant
+	for _, spellData in ipairs( modeData ) do
+		amount = amount + spellData[enumAmount]
+	end
+	return amount
 end
 
 function TCombatant:GetBarrierAmount(aMode)
-	if not self.Data[aMode] then 
+	local modeData = self[enumCombatantData][aMode]
+	if not modeData then 
 		return 0
 	end
 	local barrierAmount = 0
-	local barrierCnt = 0
-	for _, spellData in ipairs( self.Data[aMode] ) do
-		local resistList = ResistDetailsList(spellData)
-		if resistList[enumHitBlock.Barrier] then
-			barrierAmount = barrierAmount + resistList[enumHitBlock.Barrier].Amount
-			barrierCnt = barrierCnt + 1
+	local resistList
+	for _, spellData in ipairs( modeData ) do
+		resistList = ResistDetailsList(spellData)
+		if resistList[enumHitBarrier] then
+			barrierAmount = barrierAmount + TValueDetails.GetAmount(resistList[enumHitBarrier])
 		end
 	end
-	return barrierAmount, barrierCnt
+	return barrierAmount
 end
 
 --------------------------------------------------------------------------------
 -- Update Global Info
 --------------------------------------------------------------------------------
 function TCombatant:CreateGlobalInfo(aMode)
-	local combatantData = self:CreateCombatantData(aMode)
-	if not combatantData.Determination then
-		combatantData.Determination = TValueDetails:CreateNewObject()
+	local combatantData = TCombatant.CreateCombatantData(self, aMode)
+	if not combatantData[DetermInd] then
+		combatantData[DetermInd] = TValueDetails:CreateNewObject()
 	end
 	return combatantData
 end
 
 function TCombatant:UpdateGlobalInfo(anInfoIndex, aMode, aDetermination)
 	if anInfoIndex == enumGlobalInfo.Determination then
-		local combatantData = self:CreateGlobalInfo(aMode)
-		TValueDetails.RecalcDetails(combatantData.Determination, aDetermination)
-		combatantData.Determination.Percentage = TValueDetails.GetAvg(combatantData.Determination)
+		local combatantData = TCombatant.CreateGlobalInfo(self, aMode)
+		TValueDetails.RecalcDetails(combatantData[DetermInd], aDetermination)
 	end
 end
 
 function TCombatant:MergeGlobalInfo(aMode, aCombatant)
-	local newCombatantData = aCombatant.Data[aMode]
-	if not newCombatantData or not newCombatantData.Determination then
+	local newCombatantData = aCombatant[enumCombatantData][aMode]
+	if not newCombatantData or not newCombatantData[DetermInd] then
 		return
 	end
-	local combatantData = self:CreateGlobalInfo(aMode)
-	TValueDetails.MergeDetails(combatantData.Determination, newCombatantData.Determination)
-	combatantData.Determination.Percentage = TValueDetails.GetAvg(combatantData.Determination)
+	local combatantData = TCombatant.CreateGlobalInfo(self, aMode)
+	TValueDetails.MergeDetails(combatantData[DetermInd], newCombatantData[DetermInd])
 end
 
 
@@ -242,35 +274,18 @@ end
 -- Add a new spell to the list
 --------------------------------------------------------------------------------
 function TCombatant:AddNewSpell(aSpellInfo, aMode)
-	if aSpellInfo then
-		local SpellData
-		if aMode == enumMode.Dps or aMode == enumMode.Def then
-			SpellData = TDamageSpellData:CreateNewObject()
-		elseif aMode == enumMode.Hps or aMode == enumMode.IHps  then
-			SpellData = THealSpellData:CreateNewObject()
-		end
-		if aSpellInfo.lethal and aMode == enumMode.Dps then
-			self:SetWasKill(true)
-			SpellData.WasKill = true
-		elseif aSpellInfo.lethal and aMode == enumMode.Def then
-			self:SetWasDead(true)
-			SpellData.WasDead = true
-		end
-		
-		if SpellData then
-			SpellData.PetName = aSpellInfo.PetName
-			SpellData.Name = aSpellInfo.Name
-			SpellData.FromBarrier = aSpellInfo.fromBarrier
-			SpellData.Element = aSpellInfo.sysSubElement
-			SpellData.InfoID = aSpellInfo.infoID
-
-			table.insert(self:CreateCombatantData(aMode), SpellData)
-			if SpellData.PetName then
-				SpellData.PetName = SpellData.PetName:Truncate(15)
-			end
-			return SpellData
-		end
+	local spellData
+	if aMode == enumMode.Dps or aMode == enumMode.Def then
+		spellData = TDamageSpellData:CreateNewObject()
+	else
+		spellData = THealSpellData:CreateNewObject()
 	end
+
+	InitSpellDataByInfo(spellData, aSpellInfo)
+	
+	table.insert(TCombatant.CreateCombatantData(self, aMode), spellData)
+	
+	return spellData
 end
 
 function TCombatant:AddCopySpell(aMode, aSpellData, aHitTime)
@@ -278,128 +293,128 @@ function TCombatant:AddCopySpell(aMode, aSpellData, aHitTime)
 	spellData.FirstHitTime = aHitTime
 	spellData.LastHitTime = aHitTime
 	
-	table.insert(self:CreateCombatantData(aMode), spellData)
+	table.insert(TCombatant.CreateCombatantData(self, aMode), spellData)
 	return spellData
 end
 
 function TCombatant:UpdateSpellDataByInfo(aSpellInfo, aSpellData, aMode)
-	if aSpellInfo.lethal and aMode == enumMode.Dps then
-		self:SetWasKill(true)
-		aSpellData.WasKill = true
-	elseif aSpellInfo.lethal and aMode == enumMode.Def then
-		self:SetWasDead(true)
-		aSpellData.WasDead = true
-	end
 	FillSpellDataFromParams(aSpellData, aSpellInfo)
 end
 
 --------------------------------------------------------------------------------
--- Clear the spell list and data
---------------------------------------------------------------------------------
-function TCombatant:ClearData()
-	for _, data in pairs( self.Data ) do
-		data.Amount = 0
-		data.AmountPerSec = nil
-		data.Percentage = nil
-		data.LeaderPercentage = nil
-		for i, _ in ipairs( data ) do
-			data[i] = nil
-		end
-		data.Determination = nil
-	end
-end
---------------------------------------------------------------------------------
 -- Compare spell by amount
 --------------------------------------------------------------------------------
 local function CompareSpells(A, B)
-	if A.Amount == B.Amount then
-		return A.Name < B.Name end
-	return A.Amount > B.Amount
+	if A[enumAmount] == B[enumAmount] then
+		return A[enumName] < B[enumName] end
+	return A[enumAmount] > B[enumAmount]
 end
 --------------------------------------------------------------------------------
 -- Calculate the damage, DPS, HPS, according to the fight time
 --------------------------------------------------------------------------------
 function TCombatant:CalculateSpells(aFightTime, aMode)
 	if not (aFightTime > 0) then aFightTime = 1 end
-	local combatantData = self.Data[aMode]
+	local combatantData = self[enumCombatantData][aMode]
 	if not combatantData then
 		return
 	end
 	for _, spellData in ipairs( combatantData ) do
-		CalculateSpellDetailsPercentage(spellData, aFightTime, combatantData.Amount, aMode == enumMode.Dps or aMode == enumMode.Def)
+		CalculateSpellDetailsPercentage(spellData, aFightTime, TCombatant.GetAmount(self, aMode))
 	end
 	table.sort(combatantData, CompareSpells)
 	
-	self:CalculateDamageTypePercent(aMode)
+	TCombatant.CalculateDamageTypePercent(self, aMode)
 end
 --------------------------------------------------------------------------------
 -- Update information of a combatant
 --------------------------------------------------------------------------------
 function TCombatant:UpdateCombatant(anID, aName, aClassColorIndex, anIsNear)
-	if anID then self.ID = anID end
-	if aName then self.Name = aName end
-	self:SetClassColor(aClassColorIndex)
-	self:SetIsNear(anIsNear)
+	if anID then self[enumCombatantID] = anID end
+	if aName then self[enumCombatantName] = aName end
+	TCombatant.SetClassColor(self, aClassColorIndex)
+	TCombatant.SetIsNear(self, anIsNear)
 end
 --------------------------------------------------------------------------------
 -- Update the Range attribute according to the avatar
 --------------------------------------------------------------------------------
 function TCombatant:UpdateRange()	
-	if self.ID == avatar.GetId() then
-		self:SetRange(0)
+	if self[enumCombatantID] == MyAvatarID then
+		TCombatant.SetRange(self, 0)
 	else
-		self:SetRange(GetDistanceToTarget(self.ID))
+		TCombatant.SetRange(self, GetDistanceToTarget(self[enumCombatantID]))
 	end
 end
---------------------------------------------------------------------------------
--- Is the combatant close to the avatar
---------------------------------------------------------------------------------
-function TCombatant:IsClose()
-	return self:GetIsNear() and self:GetRange() <= Settings.CloseDist
+
+function TCombatant:GetBuffLeghtInPeriod(aMode, aBuffInd)
+	local combatantData = self[enumCombatantData][aMode]
+	
+	local cnt = 0
+	local buffPercent = 0
+	for _, spellData in ipairs(combatantData or {}) do
+		buffPercent = buffPercent + GetBuffPercentByIndex(spellData, aBuffInd)
+		cnt = cnt + 1
+	end
+	
+	return buffPercent / math.max(cnt, 1)
 end
 
-function TCombatant:GetIsNear()
-	return bit.band(self.BitPackedValue, m_isNearMask) == 1
+function TCombatant:GetName()
+	return self[enumCombatantName]
+end
+
+function TCombatant:GetID()
+	return self[enumCombatantID]
+end
+
+function TCombatant:IsClose()
+	return TCombatant.IsNear(self) and TCombatant.GetRange(self) <= Settings.CloseDist
+end
+
+function TCombatant:IsNear()
+	return GetPackedBoolean(m_isNearMask, self[enumCombatantPacked])
 end
 
 function TCombatant:SetIsNear(aValue)
-	self.BitPackedValue = bit.bor(bit.band(self.BitPackedValue,  bit.bnot(m_isNearMask)), aValue and 1 or 0)
+	self[enumCombatantPacked] = PackValue(m_isNearMask, BoolToNumber(aValue), self[enumCombatantPacked])
 end
 
-function TCombatant:GetWasDead()
-	return bit.rshift(bit.band(self.BitPackedValue, m_isWasDeadMask), 1) == 1
+function TCombatant:IsAbsent()
+	return GetPackedBoolean(m_isAbsentMask, self[enumCombatantPacked])
 end
 
-function TCombatant:SetWasDead(aValue)
-	self.BitPackedValue = bit.bor(bit.band(self.BitPackedValue,  bit.bnot(m_isWasDeadMask)), aValue and bit.lshift(1, 1) or 0)
+function TCombatant:SetAbsent(aValue)
+	self[enumCombatantPacked] = PackValue(m_isAbsentMask, BoolToNumber(aValue), self[enumCombatantPacked])
 end
 
-function TCombatant:GetWasKill()
-	return bit.rshift(bit.band(self.BitPackedValue, m_isWasKillMask), 2) == 1
-end
-
-function TCombatant:SetWasKill(aValue)
-	self.BitPackedValue = bit.bor(bit.band(self.BitPackedValue,  bit.bnot(m_isWasKillMask)), aValue and bit.lshift(1, 2) or 0)
+function TCombatant:GetWasLethal(aMode)
+	local needMode = aMode
+	if aMode ~= enumMode.Dps then
+		needMode = enumMode.Def
+	end
+	local combatantData = self[enumCombatantData][needMode]
+	
+	for _, spellData in ipairs(combatantData or {}) do
+		if IsSpellDataLethal(spellData) then
+			return true
+		end
+	end
+	return false
 end
 
 function TCombatant:GetClassColor()
-	return bit.rshift(bit.band(self.BitPackedValue, m_classColorIndexMask), 4)
+	return GetPackedValue(m_classColorIndexMask, self[enumCombatantPacked])
 end
 
 function TCombatant:SetClassColor(aValue)
-	self.BitPackedValue = bit.bor(bit.band(self.BitPackedValue,  bit.bnot(m_classColorIndexMask)), bit.lshift(aValue, 4))
+	self[enumCombatantPacked] = PackValue(m_classColorIndexMask, aValue, self[enumCombatantPacked])
 end
 
 function TCombatant:GetRange()
-	return bit.rshift(bit.band(self.BitPackedValue, m_rangeMask), 8)
+	return GetPackedValue(m_rangeMask, self[enumCombatantPacked])
 end
 
 function TCombatant:SetRange(aValue)
-	if aValue > 255 then --2^8
-		aValue = 255
-	end
-	if aValue < 0 then
-		aValue = 0
-	end
-	self.BitPackedValue = bit.bor(bit.band(self.BitPackedValue,  bit.bnot(m_rangeMask)), bit.lshift(aValue, 8))
+	aValue = math.min(aValue, 255) --2^8
+	aValue = math.max(aValue, 0)
+	self[enumCombatantPacked] = PackValue(m_rangeMask, aValue, self[enumCombatantPacked])
 end

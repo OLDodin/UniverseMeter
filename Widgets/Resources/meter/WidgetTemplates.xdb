@@ -41,6 +41,10 @@
 			<name>ImageBox</name>
 			<widget href="ImageBox/ImageBox.xdb" />
 		</Item>
+		<Item>
+			<name>BuffLine</name>
+			<widget href="BuffLine/Line.xdb" />
+		</Item>
 	</items>
 </UIRelatedWidgets>
 

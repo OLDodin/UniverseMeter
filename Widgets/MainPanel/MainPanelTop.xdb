@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetPanel>
+	<Name>MainPanelTop</Name>
+	<Priority>0</Priority>
+	<BackLayer href="AOHeader.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+			<Size>330</Size>
+			<Pos>0</Pos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Size>64</Size>
+			<Pos>0</Pos>
+		</Y>
+	</Placement>
+	<PickChildrenOnly>false</PickChildrenOnly>
+	<TransparentInput>false</TransparentInput>
+</WidgetPanel>

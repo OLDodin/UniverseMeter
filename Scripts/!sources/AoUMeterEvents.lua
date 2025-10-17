@@ -1,3 +1,5 @@
+local cachedGetLocalDateTimeMs = common.GetLocalDateTimeMs
+
 local m_paramsListForDps = {}
 local m_paramsListForDef = {}
 local m_paramsListForHps = {}
@@ -19,7 +21,7 @@ local m_detailPanelWasVisible = false
 onMyEvent["AOPANEL_START"] = function(params)
 	local SetVal = { val = StrMainBtn }
 	if Settings.ShowPositionOnBtn then
-		SetVal = { val = StrMainBtn..StrSpace..tostring(CurrentScoreOnMainBtn) }
+		SetVal = { val = StrMainBtn..StrSpace..tostring(CurrentScoreOnMainBtn or 1) }
 	end
 	local params = { header =  SetVal , ptype =  "button" , size =  Settings.ShowPositionOnBtn and 50 or 30 } 
 	userMods.SendEvent("AOPANEL_SEND_ADDON", { name = "UniverseMeter" , sysName = "UniverseMeter" , param = params } )
@@ -131,6 +133,7 @@ end
 --------------------------------------------------------------------------------
 onReaction["ResetBtnReaction"] = function(reaction)
 	DPSMeterGUI.HistoryPanel:Hide()
+	DPSMeterGUI.SettingsPanel:Hide()
 	DPSMeterGUI:Reset(true)
 	m_mustUpdateGUI = true
 end
@@ -140,6 +143,7 @@ onReaction["OnConfigPressed"] = function(reaction)
 		DPSMeterGUI.SettingsPanel:Hide()
 	else
 		DPSMeterGUI.SettingsPanel:Show()
+		DPSMeterGUI.HistoryPanel:Hide()
 	end
 end
 
@@ -149,11 +153,8 @@ onReaction["OnHistoryPressed"] = function(reaction)
 	else
 		DPSMeterGUI:UpdateHistory()
 		DPSMeterGUI.HistoryPanel:Show()
+		DPSMeterGUI.SettingsPanel:Hide()
 	end
-end
-
-onReaction["CloseSettingsPanelBtnReaction"] = function(reaction)
-	DPSMeterGUI.SettingsPanel:Hide()
 end
 
 onReaction["SettingsCheckBoxPressed"] = function(reaction)
@@ -174,7 +175,6 @@ onReaction["SavePressed"] = function(reaction)
 	savedData.skipDmgAndHpsOnPet = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.SkipPetCheckBox)
 	savedData.skipDmgYourselfIn = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.SkipYourselfCheckBox)
 	savedData.startHided = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.StartHidedCheckBox)
-	savedData.сollectTotalTimelapse = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.TotalTimelapseCheckBox)
 	savedData.showPositionOnBtn = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.ShowScoreCheckBox)
 	savedData.scaleFonts = GetCheckedForCheckBox(DPSMeterGUI.SettingsPanel.ScaleFontsCheckBox)
 	
@@ -195,10 +195,7 @@ end
 -- occurred when the player press the close button in the main panel
 --------------------------------------------------------------------------------
 onReaction["CloseMainPanelBtnReaction"] = function(reaction)
-	DPSMeterGUI.HistoryPanel:Hide()
-	DPSMeterGUI.MainPanel:Hide()
-	DPSMeterGUI.DetailsPanel:Hide()
-	DPSMeterGUI:DetailsClosed()
+	onReaction["ShowHideBtnReaction"]()
 end
 --------------------------------------------------------------------------------
 -- occurred when the player click a player in the player list
@@ -251,6 +248,7 @@ end
 --------------------------------------------------------------------------------
 onReaction["GetFightBtnReaction"] = function(reaction)
 	DPSMeterGUI.HistoryPanel:Hide()
+	DPSMeterGUI.SettingsPanel:Hide()
 	local wtParent = reaction.widget:GetParent()
 	if wtParent:IsEqual(DPSMeterGUI.MainPanel.FightBtn.Widget) then
 		DPSMeterGUI:SwapFight()
@@ -263,6 +261,7 @@ end
 --------------------------------------------------------------------------------
 onReaction["GetModeBtnReaction"] = function(reaction)
 	DPSMeterGUI.HistoryPanel:Hide()
+	DPSMeterGUI.SettingsPanel:Hide()
 	local wtParent = reaction.widget:GetParent()
 	if wtParent:IsEqual(DPSMeterGUI.MainPanel.ModeBtn.Widget) then
 		DPSMeterGUI:SwapMode()
@@ -277,6 +276,7 @@ onReaction["ShowHideBtnReaction"] = function(reaction)
 	if DnD:IsDragging() then return end
 	if DPSMeterGUI.MainPanel:IsVisible() then
 		DPSMeterGUI.HistoryPanel:Hide()
+		DPSMeterGUI.SettingsPanel:Hide()
 		DPSMeterGUI.MainPanel:Hide()
 		DPSMeterGUI.DetailsPanel:Hide()
 		DPSMeterGUI:DetailsClosed()
@@ -284,6 +284,20 @@ onReaction["ShowHideBtnReaction"] = function(reaction)
 		DPSMeterGUI.MainPanel:Show()
 		DPSMeterGUI:UpdateValues()
 	end
+end
+
+onReaction["OnMinusBtnPointing"] = function(reaction)
+	DPSMeterGUI:MinusPlusBtnPointing(reaction)
+end
+
+onReaction["MinusPressed"] = function(reaction)
+	DPSMeterGUI:MinusPressed()
+end
+
+onReaction["OnPlusBtnPointing"] = onReaction["OnMinusBtnPointing"]
+
+onReaction["PlusPressed"] = function(reaction)
+	DPSMeterGUI:PlusPressed()
 end
 
 --==============================================================================
@@ -295,9 +309,9 @@ onMyEvent["EVENT_UNITS_CHANGED"] = function(aParams)
 		if objID then
 			UnsubscribeListeners(objID)
 			
-			for i, buffState in ipairs(CurrentBuffsState) do
-				buffState[objID] = nil
-			end
+			DPSMeterGUI.DPSMeter:RagePlayerDespawned(objID)
+			
+			UpdateBuffsStateByDespawn(objID)
 		end
 	end
 	FabricDestroyUnused()
@@ -403,7 +417,6 @@ function FastUpdate()
 		DPSMeterGUI.DPSMeter:FastTick()
 		DPSMeterGUI:UpdateValues()
 	end
-	DPSMeterGUI.DPSMeter:CollectUnitsRage()
 end
 --------------------------------------------------------------------------------
 -- Event: EVENT_UNIT_DAMAGE_RECEIVED
@@ -426,6 +439,7 @@ function IHpsEventReceived(aParams)
 	DPSMeterGUI.DPSMeter:CollectHealDataIN(aParams)
 end 
 
+
 onMyEvent["EVENT_UNIT_FOLLOWERS_LIST_CHANGED"] = function(aParams)
 	if m_paramsListForPets[aParams.id] then
 		ReloadPet(aParams)
@@ -443,8 +457,33 @@ end
 function PlayerRemoveBuff(aPlayerID, aFindedObj)
 	local buffState = CurrentBuffsState[aFindedObj.ind][aPlayerID]
 	if buffState then
-		buffState.removeTime = common.GetLocalDateTimeMs()
+		buffState.removeTime = cachedGetLocalDateTimeMs()
 		buffState.removeAfterDeath = not object.IsExist(aPlayerID) or object.IsDead(aPlayerID)
+	end
+end
+
+function UpdateBuffsStateByDespawn(anObjID)
+	local currTime = cachedGetLocalDateTimeMs()
+	local buffState
+	for _, buffStates in ipairs(CurrentBuffsState) do
+		buffState = buffStates[anObjID]
+		if buffState then
+			if buffState.removeTime == 0 then
+				buffState.removeTime = currTime
+			end
+			buffState.removeAfterDeath = true
+		end
+	end
+end
+
+function UpdateBuffsStateByTime()
+	local currTime = cachedGetLocalDateTimeMs()
+	for i, value in ipairs(CurrentBuffsState) do
+		for playerID, buffState in pairs(value) do
+			if buffState.removeTime > 0 and currTime - buffState.removeTime > Settings.WaitBuffAfterDeathTime then
+				CurrentBuffsState[i][playerID] = nil
+			end
+		end
 	end
 end
 
@@ -635,7 +674,7 @@ function GlobalInit()
 	m_buffListener.listenerRage = PlayerRageChanged
 	
 	local unitList = avatar.GetUnitList()
-	table.insert(unitList, avatar.GetId())
+	table.insert(unitList, MyAvatarID)
 	for _, unitID in ipairs(unitList) do
 		FabricMakePlayerInfo(unitID, m_buffListener)
 	end
@@ -647,4 +686,6 @@ function GlobalInit()
 	
 	
 	StartTimer(FastUpdate, Settings.FastUpdateInterval)
+	
+	onMyEvent["EVENT_SECOND_TIMER"]()
 end

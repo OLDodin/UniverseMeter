@@ -54,6 +54,7 @@ end
 function GetTextLocalized( strTextName )
 	return localeGroup:GetText( strTextName )
 end
+
 ---------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------ GLOBAL VARIABLES, CLASSES ------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------
@@ -61,20 +62,16 @@ Global( "TWidget", {} )
 ---------------------------------------------------------------------------------------------------------------------------
 function TWidget:CreateNewObject( WidgetName )
 	return setmetatable( {
-			Widget = WidgetName and mainForm:GetChildUnchecked( WidgetName, true ),
-			LastValues = {},
-			bDraggable = false
+			Widget = WidgetName and mainForm:GetChildUnchecked( WidgetName, false ),
+			LastValues = {}
 		}, { __index = self } )
 end
 --------------------------------------------------------------------------------
 function TWidget:CreateNewObjectByDesc( WidgetName, Desc, Parent )
-	if not Parent then
-		LogInfo("ERROR - no parent for create wdg")
-	end
 	local Widget = Parent.Widget:CreateChildByDesc( Desc )
 	Widget:SetName( WidgetName )
 
-	return setmetatable( { Widget = Widget, LastValues = {}, bDraggable = false }, { __index = self } )
+	return setmetatable( { Widget = Widget, LastValues = {} }, { __index = self } )
 end
 --------------------------------------------------------------------------------
 function TWidget:GetDesc()
@@ -95,7 +92,7 @@ function TWidget:GetChildByName( Name )
 		local wtChild = self.Widget:GetChildUnchecked( Name, false )
 		
 		if wtChild then
-			return setmetatable( { Widget = wtChild, LastValues = {}, bDraggable = false }, { __index = self } )
+			return setmetatable( { Widget = wtChild, LastValues = {} }, { __index = self } )
 		end
 	end
 end
@@ -106,7 +103,7 @@ function TWidget:GetChildByIndex( Index )
 		local wtChild = wtChildren[ Index ]
 		
 		if wtChild then
-			return setmetatable( { Widget = wtChild, LastValues = {}, bDraggable = false }, { __index = self } )
+			return setmetatable( { Widget = wtChild, LastValues = {} }, { __index = self } )
 		end
 	end
 end
@@ -118,14 +115,28 @@ function TWidget:Destroy()
 	end
 end
 --------------------------------------------------------------------------------
-function TWidget:DragNDrop( bDraggable, bUseCfg, bLockedToScreenArea, Padding )
+function TWidget:DragNDrop( bUseCfg, bLockedToScreenArea, Padding )
 	if self.Widget then
-		self.bDraggable = bDraggable
-		if bUseCfg ~= nil then
-			DnD.Init( self.Widget, self.Widget, bUseCfg, bLockedToScreenArea, Padding  )
-		else
-			DnD.Enable( self.Widget, bDraggable )
+		DnD.Init( self.Widget, self.Widget, bUseCfg, bLockedToScreenArea, Padding  )
+	end
+end
+--------------------------------------------------------------------------------
+function TWidget:SetVariant( newVariant )
+	if self.Widget then
+		if self.LastValues.variant == newVariant then
+			return
 		end
+		self.LastValues.variant = newVariant
+		self.Widget:SetVariant( newVariant )
+	end
+end
+--------------------------------------------------------------------------------
+function TWidget:SetAlign( newAlignX, newAlignY )
+	if self.Widget then
+		local Placement = {}
+		if newAlignX then Placement.alignX = newAlignX end
+		if newAlignY then Placement.alignY = newAlignY end
+		self.Widget:SetPlacementPlain( Placement )
 	end
 end
 --------------------------------------------------------------------------------

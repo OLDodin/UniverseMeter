@@ -2,6 +2,7 @@
 -- File: AoUMeterUtil.lua
 -- Desc: some useful functions, constants and enums
 --------------------------------------------------------------------------------
+local enumPetName = enumSpellInfo.PetName
 
 local cachedIsExist = object.IsExist
 local cachedIsUnit = object.IsUnit
@@ -14,14 +15,38 @@ local cachedGroupGetMembers = group.GetMembers
 local cachedRaidGetMembers = raid.GetMembers
 local cachedGetFollowerMaster = unit.GetFollowerMaster
 
+local band, bor, bnot = bit.band, bit.bor, bit.bnot
+local lshift, rshift = bit.lshift, bit.rshift
+
 --------------------------------------------------------------------------------
 -- Functions
 --------------------------------------------------------------------------------
--- Get minutes & seconds from an int
-function GetMinSec (sec)
-	local lmin = math.floor(sec / 60)
-	return lmin, sec - lmin * 60
+function PackValue(aMaskInfo, aValue, aBitPackedValue)
+	return bor(band(aBitPackedValue, bnot(aMaskInfo.mask)), lshift(aValue, aMaskInfo.shift))
 end
+
+function GetPackedValue(aMaskInfo, aBitPackedValue)
+	if not aBitPackedValue then
+		return 0
+	end
+	return rshift(band(aBitPackedValue, aMaskInfo.mask), aMaskInfo.shift)
+end
+
+function GetPackedBoolean(aMaskInfo, aBitPackedValue)
+	if not aBitPackedValue then
+		return false
+	end
+	return GetPackedValue(aMaskInfo, aBitPackedValue) == 1
+end
+
+function BoolToNumber(aValue)
+	return aValue and 1 or 0
+end
+
+function GetStoreValue(aValue)
+	return (aValue and aValue ~= 0) and aValue or nil
+end
+
 --------------------------------------------------------------------------------
 -- Make a deep copy of an object (http://oentend.blogspot.com/2009/08/lua.html)
 function DeepCopyObject( object )
@@ -68,7 +93,7 @@ function IsExistPlayer(anObjID)
 end
 
 function IsPetData(aSpellData)
-	return aSpellData.PetName ~= nil
+	return aSpellData[enumPetName] ~= nil
 end
 
 --------------------------------------------------------------------------------
@@ -94,7 +119,7 @@ function SortSpellDetailsByCount(aDetailsList)
 	for Type, DamageDetails in pairs(aDetailsList) do
 		local info = {}
 		info.type = Type
-		info.cnt = DamageDetails.Count
+		info.cnt = TValueDetails.GetCount(DamageDetails)
 		table.insert(a, info)
 	end
 
@@ -119,7 +144,7 @@ function SortSpellDetailsByAmount(aDetailsList)
 	for Type, DamageDetails in pairs(aDetailsList) do
 		local info = {}
 		info.type = Type
-		info.cnt = math.abs(DamageDetails.Amount)
+		info.cnt = math.abs(TValueDetails.GetAmount(DamageDetails))
 		table.insert(a, info)
 	end
 
@@ -175,11 +200,11 @@ local function AddShardName(aName, aPlayerID, aMyShardName)
 end
 
 function InitMyAvatarInfo()
-	local myID = avatar.GetId()
+	MyAvatarID = avatar.GetId()
 	m_myAvatarInfo = {}
-	m_myAvatarInfo.shardName = GetShardName(myID)
-	m_myAvatarInfo.id = myID
-	m_myAvatarInfo.name = object.GetName(myID)
+	m_myAvatarInfo.shardName = GetShardName(MyAvatarID)
+	m_myAvatarInfo.id = MyAvatarID
+	m_myAvatarInfo.name = object.GetName(MyAvatarID)
 	m_myAvatarInfo.className = avatar.GetClass()
 end
 
@@ -264,19 +289,19 @@ function CompareColor(aColor1, aColor2)
 end
 
 function GetTimeString(aSeconds)
-	local minutesStr
-	local secondsStr
-	local minutes = math.floor(aSeconds/60)
-	local seconds = aSeconds - minutes*60
+	local hours = math.floor(aSeconds/3600)
+	local minutes = math.floor((aSeconds - hours*3600)/60)
+	local seconds = aSeconds - hours*3600 - minutes*60
 	
-	if minutes < 10 then minutesStr = "0"..tostring(minutes) else minutesStr = tostring(minutes) end
-	if seconds < 10 then secondsStr = "0"..tostring(seconds) else secondsStr = tostring(seconds) end
-	
-	return minutesStr..":"..secondsStr
+	if hours > 0 then
+		return string.format("%d:%02d:%02d", hours, minutes, seconds)
+	else
+		return string.format("%d:%02d", minutes, seconds)
+	end
 end
 
 function CalculateState(aMember)
-	return (aMember.id == avatar.GetId() or aMember.state and (aMember.state == GROUP_MEMBER_STATE_NEAR or aMember.state == GROUP_MEMBER_STATE_MERC or aMember.state == RAID_MEMBER_STATE_NEAR)) and true or false
+	return (aMember.id == MyAvatarID or aMember.state and (aMember.state == GROUP_MEMBER_STATE_NEAR or aMember.state == GROUP_MEMBER_STATE_MERC or aMember.state == RAID_MEMBER_STATE_NEAR)) and true or false
 end
 
 function CalculateClassIndex(aClassName)

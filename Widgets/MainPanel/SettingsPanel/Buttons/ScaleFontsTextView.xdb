@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetTextView>
+	<Name>ScaleFontsCheckBoxText</Name>
+	<Priority>1</Priority>
+  <Placement>
+    <X>
+      <Align>WIDGET_ALIGN_LOW</Align>
+      <Pos>45</Pos>
+      <Size>280</Size>
+    </X>
+    <Y>
+      <Align>WIDGET_ALIGN_LOW</Align>
+      <Pos>254</Pos>
+      <Size>30</Size>
+    </Y>
+  </Placement>
+	<FormatFileRef href="TextTemp/Text.txt" />
+	<TextValues />
+	<BackLayer href="" />
+	<Visible>True</Visible>
+	<Enabled>True</Enabled>
+	<TextStyle>
+	    <multiline>False</multiline>
+	    <wrapText>False</wrapText>
+	</TextStyle>
+ <TransparentInput>True</TransparentInput>
+</WidgetTextView>

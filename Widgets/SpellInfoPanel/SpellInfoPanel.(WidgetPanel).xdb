@@ -20,6 +20,8 @@
 		<Item href="TimeLapsePanel/ScrollVertical/ScrollableContainer.(WidgetPanel).xdb"/>
 		<Item href="TimeLapsePanel/TextViews/CurrTime.(WidgetTextView).xdb"/>
 		
+		<Item href="BuffImg\ImageBox.xdb" />
+		
 		<Item href="../MainPanel/FightDropDownPanel/FightDropDownPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
 		<Item href="../MainPanel/ModeDropDownPanel/ModeDropDownPanel.(WidgetPanel).xdb#xpointer(/WidgetPanel)" />
 	</Children>

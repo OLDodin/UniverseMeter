@@ -6,11 +6,11 @@
 		<X>
 			<Align>WIDGET_ALIGN_LOW</Align>
 			<Pos>0</Pos>
-			<Size>36</Size>
+			<Size>40</Size>
 		</X>
 		<Y>
 			<Align>WIDGET_ALIGN_HIGH</Align>
-			<HighPos>7</HighPos>
+			<HighPos>11</HighPos>
 			<Size>18</Size>
 		</Y>
 	</Placement>

@@ -12,13 +12,12 @@
     </X>
     <Y>
       <Align>WIDGET_ALIGN_LOW</Align>
-      <Pos>420</Pos>
+      <Pos>440</Pos>
       <Size>25</Size>
     </Y>
   </Placement>
 	<Variants>
 		<Item>
-			<TextFileRef href="ButtonText.txt" />
 			<Reaction>AllTimePressed</Reaction>
 		</Item>
 	</Variants>

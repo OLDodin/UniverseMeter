@@ -1,24 +1,30 @@
 --------------------------------------------------------------------------------
 -- Enumerations
 --------------------------------------------------------------------------------
+
 Global( "enumHit", { Normal = 1, Critical = 2, Glancing = 3 } )
 Global( "enumMiss", { Dodge = 1, Miss = 2 } )
 Global( "enumHitBlock", { Block = 1, Parry = 2, Barrier = 3, Resist = 4, Absorb = 5, RunesAbsorb = 6, MultAbsorb = 7, Mount = 8 } )
 Global( "enumHealResist", { Resisted = 1, RuneResisted = 2, Absorbed = 3, Overload = 4 } )
 Global( "enumGlobalInfo", { Determination = 1,  Critical = 2, Physical = 3, Elemental = 4, Holy = 5, Natural = 6 } )
-Global( "enumMode", { Dps = 1, Hps = 2, Def = 3, IHps = 4 } )
+Global( "enumMode", { Dps = 0, Hps = 1, Def = 2, IHps = 3 } )
 Global( "enumFight", { Current = 0, Total = 1, History = 3 } )
+Global( "enumDmgTypes", { Physical = 0, Elemental = 1, Holy = 2, Natural = 3 } )
+Global( "enumInfo", { Amount = 0, Count = 1, Min = 2, Max = 3 } )
+Global( "enumSpellInfo", { Count = 0, Amount = 1, InfoID = 2, Name = 3, PackedValue = 4, Hits = 5, PetName = 6 } )
+Global( "enumCombatantInfo", { ID = 0, Name = 1, BitPackedValue = 2, Data = 3 } )
+Global( "enumTimelapseScale", { [1] = 1, [2] = 1.16, [3] = 1.3, [4] = 1.6 } )
 
 --------------------------------------------------------------------------------
 -- Init in FillBuffCheckList
 --------------------------------------------------------------------------------
-Global( "ServerBuffIndex", { Valor = 0, Vulnerability = 0, Weakness = 0, Defense = 0 } )
+Global( "CustomBuffIndex", { Valor = 0, Vulnerability = 0, Weakness = 0, Defense = 0, Might = 0 } )
 Global( "DPSHPSTYPES", 0)
 Global( "DEFTYPES", 0)
 --------------------------------------------------------------------------------
 -- Constants
 --------------------------------------------------------------------------------
-Global( "INITSPELLSCNT", 20)
+Global( "INITSPELLSCNT", 30)
 Global( "DMGTYPES", GetTableSize(enumHit))
 Global( "MISSTYPES", GetTableSize(enumMiss))
 Global( "BLOCKDMGTYPES", GetTableSize(enumHitBlock))
@@ -34,13 +40,12 @@ Global("Settings", {
 		DefaultMode = enumMode.Dps,	    -- default mode when starts
 		MaxCombatants = 30,	            -- Number of maximum combatants to display
 		FastUpdateInterval = 0.2,
-		HeavyMode_MaxCombatant = 2,	    -- Below this value, the GUI is refreshed at every FastUpdateInterval, else every second only
+		HeavyMode_MaxCombatant = 2,	    -- Below this value, the GUI is refreshed at every FastUpdateInterval, else FastUpdateInterval * 3
 		MaxOffBattleTime = 3,           -- Off-time battle (in seconds) allows to retrieve data coming just after the end of the fight (the events seems to not arrive in the correct order)
 		CloseDist = 150,        		-- Range to consider if a combatant is close to the avatar or not 
 		SkipDmgAndHpsOnPet = false,		-- ignore dd out and hps out for pet
 		SkipDmgYourselfIn = false,
 		StartHided = false,
-		CollectTotalTimelapse = false,		-- memory consumption optimization
 		ShowPositionOnBtn = false,			-- show active mode position on btn
 		ScaleFonts = false,
 		MemoryUsageLimit = common.GetClientArch() == CLIENT_ARCH_WIN64 and 350*1024 or 50*1024,	
@@ -101,6 +106,10 @@ Global("UnknownTex", {})
 Global("DeadTex", {})
 Global("KillTex", {})
 Global("DeadKillTex", {})
+Global("DefenceTex", {})
+Global("MightTex", {})
+Global("ValorTex", {})
+
 --------------------------------------------------------------------------------
 -- Events
 --------------------------------------------------------------------------------
@@ -123,7 +132,7 @@ Global("ClassColorsIndex", {
 		["BARD"]		= 9,
 		["ENGINEER"]    = 10,
 		["WARLOCK"]     = 11,
-		["UNKNOWN"]		= 12,
+		["UNKNOWN"]		= 12
 	})
 Global("ClassColors", {
 		[1]		= { r = 165/255, g = 138/255, b = 087/255, a = 1 },
@@ -137,22 +146,28 @@ Global("ClassColors", {
 		[9]		= { r = 000/255, g = 255/255, b = 200/255, a = 1 },
 		[10]    = { r = 135/255, g = 163/255, b = 177/255, a = 1 },
 		[11]    = { r = 125/255, g = 101/255, b = 219/255, a = 1 },
-		[12]	= { r = 127/255, g = 127/255, b = 127/255, a = 1 },
+		[12]	= { r = 127/255, g = 127/255, b = 127/255, a = 1 }
 	})
+Global( "enumSubElementIndex", {
+	["ENUM_SubElement_PHYSICAL"]	= enumDmgTypes.Physical,
+
+	["ENUM_SubElement_FIRE"]		= enumDmgTypes.Elemental,
+	["ENUM_SubElement_COLD"]		= enumDmgTypes.Elemental,
+	["ENUM_SubElement_LIGHTNING"]	= enumDmgTypes.Elemental,
+
+	["ENUM_SubElement_HOLY"]		= enumDmgTypes.Holy,
+	["ENUM_SubElement_SHADOW"]		= enumDmgTypes.Holy,
+	["ENUM_SubElement_ASTRAL"]		= enumDmgTypes.Holy,
+
+	["ENUM_SubElement_POISON"]		= enumDmgTypes.Natural,
+	["ENUM_SubElement_DISEASE"]	    = enumDmgTypes.Natural,
+	["ENUM_SubElement_ACID"]		= enumDmgTypes.Natural
+})
 Global( "DamageTypeColors", {
-		["ENUM_SubElement_PHYSICAL"]	= { r = 0.7, g = 0.5, b = 0.3, a = 1 },
-		
-		["ENUM_SubElement_FIRE"]		= { r = 0.2, g = 0.35, b = 1.0, a = 1 },
-		["ENUM_SubElement_COLD"]		= { r = 0.2, g = 0.35, b = 1.0, a = 1 },
-		["ENUM_SubElement_LIGHTNING"]	= { r = 0.2, g = 0.35, b = 1.0, a = 1 },
-		
-		["ENUM_SubElement_HOLY"]		= { r = 1.0, g = 1.0, b = 0.5, a = 1 },
-		["ENUM_SubElement_SHADOW"]		= { r = 1.0, g = 1.0, b = 0.5, a = 1 },
-		["ENUM_SubElement_ASTRAL"]		= { r = 1.0, g = 1.0, b = 0.5, a = 1 },
-		
-		["ENUM_SubElement_POISON"]		= { r = 0.3, g = 1.0, b = 0.3, a = 1 },
-		["ENUM_SubElement_DISEASE"]	    = { r = 0.3, g = 1.0, b = 0.3, a = 1 },
-		["ENUM_SubElement_ACID"]		= { r = 0.3, g = 1.0, b = 0.3, a = 1 },
+		[enumDmgTypes.Physical]	= { r = 0.7, g = 0.5, b = 0.3, a = 1 },
+		[enumDmgTypes.Elemental]	= { r = 0.2, g = 0.35, b = 1.0, a = 1 },
+		[enumDmgTypes.Holy]	= { r = 1.0, g = 1.0, b = 0.5, a = 1 },
+		[enumDmgTypes.Natural]	= { r = 0.3, g = 1.0, b = 0.3, a = 1 }
 	})
 Global( "HitTypeColors", {
 		[1] = { r = 1.0, g = 1.0, b = 1.0, a = 1 }, -- Normal
@@ -164,10 +179,10 @@ Global( "HitTypeColors", {
 Global( "GlobalInfoTypeColors", {
 		[1] = { r = 1.0, g = 1.0, b = 1.0, a = 1 }, --Determination
 		[2] = { r = 1.0, g = 0.0, b = 0.0, a = 1 }, --Critical
-		[3] = { r = 0.7, g = 0.5, b = 0.3, a = 1 }, --Physical
-		[4] = { r = 0.2, g = 0.35, b = 1.0, a = 1 }, --Elemental
-		[5] = { r = 1.0, g = 1.0, b = 0.5, a = 1 }, --Holy
-		[6] = { r = 0.3, g = 1.0, b = 0.3, a = 1 }, --Natural
+		[3] = DamageTypeColors[enumDmgTypes.Physical], --Physical
+		[4] = DamageTypeColors[enumDmgTypes.Elemental], --Elemental
+		[5] = DamageTypeColors[enumDmgTypes.Holy], --Holy
+		[6] = DamageTypeColors[enumDmgTypes.Natural] --Natural
 	})
 	
 for i = 6, 100, 8 do
@@ -189,4 +204,5 @@ Global("DPSMeterGUI", {})
 
 Global( "CurrentBuffsState", {})
 
-Global( "CurrentScoreOnMainBtn", 1)
+Global( "CurrentScoreOnMainBtn", false)
+Global("MyAvatarID", false)

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetPanel>
+	<Name>SettingsPanel</Name>
+	<Priority>3</Priority>
+	<Children>
+		<Item href="Buttons/DefCheckBox/CheckBox.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/DefCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="Buttons/DpsCheckBox/CheckBox.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/DpsCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="Buttons/HpsCheckBox/CheckBox.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/HpsCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="Buttons/IhpsCheckBox/CheckBox.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/IhpsCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="Buttons/SkipPetCheckBox/CheckBox.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/SkipPetCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="Buttons/SkipYourselfCheckBox/CheckBox.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/SkipYourselfCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="Buttons/StartHidedCheckBox/CheckBox.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/StartHidedCheckBox_text/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="Buttons/ShowScoreCheckBox.xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/ShowScoreTextView.xdb#xpointer(/WidgetTextView)" />
+		<Item href="Buttons/ScaleFontsCheckBox.xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/ScaleFontsTextView.xdb#xpointer(/WidgetTextView)" />
+				
+		<Item href="Buttons/SaveBtn/Button.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/HeaderText/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />		
+		
+		<Item href="Buttons/CombatantCnt.(WidgetEditLine).xdb" />
+		<Item href="Buttons/CombatantCnt_text.(WidgetTextView).xdb" />
+	</Children>
+	<BackLayer href="SettingsPanel.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Size>340</Size>
+			<Pos>0</Pos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Size>350</Size>
+			<Pos>30</Pos>
+		</Y>
+	</Placement>
+	<Visible>false</Visible>
+</WidgetPanel>

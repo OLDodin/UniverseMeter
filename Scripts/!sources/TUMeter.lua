@@ -6,6 +6,7 @@ local cachedGetRage = unit.GetRage
 local cachedGetName = object.GetName
 local cachedIsExist = object.IsExist
 local cachedGetFollowerMaster = unit.GetFollowerMaster
+local cachedGetLocalDateTimeMs = common.GetLocalDateTimeMs
 
 --------------------------------------------------------------------------------
 -- Type TUMeter
@@ -25,8 +26,7 @@ function TUMeter:CreateNewObject()
 			HistoryTotalFights = TList(),
 			HistoryCurrentFights = TList(),
 			CurrentPlayersDetermination = {}, 
-			LastTickPlayersDetermination = { timestamp = 0 },
-			LastLastTickPlayersDetermination = { timestamp = 0 },
+			LastPlayersDetermination = {},
 			CheckMemoryCnt = 0,
 			ClearCacheCnt = 0,
 			bHistoryIncresed = false,
@@ -71,7 +71,7 @@ end
 function TUMeter:UpdateOrAddCombatant(aMember)
 	self.bHasChangesOnTick = true
 	local combatant = self:GetLastFightPeriod():UpdateOrAddCombatant(aMember.id, aMember.name, CalculateClassIndex(aMember.className), CalculateState(aMember))
-	combatant:UpdateRange()
+	TCombatant.UpdateRange(combatant)
 end
 --------------------------------------------------------------------------------
 -- Regen (add or update) combatant list
@@ -91,7 +91,7 @@ function TUMeter:UpdateCombatantPos()
 		if member.id then
 			local combatant = currentFight:GetCombatant(member.id)
 			if combatant then
-				combatant:UpdateRange()
+				TCombatant.UpdateRange(combatant)
 			end
 		end
 	end
@@ -116,10 +116,10 @@ function TUMeter:SecondTick()
 		if not self.bHasChangesOnTick then
 			--memory optimize
 			self.Fight.Current:AddFightPeriodAndApply(self.EmptyPeriod)
-			self.Fight.Total:AddFightPeriodAndApply(self.EmptyPeriod, not Settings.CollectTotalTimelapse)
+			self.Fight.Total:AddFightPeriodAndApply(self.EmptyPeriod)
 		else
 			self.Fight.Current:AddFightPeriodAndApply(lastPeriod)
-			self.Fight.Total:AddFightPeriodAndApply(lastPeriod, not Settings.CollectTotalTimelapse)
+			self.Fight.Total:AddFightPeriodAndApply(lastPeriod)
 		end
 	else
 		self.Fight.Current:UpdateCombatantFromFightPeriod(lastPeriod)
@@ -136,33 +136,39 @@ function TUMeter:SecondTick()
 end
 
 function TUMeter:UpdateUnitRage(anID, aValue)
-	self.CurrentPlayersDetermination[anID] = aValue
-end
-
-function TUMeter:CollectUnitsRage()
-	self.LastLastTickPlayersDetermination = self.LastTickPlayersDetermination
-	
-	self.LastTickPlayersDetermination = self.CurrentPlayersDetermination
-	self.LastTickPlayersDetermination.timestamp = common.GetLocalDateTimeMs()
-	
-	self.CurrentPlayersDetermination = {}
+	self.LastPlayersDetermination[anID] = self.CurrentPlayersDetermination[anID]
+	self.CurrentPlayersDetermination[anID] = { value = aValue, timestamp = cachedGetLocalDateTimeMs() }
 end
 
 function TUMeter:GetUnitRage(anID)
 	if not anID then
-		return nil
+		return 0
 	end
-	local determinationArr = self.LastTickPlayersDetermination
-	if common.GetLocalDateTimeMs() - self.LastTickPlayersDetermination.timestamp < 50 then
-		determinationArr = self.LastLastTickPlayersDetermination
+
+	local currTime = cachedGetLocalDateTimeMs()
+	local determinationObj = self.CurrentPlayersDetermination[anID]
+	local lastDeterminationObj = nil
+	if determinationObj and currTime - determinationObj.timestamp < 60 then
+		lastDeterminationObj = self.LastPlayersDetermination[anID]
+		if lastDeterminationObj and currTime - lastDeterminationObj.timestamp < 1100 then
+			determinationObj = self.LastPlayersDetermination[anID]
+		end
+	end
+
+	if not determinationObj then
+		local currDetermination = IsExistUnit(anID) and cachedGetRage(anID) or 0
+		self.CurrentPlayersDetermination[anID] = { value = currDetermination, timestamp = currTime }
+		return currDetermination
 	end
 	
-	if not determinationArr[anID] then
-		determinationArr[anID] = IsExistUnit(anID) and cachedGetRage(anID) or nil
-	end
-	
-	return determinationArr[anID]
+	return determinationObj.value
 end
+
+function TUMeter:RagePlayerDespawned(anID)
+	self.LastPlayersDetermination[anID] = nil
+	self.CurrentPlayersDetermination[anID] = nil
+end
+
 
 function TUMeter:GetFightCombatant(anID)
 	if not anID then return end
@@ -260,6 +266,7 @@ function TUMeter:GetInfoFromParams(aParams)
 end
 
 -- например, для парных боссов приходит урон и для 2го, но уже только с указанием sourceName targetName
+-- или урон от вихрей на "ведьмин яр хаос" - урон без имени и ид нанёсшего будет как "?->имя игрока"
 local function BuildBySourceName(aSrcName, aTargetName)
 	local spellName = aSrcName and not aSrcName:IsEmpty() and aSrcName or StrUnknown
 	if aTargetName then
@@ -281,48 +288,42 @@ end
 --------------------------------------------------------------------------------
 -- Get information of a spell
 --------------------------------------------------------------------------------
-function TUMeter:GetSpellInfoFromParams(aParams, anIsPet, aMode)
+function TUMeter:GetSpellInfoFromParamsDD(aParams, anIsPet, aMode)
 	local spellInfo = {}
 	
 	spellInfo.infoID = aParams.buffId or aParams.spellId or aParams.abilityId or aParams.mapModifierId
 
 	if aParams.damageSource == "DamageSource_DAMAGEPOOL" then
-		spellInfo.Name = StrDamagePool
+		spellInfo.name = StrDamagePool
 		spellInfo.fromBarrier = true
 	elseif aParams.damageSource == "DamageSource_BARRIER" then
-		spellInfo.Name = StrFromBarrier
+		spellInfo.name = StrFromBarrier
 		spellInfo.fromBarrier = true
 	else
-		spellInfo.Name = aParams.ability
+		spellInfo.name = aParams.ability
 		
-		if spellInfo.Name == nil or spellInfo.Name:IsEmpty() then
+		if spellInfo.name == nil or spellInfo.name:IsEmpty() then
 			local someInfo = self:GetInfoFromParams(aParams)
 			if someInfo and someInfo.name and not someInfo.name:IsEmpty() then
-				spellInfo.Name = someInfo.name
+				spellInfo.name = someInfo.name
 			else
-				spellInfo.Name =
+				spellInfo.name =
 				aParams.isExploit and StrExploit
 				or aParams.isFall and StrFall
-				or (aMode == enumMode.Dps or aMode == enumMode.Def) and BuildBySourceName(aParams.sourceName, aParams.targetName)
-				or (aMode == enumMode.Hps or aMode == enumMode.IHps) and BuildHealBySourceName(aParams.healerId, aParams.unitId)
+				or BuildBySourceName(aParams.sourceName, aParams.targetName)
 				or StrUnknown
 			end
 		end
 	end
 	
-	spellInfo.IsPet = anIsPet
-	spellInfo.PetName = anIsPet and aParams.sourceName or nil
+	spellInfo.isPet = anIsPet
+	spellInfo.petName = anIsPet and aParams.sourceName or nil
 	
-	spellInfo.Determination = self:GetUnitRage(aParams.source or aParams.healerId)
-	
-	if aMode == enumMode.Hps or aMode == enumMode.IHps then
-		spellInfo.sysSubElement = "ENUM_SubElement_HOLY"
-	else
-		spellInfo.sysSubElement = aParams.sysSubElement
-	end
-	
-	--dd event
-	spellInfo.amount = aParams.amount or aParams.heal
+	spellInfo.determination = self:GetUnitRage(aParams.source)
+	spellInfo.sysSubElement = enumSubElementIndex[aParams.sysSubElement]
+
+
+	spellInfo.amount = aParams.amount
 	spellInfo.isMiss = aParams.isMiss
 	spellInfo.isDodge = aParams.isDodge
 	spellInfo.isCritical = aParams.isCritical
@@ -336,31 +337,19 @@ function TUMeter:GetSpellInfoFromParams(aParams, anIsPet, aMode)
 	spellInfo.toMount = aParams.toMount
 	spellInfo.multipliersAbsorb = aParams.multipliersAbsorb
 	spellInfo.lethal = aParams.lethal
-	--heal event
-	spellInfo.heal = aParams.heal
-	spellInfo.resisted = aParams.resisted
-	spellInfo.runeResisted = aParams.runeResisted
-	spellInfo.absorbed = aParams.absorbed
-	spellInfo.overload = aParams.overload
-	spellInfo.lethality = aParams.lethality
 	
-	spellInfo.Vulnerability = false
-	spellInfo.Weakness = false
-	spellInfo.Valor = false
-	spellInfo.Defense = false
-
-	spellInfo.sourceID = aParams.source or aParams.healerId
-	spellInfo.targetID = aParams.target or aParams.unitId
+	spellInfo.sourceID = aParams.source
+	spellInfo.targetID = aParams.target
    
 	for _, combatTag in pairs( aParams.targetTags or {} ) do
 		local info = combatTag:GetInfo()
 		if info.isHelpful then 
 			if info.name == StrDefense then
-				spellInfo.Defense = true
+				spellInfo.defense = true
 			end
 		else
 			if info.name == StrVulnerability then
-				spellInfo.Vulnerability = true
+				spellInfo.vulnerability = true
 			end
 		end
 	end
@@ -369,14 +358,52 @@ function TUMeter:GetSpellInfoFromParams(aParams, anIsPet, aMode)
 		local info = combatTag:GetInfo()
 		if info.isHelpful then
 			if info.name == StrValor then
-				spellInfo.Valor = true
+				spellInfo.valor = true
 			end
 		else
 			if info.name == StrWeakness then
-				spellInfo.Weakness = true
+				spellInfo.weakness = true
 			end
 		end
 	end
+
+	return spellInfo
+end
+
+function TUMeter:GetSpellInfoFromParamsHPS(aParams, anIsPet)
+	local spellInfo = {}
+	
+	spellInfo.infoID = aParams.buffId or aParams.spellId or aParams.abilityId
+
+	local someInfo = self:GetInfoFromParams(aParams)
+	if someInfo and someInfo.name and not someInfo.name:IsEmpty() then
+		spellInfo.name = someInfo.name
+	else
+		spellInfo.name =
+		aParams.isFall and StrFall
+		or BuildHealBySourceName(aParams.healerId, aParams.unitId)
+		or StrUnknown
+	end
+
+	spellInfo.isPet = anIsPet
+	if anIsPet and IsExistUnit(aParams.healerId) then
+		spellInfo.petName = cachedGetName(aParams.healerId) or nil
+	end
+	
+	spellInfo.determination = self:GetUnitRage(aParams.healerId)
+
+	spellInfo.sysSubElement = enumSubElementIndex["ENUM_SubElement_HOLY"]
+
+	spellInfo.amount = aParams.heal
+	spellInfo.isCritical = aParams.isCritical
+	spellInfo.isGlancing = aParams.isGlancing
+	spellInfo.resisted = aParams.resisted
+	spellInfo.runeResisted = aParams.runeResisted
+	spellInfo.absorbed = aParams.absorbed
+	spellInfo.overload = aParams.overload
+	
+	spellInfo.sourceID = aParams.healerId
+	spellInfo.targetID = aParams.unitId
 
 	return spellInfo
 end
@@ -385,13 +412,14 @@ end
 --	Condition: the avatar is in combat
 --------------------------------------------------------------------------------
 function TUMeter:ShouldCollectData()
-	if object.IsInCombat(avatar.GetId()) then
+	if object.IsInCombat(MyAvatarID) then
 		return true
 	end
 
-	-- Should parse all other fighters ?
+	local comdID
 	for i, combatant in pairs(self:GetLastFightPeriod().CombatantsList) do
-		if combatant.ID and cachedIsExist(combatant.ID) and combatant:IsClose() and (object.IsInCombat(combatant.ID) or PlayerPetInCombat(combatant.ID)) then			
+		comdID = TCombatant.GetID(combatant)
+		if comdID and cachedIsExist(comdID) and TCombatant.IsClose(combatant) and (object.IsInCombat(comdID) or PlayerPetInCombat(comdID)) then			
 			return true
 		end
 	end
@@ -400,7 +428,12 @@ function TUMeter:ShouldCollectData()
 end
 
 function TUMeter:CollectData(aMode, aCombatant, anIsPet, aParams)
-	local spellInfo = self:GetSpellInfoFromParams(aParams, anIsPet, aMode)
+	local spellInfo
+	if aMode == enumMode.Dps or aMode == enumMode.Def then
+		spellInfo = self:GetSpellInfoFromParamsDD(aParams, anIsPet)
+	else
+		spellInfo = self:GetSpellInfoFromParamsHPS(aParams, anIsPet)
+	end
 	self:UpdateFightData(aMode, aCombatant, spellInfo)
 	return true
 end
@@ -419,7 +452,7 @@ function TUMeter:CollectDamageDealedData(aParams)
 	if Settings.SkipDmgAndHpsOnPet and IsExistPet(aParams.target) then return end
 
 	-- If we're not collecting data, means we are not currently in fight, then start a new one
-	if not self.bCollectData and currFightCombatant:IsClose() and (self:ShouldCollectData() or aParams.lethal) then
+	if not self.bCollectData and TCombatant.IsClose(currFightCombatant) and (self:ShouldCollectData() or aParams.lethal) then
 		self:Start()
 	end
 
@@ -437,7 +470,7 @@ function TUMeter:CollectDamageReceivedData(aParams)
 
 	if not currFightCombatant then return end
 
-	if not self.bCollectData and currFightCombatant:IsClose() and (self:ShouldCollectData() or aParams.lethal) then
+	if not self.bCollectData and TCombatant.IsClose(currFightCombatant) and (self:ShouldCollectData() or aParams.lethal) then
 		self:Start()
 	end
 
@@ -460,7 +493,7 @@ function TUMeter:CollectHealData(aParams)
 	
 	if Settings.SkipDmgAndHpsOnPet and IsExistPet(aParams.unitId) then return end
 
-	if not self.bCollectData and currFightCombatant:IsClose() and self:ShouldCollectData() then
+	if not self.bCollectData and TCombatant.IsClose(currFightCombatant) and self:ShouldCollectData() then
 		self:Start()
 	end
 
@@ -473,7 +506,7 @@ function TUMeter:CollectHealDataIN(aParams)
 
 	if not currFightCombatant then return end
 
-	if not self.bCollectData and currFightCombatant:IsClose() and self:ShouldCollectData() then
+	if not self.bCollectData and TCombatant.IsClose(currFightCombatant) and self:ShouldCollectData() then
 		self:Start()
 	end
 
@@ -483,18 +516,14 @@ end
 -- Update the data in the given mode
 --------------------------------------------------------------------------------
 function TUMeter:UpdateFightData(aMode, aCombatant, aSpellInfo)
-	aCombatant:IncreaseCombatantAmount(aSpellInfo.amount, aMode)
-
-	if aSpellInfo.Determination ~= nil then
-		aCombatant:UpdateGlobalInfo(enumGlobalInfo.Determination, aMode, aSpellInfo.Determination)
-	end
+	TCombatant.UpdateGlobalInfo(aCombatant, enumGlobalInfo.Determination, aMode, aSpellInfo.determination)
 	
-	local spellData = aCombatant:GetSpellByIdentifier(aMode, aSpellInfo.IsPet, aSpellInfo.sysSubElement, aSpellInfo.Name)
+	local spellData = TCombatant.GetSpellByIdentifier(aCombatant, aMode, aSpellInfo.isPet, aSpellInfo.sysSubElement, aSpellInfo.name)
 	if not spellData then
-		spellData = aCombatant:AddNewSpell(aSpellInfo, aMode)
+		spellData = TCombatant.AddNewSpell(aCombatant, aSpellInfo, aMode)
 	end
 
-	aCombatant:UpdateSpellDataByInfo(aSpellInfo, spellData, aMode)
+	TCombatant.UpdateSpellDataByInfo(aCombatant, aSpellInfo, spellData, aMode)
 	
 	self.bHasChangesOnTick = true
 end
@@ -505,7 +534,7 @@ function TUMeter:CollectMissedDataOnStartFight(anObjID)
 	local currFightCombatant = self:GetFightCombatant(anObjID)
 	if not currFightCombatant then return end
 
-	if not self.bCollectData and currFightCombatant:IsClose() and self:ShouldCollectData() then
+	if not self.bCollectData and TCombatant.IsClose(currFightCombatant) and self:ShouldCollectData() then
 		local periodsArrSize = self.GlobalFightPeriodsArr.length
 		if periodsArrSize > 1 then
 			local prevPeriod = TList:unpackFromList(self.GlobalFightPeriodsArr:prev(self.GlobalFightPeriodsArr.last))
@@ -538,7 +567,7 @@ function TUMeter:Start()
 		local prevPeriod = TList:unpackFromList(self.GlobalFightPeriodsArr:prev(self.GlobalFightPeriodsArr.last))
 		if prevPeriod:HasData() then
 			self.Fight.Current:AddFightPeriodAndApply(prevPeriod)
-			self.Fight.Total:AddFightPeriodAndApply(prevPeriod, not Settings.CollectTotalTimelapse)
+			self.Fight.Total:AddFightPeriodAndApply(prevPeriod)
 		end
 	end
 end

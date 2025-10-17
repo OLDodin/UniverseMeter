@@ -23,6 +23,7 @@
 		<Item href="Scripts/LinkedList.lua"/>
 		<Item href="Scripts/AoUMeterDecl.lua"/>
 		<Item href="Scripts/AoUMeterUtil.lua"/>
+		<Item href="Scripts/TValueDetails.lua"/>
 		<Item href="Scripts/TSpellData.lua"/>
 		<Item href="Scripts/TCombatant.lua"/>
 		<Item href="Scripts/TFight.lua"/>

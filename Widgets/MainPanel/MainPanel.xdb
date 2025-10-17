@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetPanel>
+	<Name>MainPanel</Name>
+	<Priority>2</Priority>
+	<Children>
+		<Item href="Buttons/ResetBtn/ResetBtn.(WidgetButton).xdb" />
+		<Item href="Buttons/CloseBtn/CloseBtn.(WidgetButton).xdb" />
+		<Item href="FightDropDownPanel/FightDropDownPanel.(WidgetPanel).xdb" />
+		<Item href="ModeDropDownPanel/ModeDropDownPanel.(WidgetPanel).xdb" />
+		<Item href="Buttons/ConfigBtn/ConfigButton.(WidgetButton).xdb" />
+		<Item href="Buttons/HistoryBtn/HistoryButton.(WidgetButton).xdb" />
+		<Item href="SettingsPanel/SettingsPanel.(WidgetPanel).xdb" />
+		<Item href="HistoryPanel/HistoryPanel.(WidgetPanel).xdb" />
+		
+		<Item href="MainPanelTop.xdb" />
+	</Children>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Size>330</Size>
+			<Pos>35</Pos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Size>280</Size>
+			<Pos>300</Pos>
+		</Y>
+	</Placement>
+	<PickChildrenOnly>true</PickChildrenOnly>
+	<TransparentInput>false</TransparentInput>
+	<Visible>true</Visible>
+	<Enabled>true</Enabled>
+</WidgetPanel>

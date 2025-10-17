@@ -14,20 +14,17 @@
 	</Placement>
 	<IgnoreDblClick>true</IgnoreDblClick>
 	<Variants>
-		<Item>
-			
+		<Item>	
 			<LayerHighlight href="ButtonHighlighted.xdb" />
 			<PushedOffset x="-2" y="2" />
 			<StateNormal>
 				<LayerMain href="ButtonNormal.xdb" />
-				
 			</StateNormal>
 			<StatePushed>
 				<LayerMain href="ButtonPressed.xdb" />
 			</StatePushed>
 			<StateDisabled>
 				<LayerMain href="ButtonDisabled.xdb" />
-				
 			</StateDisabled>
 			<ReactionOnUp>true</ReactionOnUp>
 		</Item>
@@ -59,20 +56,5 @@
 			</StateDisabled>
 			<ReactionOnUp>true</ReactionOnUp>
 		</Item>
-		<Item>			
-			<LayerHighlight href="ButtonHighlighted.xdb" />
-			<PushedOffset x="-2" y="2" />
-			<StateNormal>
-				<LayerMain href="ButtonNormal4.xdb" />
-			</StateNormal>
-			<StatePushed>
-				<LayerMain href="ButtonPressed4.xdb" />
-			</StatePushed>
-			<StateDisabled>
-				<LayerMain href="ButtonDisabled.xdb" />
-			</StateDisabled>
-			<ReactionOnUp>true</ReactionOnUp>
-		</Item>
 	</Variants>
-	
 </WidgetButton>

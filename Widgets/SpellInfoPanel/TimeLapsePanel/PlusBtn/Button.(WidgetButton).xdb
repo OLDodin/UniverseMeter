@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetButton>
+<Name>PlusBtn</Name>
+	<Header>
+		<Prototype href="/Mods/SampleCommon/Button/ButtonRegular.Prototype.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+	</Header>
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<Pos>4</Pos>
+			<Size>22</Size>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Pos>4</Pos>
+			<Size>22</Size>
+		</Y>
+	</Placement>
+	<fade>0.2</fade>
+	<Variants>
+		<Item>
+			<Reaction>PlusPressed</Reaction>
+			<ReactionOnUp>false</ReactionOnUp>
+		</Item>
+	</Variants>
+	<reactionOnPointing>OnPlusBtnPointing</reactionOnPointing>
+</WidgetButton>

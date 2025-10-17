@@ -16,6 +16,7 @@ local function FillBuffCheckList()
 		table.insert(buffCheckList, {name = GetTextLocalized("HpsBuff"..i), ind = index, forSrc = true, forHps = true})
 		index = index + 1
 	end
+	CustomBuffIndex.Might = 2
 	for i = 1, 3 do
 		table.insert(buffCheckList, {name = GetTextLocalized("DpsHpsBuff"..i), ind = index, forSrc = true, forHps = true, forDps = true})
 		index = index + 1
@@ -24,12 +25,12 @@ local function FillBuffCheckList()
 		table.insert(buffCheckList, {name = GetTextLocalized("DpsBuff"..i), ind = index, forSrc = true, forDps = true})
 		index = index + 1
 	end
-	ServerBuffIndex.Valor = index - 1
+	CustomBuffIndex.Valor = index - 1
 	for i = 3, 3 do
 		table.insert(buffCheckList, {name = GetTextLocalized("DpsBuff"..i), ind = index, forTarget = true, forDps = true})
 		index = index + 1
 	end
-	ServerBuffIndex.Vulnerability = index - 1
+	CustomBuffIndex.Vulnerability = index - 1
 	
 	DPSHPSTYPES = 9
 	DEFTYPES = 27
@@ -41,12 +42,12 @@ local function FillBuffCheckList()
 		table.insert(buffCheckList, {name = GetTextLocalized("DefBuff"..i), ind = index, forTarget = true, forDps = true})
 		index = index + 1
 	end
-	ServerBuffIndex.Defense = index - 1
+	CustomBuffIndex.Defense = index - 1
 	for i = 26, 26 do
 		table.insert(buffCheckList, {name = GetTextLocalized("DefBuff"..i), ind = index, forSrc = true, forDps = true})
 		index = index + 1
 	end
-	ServerBuffIndex.Weakness = index - 1
+	CustomBuffIndex.Weakness = index - 1
 	
 	for i = 1, DPSHPSTYPES do
 		TitleCustomDpsBuffType[i] = buffCheckList[i].name
@@ -139,6 +140,9 @@ local function Init()
 	DeadTex = textureGroup:GetTexture("Dead")
 	KillTex = textureGroup:GetTexture("Kill")
 	DeadKillTex = textureGroup:GetTexture("DeadKill")
+	DefenceTex = textureGroup:GetTexture("Defence")
+	MightTex = textureGroup:GetTexture("Might")
+	ValorTex = textureGroup:GetTexture("Valor")
 
 	local savedData = userMods.GetGlobalConfigSection("UniverseMeterSettings")
 	if savedData then
@@ -150,7 +154,6 @@ local function Init()
 		Settings.SkipDmgAndHpsOnPet = savedData.skipDmgAndHpsOnPet
 		Settings.SkipDmgYourselfIn = savedData.skipDmgYourselfIn
 		Settings.StartHided = savedData.startHided
-		Settings.CollectTotalTimelapse = savedData.сollectTotalTimelapse
 		Settings.ShowPositionOnBtn = savedData.showPositionOnBtn
 		Settings.ScaleFonts = savedData.scaleFonts
 		if savedData.maxCombatants then
