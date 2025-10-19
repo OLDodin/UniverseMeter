@@ -6,7 +6,9 @@ local m_paramsListForHps = {}
 local m_paramsListForIHps = {}
 local m_paramsListForPets = {}
 
+local m_redrawCnt = 0
 local m_mustUpdateGUI = true
+local m_mustRedrawGUI = true
 local m_buffListener = {}
 local m_isBtnInAOPanelNow = false
 local m_mainPanelWasVisible = false
@@ -386,37 +388,51 @@ onMyEvent["EVENT_SECOND_TIMER"] = function(aParams)
 	OnEventSecondZatichka()
 	UpdateBuffsStateByTime()
 	
-	DPSMeterGUI.DPSMeter:SecondTick()
-	DPSMeterGUI.DPSMeter:UpdateCombatantPos()
+	local dpsMeter = DPSMeterGUI.DPSMeter
+	
+	dpsMeter:SecondTick(false)
+	dpsMeter:UpdateCombatantPos()
 
-	if DPSMeterGUI.DPSMeter.bHistoryChanged then
+	if dpsMeter.bHistoryChanged then
 		DPSMeterGUI:UpdateHistory(true)
-		DPSMeterGUI.DPSMeter.bHistoryChanged = false
+		dpsMeter.bHistoryChanged = false
 	end
 	
-	if DPSMeterGUI.DPSMeter.bCollectData then
-		if DPSMeterGUI.DPSMeter:ShouldCollectData() then
-			DPSMeterGUI.DPSMeter:ResetOffBattleTime()
+	if dpsMeter.bCollectData then
+		if dpsMeter:ShouldCollectData() then
+			dpsMeter:ResetOffBattleTime()
 		else
-			local offBattleTime = DPSMeterGUI.DPSMeter:UpdateOffBattleTime()
+			local offBattleTime = dpsMeter:UpdateOffBattleTime()
 			local maxOffBattleTime = Settings.MaxOffBattleTime
 			if offBattleTime > maxOffBattleTime then
-				DPSMeterGUI.DPSMeter:Stop()
+				dpsMeter:Stop()
+				m_mustRedrawGUI = true
 			end
 		end
-		DPSMeterGUI:UpdateValues()
-	elseif m_mustUpdateGUI then
-		DPSMeterGUI:UpdateValues()
 	end
-	
+	-- перерисуем после dpsMeter:SecondTick где произойдет смена списка комбатантов
+	if m_mustUpdateGUI then
+		m_mustRedrawGUI = true
+	end
 	m_mustUpdateGUI = false
 end
 
 function FastUpdate()
-	if DPSMeterGUI.DPSMeter.bCollectData and DPSMeterGUI:GetActiveFight():GetCombatantCount() <= Settings.HeavyMode_MaxCombatant then
-		DPSMeterGUI.DPSMeter:FastTick()
+	local dpsMeter = DPSMeterGUI.DPSMeter
+	local needRedraw = m_mustRedrawGUI
+	
+	m_redrawCnt = m_redrawCnt + 1
+	if m_redrawCnt == 3 then
+		m_redrawCnt = 0
+		needRedraw = needRedraw or dpsMeter.bCollectData
+	end
+	needRedraw = needRedraw or (dpsMeter.bCollectData and DPSMeterGUI:GetActiveFight():GetCombatantCount() <= Settings.HeavyMode_MaxCombatant)
+	if needRedraw then
+		dpsMeter:FastTick()
 		DPSMeterGUI:UpdateValues()
 	end
+	
+	m_mustRedrawGUI = false
 end
 --------------------------------------------------------------------------------
 -- Event: EVENT_UNIT_DAMAGE_RECEIVED

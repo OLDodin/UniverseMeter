@@ -17,7 +17,6 @@ Global("TUMeter", {})
 function TUMeter:CreateNewObject()
 	local obj = setmetatable({
 			bCollectData = false,		-- If we must collect data or not (are we in fight or not)
-			bRaidRebuilded = false,
 			bHasChangesOnTick = false,
 			Fight = { Total = nil, Current = nil},	
 			OffBattleTime = 0,          -- Off-time battle allows to retrieve data coming just after the end of the fight (the events seems to not arrive in the correct order)
@@ -103,15 +102,9 @@ function TUMeter:FastTick()
 	self.Fight.Total:UpdateOnlyDisplayData(lastPeriod)
 end
 
-function TUMeter:SecondTick()
+function TUMeter:SecondTick(aByRaidRebuilded)
 	local lastPeriod = self:GetLastFightPeriod()
-	if self.bRaidRebuilded then
-		lastPeriod:RaidRebuilded()
-		self:RegenCombatantList()
-		self.bRaidRebuilded = false
-		self.bHasChangesOnTick = true
-	end
-	
+
 	if self.bCollectData then
 		if not self.bHasChangesOnTick then
 			--memory optimize
@@ -127,7 +120,11 @@ function TUMeter:SecondTick()
 	end
 	
 	local newFightPeriod = self:AddNewFightPeriod()
-	newFightPeriod:CleanCopyCombantants(lastPeriod)
+	if aByRaidRebuilded then
+		self:RegenCombatantList()
+	else
+		newFightPeriod:CleanCopyCombantants(lastPeriod)
+	end
 	
 	self.bHasChangesOnTick = false
 	
@@ -565,6 +562,10 @@ function TUMeter:Start()
 	local periodsArrSize = self.GlobalFightPeriodsArr.length
 	if periodsArrSize > 1 then
 		local prevPeriod = TList:unpackFromList(self.GlobalFightPeriodsArr:prev(self.GlobalFightPeriodsArr.last))
+		--если я не в пати, а в прошлой секунде данные по группе/рейду, то не используем их
+		if not raid.IsExist() and not group.IsExist() and prevPeriod:GetCombatantCount() > 1 then
+			return
+		end
 		if prevPeriod:HasData() then
 			self.Fight.Current:AddFightPeriodAndApply(prevPeriod)
 			self.Fight.Total:AddFightPeriodAndApply(prevPeriod)
@@ -575,9 +576,11 @@ end
 -- Stop combat
 --------------------------------------------------------------------------------
 function TUMeter:Stop()
+	if self.bCollectData then
+		self.Fight.Current:StopFight()
+		self.Fight.Total:StopFight()
+	end
 	self.bCollectData = false
-	self.Fight.Current:StopFight()
-	self.Fight.Total:StopFight()
 end
 
 function TUMeter:ResetOffBattleTime()
@@ -594,14 +597,21 @@ end
 -- Reset all fights
 --------------------------------------------------------------------------------
 function TUMeter:ResetAllFights()
+	if self.Fight.Total then
+		--переносим данные текущего TFightPeriod
+		self:SecondTick(true)
+	else
+		-- инициализация
+		self:RegenCombatantList()
+	end
+	
+	self:Stop()
+	
 	self:PushFightFromTotalToHistory()
 	self:PushFightFromCurrentToHistory()
 
 	self.Fight.Total = TFight:CreateNewObject()
 	self.Fight.Current = TFight:CreateNewObject()
-	
-	self.bRaidRebuilded = true
-	self.bCollectData = false
 end
 
 function TUMeter:PushFightFromTotalToHistory()

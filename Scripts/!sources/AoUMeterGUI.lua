@@ -86,7 +86,7 @@ function TDetailsPanelGUI:CreateNewObject(name)
 			ModeBtn = widget:GetChildByName("ModePanel"),
 			ModeText = widget:GetChildByName("ModePanel"):GetChildByName("ModeNameTextView").Widget, -- Button to switch the active mode      
 			
-			PlayerNameText = widget:GetChildByName("SpellPlayerNameTextViewName").Widget,
+			PlayerNameText = widget:GetChildByName("SpellPlayerNameTextViewName"),
 			
 			ResistHeaderText = widget:GetChildByName("ResistHeaderTextView"),
 			DpsBuffHeaderText = widget:GetChildByName("DpsBuffHeaderTextView"),
@@ -375,7 +375,7 @@ function TUMeterGUI:DisplayTotal()
 
 	totalPanel.Name:SetVal("Time", GetTimeString(self:GetActiveFight().Timer:GetElapsedTime()))
 	local activeFightData = self:GetActiveFightData()
-	totalPanel.Value:SetVal("DamageDone", cachedFormatFloat(activeFightData.Amount, "%f3K5"))
+	totalPanel.Value:SetVal("DamageDone", cachedFormatInt(activeFightData.Amount, "%dK5"))
 	totalPanel.Value:SetVal("DPS", cachedFormatFloat(activeFightData.AmountPerSec, "%f3K5"))
 end
 --------------------------------------------------------------------------------
@@ -406,14 +406,14 @@ function TUMeterGUI:DisplayPlayer(aCurrFight, aPlayerIndex)
 	local combatantActiveData = TCombatant.GetCombatantData(combatant, self.ActiveMode)
 	if combatantActiveData then
 		playerPanel.Bar:SetWidth(math.max(self.BarWidth * (combatantActiveData.LeaderPercentage / 100), 1))
-		playerPanel.Value:SetVal("DamageDone", cachedFormatFloat(TCombatant.GetAmount(combatant, self.ActiveMode), "%f3K5"))
+		playerPanel.Value:SetVal("DamageDone", cachedFormatInt(TCombatant.GetAmount(combatant, self.ActiveMode), "%dK5"))
 		playerPanel.Value:SetVal("DPS", cachedFormatFloat(combatantActiveData.AmountPerSec, "%f3K5"))
 		playerPanel.Percent:SetVal("Percentage", cachedFormatInt(combatantActiveData.Percentage, "%d"))
 	else
 		playerPanel.Bar:SetWidth(1)
-		playerPanel.Value:SetVal("DamageDone", cachedFormatFloat(0, "%f3K5"))
-		playerPanel.Value:SetVal("DPS", cachedFormatFloat(0, "%f3K5"))
-		playerPanel.Percent:SetVal("Percentage", cachedFormatInt(0, "%d"))
+		playerPanel.Value:SetVal("DamageDone", "0")
+		playerPanel.Value:SetVal("DPS", "0")
+		playerPanel.Percent:SetVal("Percentage", "0")
 	end
 end
 --------------------------------------------------------------------------------
@@ -426,7 +426,7 @@ function TUMeterGUI:UpdatePlayerList()
 		self:UpdateScoreOnMainBtn(currentFight)
 		return 
 	end
-	
+
 	currentFight:RecalculateCombatantsData(self.ActiveMode) -- Important
 
 	local combatantCount = math.min(currentFight:GetCombatantCount(), Settings.MaxCombatants)
@@ -434,6 +434,7 @@ function TUMeterGUI:UpdatePlayerList()
 	self.MainPanel:SetHeight(math.max((47 + (combatantCount + 1) * 24), self.MainPanel.SettingsPanelHeight + 30))
 
 	self:DisplayTotal()
+
 	for playerIndex = 1, combatantCount do
 		self:DisplayPlayer(currentFight, playerIndex)
 	end
@@ -560,7 +561,7 @@ function TUMeterGUI:DisplaySpell(aSpellIndex, aSelectedCombatant)
 		spellPanel.Name:SetVal("PetName", spellData[enumPetName] and spellData[enumPetName]:Truncate(15) or StrNone)
 		spellPanel.Name:SetVal("Name", spellData[enumName])
 		
-		spellPanel.Damage:SetVal("DamageDone", cachedFormatFloat(spellData[enumAmount] , "%f3K5"))
+		spellPanel.Damage:SetVal("DamageDone", cachedFormatInt(spellData[enumAmount] , "%dK5"))
 		spellPanel.Damage:SetVal("DPS", cachedFormatFloat(spellData.AmountPerSec , "%f3K5"))
 		spellPanel.CPS:SetVal("CPS", cachedFormatFloat(GetAverageCntPerSecond(spellData) , "%.1f"))
 		spellPanel.DmgBlock:SetVal("DamageBlock", cachedFormatInt(spellData.ResistPercentage , "%d"))
@@ -632,7 +633,9 @@ function TUMeterGUI:MinusPressed()
 	
 	self:CreateTimeLapse(true)
 	
-	self.DetailsPanel.TimeLapseScroll.Widget:SetContainerOffset(offsetBefore*newScale/currScale)
+	local timelapseScroll = self.DetailsPanel.TimeLapseScroll.Widget
+	timelapseScroll:SetContainerOffset(offsetBefore*newScale/currScale)
+	timelapseScroll:ForceReposition()
 end
 
 function TUMeterGUI:PlusPressed()
@@ -648,8 +651,9 @@ function TUMeterGUI:PlusPressed()
 	local offsetBefore = self.DetailsPanel.TimeLapseScroll.Widget:GetContainerOffset()
 	
 	self:CreateTimeLapse(true)
-	
-	self.DetailsPanel.TimeLapseScroll.Widget:SetContainerOffset(offsetBefore*newScale/currScale)
+	local timelapseScroll = self.DetailsPanel.TimeLapseScroll.Widget
+	timelapseScroll:SetContainerOffset(offsetBefore*newScale/currScale)
+	timelapseScroll:ForceReposition()
 end
 
 function TUMeterGUI:CreateTimeLapse(aNotRepositionScroller)
@@ -671,7 +675,7 @@ function TUMeterGUI:CreateTimeLapse(aNotRepositionScroller)
 	end
 	
 	local timeLapseScale = enumTimelapseScale[m_timeLapseScaleStep]
-	local btnWidth = math.round(60 * timeLapseScale)
+	local btnWidth = math.round(6 * timeLapseScale)
 	
 	local detailsPanel = self.DetailsPanel
 	
@@ -765,6 +769,8 @@ function TUMeterGUI:CreateTimeLapse(aNotRepositionScroller)
 					buffLine:SetPosition(btnPosX + btnWidth - buffLineWidth)
 					prevBuffTouchedRight = true
 				end
+			else
+				prevBuffTouchedRight = false
 			end
 			
 			if infoTexture then
@@ -1117,8 +1123,8 @@ end
 --------------------------------------------------------------------------------
 -- Swap to the next mode
 --------------------------------------------------------------------------------
-function TUMeterGUI:Reset(fullReset)
-	self.DPSMeter:ResetAllFights(fullReset)
+function TUMeterGUI:Reset()
+	self.DPSMeter:ResetAllFights()
 	self.ActiveFightMode = enumFight.Current
 	self.MainPanel.FightText:SetVal("Name", TitleFight[self.ActiveFightMode])
 	self.DetailsPanel.SpellScrollList:SetContainerOffset(0)
@@ -1359,7 +1365,7 @@ function TUMeterGUI:Init()
 	local spellOffsetX = 330
 	local globalOffsetX = 20
 
-	self.DetailsPanel.PlayerNameText:Show(true)
+	self.DetailsPanel.PlayerNameText:Show()
 	self.DetailsPanel.SpellScrollList:Show(true)
 	self.DetailsPanel.TimeLapsePanel:Show()
 	self.DetailsPanel.AllTimeBtn:Show()

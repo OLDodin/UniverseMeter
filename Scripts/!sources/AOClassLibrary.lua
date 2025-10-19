@@ -75,243 +75,180 @@ function TWidget:CreateNewObjectByDesc( WidgetName, Desc, Parent )
 end
 --------------------------------------------------------------------------------
 function TWidget:GetDesc()
-	if self.Widget then
-		return self.Widget:GetWidgetDesc()
-	end
+	return self.Widget:GetWidgetDesc()
 end
 --------------------------------------------------------------------------------
 function TWidget:GetChildCount()
-	if self.Widget then
-		return table.getn( self.Widget:GetNamedChildren() ) + 1
-	end
-	return 0
+	return table.getn( self.Widget:GetNamedChildren() ) + 1
 end
 --------------------------------------------------------------------------------
 function TWidget:GetChildByName( Name )
-	if self.Widget then
-		local wtChild = self.Widget:GetChildUnchecked( Name, false )
-		
-		if wtChild then
-			return setmetatable( { Widget = wtChild, LastValues = {} }, { __index = self } )
-		end
+	local wtChild = self.Widget:GetChildUnchecked( Name, false )
+	
+	if wtChild then
+		return setmetatable( { Widget = wtChild, LastValues = {} }, { __index = self } )
 	end
 end
 --------------------------------------------------------------------------------
 function TWidget:GetChildByIndex( Index )
-	if self.Widget then
-		local wtChildren = self.Widget:GetNamedChildren()
-		local wtChild = wtChildren[ Index ]
-		
-		if wtChild then
-			return setmetatable( { Widget = wtChild, LastValues = {} }, { __index = self } )
-		end
+	local wtChildren = self.Widget:GetNamedChildren()
+	local wtChild = wtChildren[ Index ]
+	
+	if wtChild then
+		return setmetatable( { Widget = wtChild, LastValues = {} }, { __index = self } )
 	end
 end
 --------------------------------------------------------------------------------
 function TWidget:Destroy()
-	if self.Widget then
-		self.Widget:DestroyWidget()
-		self = nil
-	end
+	self.Widget:DestroyWidget()
 end
 --------------------------------------------------------------------------------
 function TWidget:DragNDrop( bUseCfg, bLockedToScreenArea, Padding )
-	if self.Widget then
-		DnD.Init( self.Widget, self.Widget, bUseCfg, bLockedToScreenArea, Padding  )
-	end
+	DnD.Init( self.Widget, self.Widget, bUseCfg, bLockedToScreenArea, Padding  )
 end
 --------------------------------------------------------------------------------
 function TWidget:SetVariant( newVariant )
-	if self.Widget then
-		if self.LastValues.variant == newVariant then
-			return
-		end
-		self.LastValues.variant = newVariant
-		self.Widget:SetVariant( newVariant )
+	if self.LastValues.variant == newVariant then
+		return
 	end
+	self.LastValues.variant = newVariant
+	self.Widget:SetVariant( newVariant )
 end
 --------------------------------------------------------------------------------
 function TWidget:SetAlign( newAlignX, newAlignY )
-	if self.Widget then
-		local Placement = {}
-		if newAlignX then Placement.alignX = newAlignX end
-		if newAlignY then Placement.alignY = newAlignY end
-		self.Widget:SetPlacementPlain( Placement )
-	end
+	local Placement = {}
+	if newAlignX then Placement.alignX = newAlignX end
+	if newAlignY then Placement.alignY = newAlignY end
+	self.Widget:SetPlacementPlain( Placement )
 end
 --------------------------------------------------------------------------------
 function TWidget:SetPosition( newX, newY )
-	if self.Widget then
-		local Placement = {}
-		if newX then Placement.posX = math.ceil( newX ) end
-		if newY then Placement.posY = math.ceil( newY ) end
-		self.Widget:SetPlacementPlain( Placement )
-	end
+	local Placement = {}
+	if newX then Placement.posX = math.ceil( newX ) end
+	if newY then Placement.posY = math.ceil( newY ) end
+	self.Widget:SetPlacementPlain( Placement )
 end
 --------------------------------------------------------------------------------
 function TWidget:SetHighPosition( newX, newY )
-	if self.Widget then
-		local Placement = {}
-		if newX then Placement.highPosX = math.ceil( newX ) end
-		if newY then Placement.highPosY = math.ceil( newY ) end
-		self.Widget:SetPlacementPlain( Placement )
-	end
+	local Placement = {}
+	if newX then Placement.highPosX = math.ceil( newX ) end
+	if newY then Placement.highPosY = math.ceil( newY ) end
+	self.Widget:SetPlacementPlain( Placement )
 end
 --------------------------------------------------------------------------------
 function TWidget:SetWidth( newW )
-	if self.Widget then
-		if self.LastValues.width == newW then
-			return
-		end
-		self.LastValues.width = newW
-		self.Widget:SetPlacementPlain( { sizeX = math.ceil(newW) } )
+	if self.LastValues.width == newW then
+		return
 	end
+	self.LastValues.width = newW
+	self.Widget:SetPlacementPlain( { sizeX = math.ceil(newW) } )
 end
 --------------------------------------------------------------------------------
 function TWidget:SetHeight( newH )
-	if self.Widget then
-		if self.LastValues.height == newH then
-			return
-		end
-		self.LastValues.height = newH
-		self.Widget:SetPlacementPlain( { sizeY = math.ceil( newH ) } )
+	if self.LastValues.height == newH then
+		return
 	end
+	self.LastValues.height = newH
+	self.Widget:SetPlacementPlain( { sizeY = math.ceil( newH ) } )
 end
 --------------------------------------------------------------------------------
 function TWidget:GetPosition()
-	if self.Widget then
-		local Placement = self.Widget:GetPlacementPlain()
-        return Placement.posX, Placement.posY
-	end
+	local Placement = self.Widget:GetPlacementPlain()
+	return Placement.posX, Placement.posY
 end
 --------------------------------------------------------------------------------
 function TWidget:GetWidth()
-	if self.Widget then
-		return self.Widget:GetPlacementPlain().sizeX
-	end
+	return self.Widget:GetPlacementPlain().sizeX
 end
 --------------------------------------------------------------------------------
 function TWidget:GetHeight()
-	if self.Widget then
-		return self.Widget:GetPlacementPlain().sizeY
-	end
+	return self.Widget:GetPlacementPlain().sizeY
 end
 --------------------------------------------------------------------------------
 function TWidget:SetColor( Color, Alpha )
-	if self.Widget then
-		if Alpha then
-			Color.a = Alpha
-		end
-		if CompareColor(self.LastValues.color, Color) then
-			return
-		end
-		self.LastValues.color = table.sclone(Color)
-		
-		self.Widget:SetBackgroundColor( Color )
+	if Alpha then
+		Color.a = Alpha
 	end
+	if CompareColor(self.LastValues.color, Color) then
+		return
+	end
+	self.LastValues.color = table.sclone(Color)
+	
+	self.Widget:SetBackgroundColor( Color )
 end
 --------------------------------------------------------------------------------
 function TWidget:SetTransparency( Alpha )
-	if self.Widget then
-		local Color = self.Widget:GetBackgroundColor()
-		Color.a = Alpha
-		self.Widget:SetBackgroundColor( Color )
-	end
+	local Color = self.Widget:GetBackgroundColor()
+	Color.a = Alpha
+	self.Widget:SetBackgroundColor( Color )
 end
 --------------------------------------------------------------------------------
 function TWidget:Show()
-	if self.Widget and not self.Widget:IsVisible() then
-		self.Widget:Show( true )
+	if self.LastValues.visible then
+		return
 	end
+	self.LastValues.visible = true
+
+	self.Widget:Show( true )
 end
 --------------------------------------------------------------------------------
 function TWidget:Hide()
-	if self.Widget and self.Widget:IsVisible() then
-		self.Widget:Show( false )
+	if self.LastValues.visible == false then
+		return
 	end
+	self.LastValues.visible = false
+
+	self.Widget:Show( false )
 end
 --------------------------------------------------------------------------------
 function TWidget:IsVisible()
-	if self.Widget then
-		return self.Widget:IsVisible()
-	end
-    return false
+	return self.Widget:IsVisible()
 end
 --------------------------------------------------------------------------------
-function TWidget:HideAllChild()
-	if self.Widget then
-		local wtChildren = self.Widget:GetNamedChildren()
-		for _, wtChild in pairs( wtChildren ) do
-			wtChild:Show( false )
-		end
-	end
-end
-
 function TWidget:DestroyAllChild()
-	if self.Widget then
-		local wtChildren = self.Widget:GetNamedChildren()
-		for _, wtChild in pairs( wtChildren ) do
-			wtChild:DestroyWidget()
-		end
-	end
-end
-
---------------------------------------------------------------------------------
-function TWidget:ShowAllChild()
-	if self.Widget then
-		local wtChildren = self.Widget:GetNamedChildren()
-		for _, wtChild in pairs( wtChildren ) do
-			wtChild:Show( true )
-		end
+	local wtChildren = self.Widget:GetNamedChildren()
+	for _, wtChild in pairs( wtChildren ) do
+		wtChild:DestroyWidget()
 	end
 end
 --------------------------------------------------------------------------------
-function TWidget:SetVal(aTag, aValue)
-	if self.Widget then
-		self.Widget:SetVal(aTag, aValue)
-	end
+function TWidget:SetVal(aTag, aValue, aCmpVal)
+	self.Widget:SetVal(aTag, aValue)
 end
 
 function TWidget:SetBackgroundTexture(aTexture)
-	if self.Widget then
-		self.Widget:SetBackgroundTexture(aTexture)
-	end
+	self.Widget:SetBackgroundTexture(aTexture)
 end
 
 function TWidget:SetTextAttributes(aTagTextValue, aFontName, aFontSize, anAlign, aShadow, anOutline, aColor)
-	if self.Widget then
-		local attributes = {}
-		if aFontName then
-			attributes[ tagFontName ] = aFontName
-		end	
-		if anAlign then
-			attributes[ tagAlignX ] = anAlign
-		end	
-		if aFontSize then
-			attributes[ tagFontsize ] = tostring(aFontSize)
-		end	
-		if aShadow then
-			attributes[ tagShadow ] = tostring(aShadow)
-		end	
-		if anOutline then
-			attributes[ tagOutline ] = tostring(anOutline)
-		end	
-		
-		if aColor then
-			-- example "0xFFEEDDCC"
-			attributes[ tagColor ] = tostring(anOutline)
-		end	
-		if table.nkeys(attributes) > 0 then
-			self.Widget:SetTextAttributes(true, aTagTextValue and userMods.ToWString(aTagTextValue), attributes)
-		end
+	local attributes = {}
+	if aFontName then
+		attributes[ tagFontName ] = aFontName
+	end	
+	if anAlign then
+		attributes[ tagAlignX ] = anAlign
+	end	
+	if aFontSize then
+		attributes[ tagFontsize ] = tostring(aFontSize)
+	end	
+	if aShadow then
+		attributes[ tagShadow ] = tostring(aShadow)
+	end	
+	if anOutline then
+		attributes[ tagOutline ] = tostring(anOutline)
+	end	
+	
+	if aColor then
+		-- example "0xFFEEDDCC"
+		attributes[ tagColor ] = tostring(anOutline)
+	end	
+	if table.nkeys(attributes) > 0 then
+		self.Widget:SetTextAttributes(true, aTagTextValue and userMods.ToWString(aTagTextValue), attributes)
 	end
 end
 
 
 function TWidget:ClearScrollList()
-	if not self.Widget then
-		return
-	end
 	local containerArr = {}
 	for i = 0, self.Widget:GetElementCount() - 1 do
 		table.insert(containerArr, self.Widget:At(i))

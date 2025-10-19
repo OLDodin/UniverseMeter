@@ -166,10 +166,6 @@ function TFightPeriod:GetCombatantCount()
 	return table.getn(self.CombatantsList) or 0
 end
 
-function TFightPeriod:RaidRebuilded()
-	self.CombatantsList = {}
-end
-
 function TFightPeriod:HasData()
 	for _, combatant in pairs(self.CombatantsList) do
 		if TCombatant.HasData(combatant) then
