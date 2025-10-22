@@ -146,6 +146,7 @@ function TDetailsPanelGUI:CreateNewObject(name)
 			SpellBarWidth = 449, 
 			SpellDetailBarWidth = 370, 
 			DetailsPanelHeight = 480,
+			TimeLapseScrollWidth = 300
 		}, { __index = widget })
 end
 --------------------------------------------------------------------------------
@@ -350,6 +351,8 @@ function TUMeterGUI:UpdateSelectedCombatant()
 end
 
 function TUMeterGUI:ResetSelectedCombatant()
+	self:StopAnimTimeLapseElement(self.TimelapseIndex)
+	
 	self.SelectedCombatant = nil
 	self.TimelapseIndex = nil
 	self.SelectedSpellIndex = nil
@@ -628,14 +631,8 @@ function TUMeterGUI:MinusPressed()
 	if m_timeLapseScaleStep == 1 then
 		self.DetailsPanel.MinusBtn.Widget:Enable(false)
 	end
-	local newScale = enumTimelapseScale[m_timeLapseScaleStep]
-	local offsetBefore = self.DetailsPanel.TimeLapseScroll.Widget:GetContainerOffset()
-	
-	self:CreateTimeLapse(true)
-	
-	local timelapseScroll = self.DetailsPanel.TimeLapseScroll.Widget
-	timelapseScroll:SetContainerOffset(offsetBefore*newScale/currScale)
-	timelapseScroll:ForceReposition()
+
+	self:CreateTimeLapse(true, currScale)
 end
 
 function TUMeterGUI:PlusPressed()
@@ -647,23 +644,20 @@ function TUMeterGUI:PlusPressed()
 		self.DetailsPanel.PlusBtn.Widget:Enable(false)
 	end
 	
-	local newScale = enumTimelapseScale[m_timeLapseScaleStep]
-	local offsetBefore = self.DetailsPanel.TimeLapseScroll.Widget:GetContainerOffset()
-	
-	self:CreateTimeLapse(true)
-	local timelapseScroll = self.DetailsPanel.TimeLapseScroll.Widget
-	timelapseScroll:SetContainerOffset(offsetBefore*newScale/currScale)
-	timelapseScroll:ForceReposition()
+	self:CreateTimeLapse(true, currScale)
 end
 
-function TUMeterGUI:CreateTimeLapse(aNotRepositionScroller)
+function TUMeterGUI:CreateTimeLapse(aKeepVisualPos, aPrevScale)
+	local detailsPanel = self.DetailsPanel
 	local timeLapse = self:GetActiveDetailTimeLapse()
 	local fightTime = GetTableSize(timeLapse)
+	
+	self:StopAnimTimeLapseElement(self.TimelapseIndex)
 	
 	local timeLapseCombatant
 	local amount = 0
 	local maxAmount = 1
-	for i, fightPeriod in ipairs(timeLapse) do
+	for _, fightPeriod in ipairs(timeLapse) do
 		timeLapseCombatant = fightPeriod:GetCombatant(self.SelectedCombatantInfo.id, self.SelectedCombatantInfo.name)
 		
 		if timeLapseCombatant then
@@ -674,10 +668,11 @@ function TUMeterGUI:CreateTimeLapse(aNotRepositionScroller)
 		maxAmount = math.max(amount, maxAmount)
 	end
 	
+	local baseBtnWidth = 6
 	local timeLapseScale = enumTimelapseScale[m_timeLapseScaleStep]
-	local btnWidth = math.round(6 * timeLapseScale)
+	local btnWidth = math.round(baseBtnWidth * timeLapseScale)
 	
-	local detailsPanel = self.DetailsPanel
+	
 	
 	local startPosShift = 10
 	local lastScrollWdg = nil
@@ -701,6 +696,7 @@ function TUMeterGUI:CreateTimeLapse(aNotRepositionScroller)
 	local buffLen
 	local prevBuffTouchedRight = false
 	local buffLineWidth
+	local selectedWdg
 
 	AllCacheInvalidate()
 				
@@ -744,6 +740,9 @@ function TUMeterGUI:CreateTimeLapse(aNotRepositionScroller)
 				dpsBtn:SetHeight(btnHeight)
 
 				lastScrollWdg = dpsBtn
+				if i == self.TimelapseIndex then
+					self:StartAnimTimeLapseElement(dpsBtn.Widget)
+				end
 			else
 				btnHeight = 0
 			end
@@ -812,16 +811,22 @@ function TUMeterGUI:CreateTimeLapse(aNotRepositionScroller)
 	
 	DestroyAllInvalidated()
 	
-	detailsPanel.BigPanel:SetWidth(btnWidth*fightTime+50)
+	local timelapseScroll = detailsPanel.TimeLapseScroll.Widget
+	local contentWidthAfter = btnWidth*fightTime+50
 	
-	if aNotRepositionScroller then
-		return
-	end
+	detailsPanel.BigPanel:SetWidth(contentWidthAfter)
 	
-	local timelapseScroll = self.DetailsPanel.TimeLapseScroll.Widget
-	timelapseScroll:ForceReposition()
-	if not self.TimelapseIndex and lastScrollWdg then
-		timelapseScroll:EnsureVisible(lastScrollWdg.Widget)
+	if aKeepVisualPos then
+		local offsetBefore = timelapseScroll:GetContainerOffset()
+		local contentWidthBefore = math.round(baseBtnWidth * aPrevScale)*fightTime+50
+		local koef = contentWidthAfter / contentWidthBefore
+		timelapseScroll:SetContainerOffset(offsetBefore*koef + detailsPanel.TimeLapseScrollWidth/2 * (koef-1))
+		timelapseScroll:ForceReposition()
+	else
+		if not self.TimelapseIndex and lastScrollWdg then
+			timelapseScroll:EnsureVisible(lastScrollWdg.Widget)
+		end
+		timelapseScroll:ForceReposition()
 	end
 end
 
@@ -832,7 +837,22 @@ function TUMeterGUI:SetSelectedSpellIndex(anIndex)
 	end
 end
 
-function TUMeterGUI:SwitchToTimeLapseElement(anIndex)
+function TUMeterGUI:StartAnimTimeLapseElement(aWdg)
+	aWdg:PlayFadeEffectSequence({ { 0.3, 1.0, 1000, EA_SYMMETRIC_FLASH }, cycled = true, sendStepEvent = false })
+end
+
+function TUMeterGUI:StopAnimTimeLapseElement(anIndex)
+	if anIndex then
+		local selectedWdg = self.DetailsPanel.BigPanel:GetChildByName("DpsBtn"..tostring(anIndex))
+		if selectedWdg then
+			selectedWdg.Widget:FinishFadeEffect()
+			selectedWdg.Widget:SetFade(1)
+		end
+	end
+end
+
+function TUMeterGUI:SwitchToTimeLapseElement(aWdg, anIndex)
+	self:StopAnimTimeLapseElement(self.TimelapseIndex)
 	self.TimelapseIndex = anIndex
 	
 	self.DetailsPanel.SpellScrollList:SetContainerOffset(0)
@@ -840,6 +860,8 @@ function TUMeterGUI:SwitchToTimeLapseElement(anIndex)
 	
 	self.DetailsPanel.SpellCurrTimeText:SetVal("Time", cachedToWString(GetTimeString(self.TimelapseIndex*1)))
 	self.DetailsPanel.SpellCurrTimeText.Widget:PlayTextScaleEffect( 1.0, 1.2, 800, EA_SYMMETRIC_FLASH )
+	
+	self:StartAnimTimeLapseElement(aWdg)
 	
 	self:UpdateValues()
 end

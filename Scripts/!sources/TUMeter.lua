@@ -7,6 +7,7 @@ local cachedGetName = object.GetName
 local cachedIsExist = object.IsExist
 local cachedGetFollowerMaster = unit.GetFollowerMaster
 local cachedGetLocalDateTimeMs = common.GetLocalDateTimeMs
+local cachedIsInCombat = object.IsInCombat
 
 --------------------------------------------------------------------------------
 -- Type TUMeter
@@ -409,14 +410,14 @@ end
 --	Condition: the avatar is in combat
 --------------------------------------------------------------------------------
 function TUMeter:ShouldCollectData()
-	if object.IsInCombat(MyAvatarID) then
+	if cachedIsInCombat(MyAvatarID) then
 		return true
 	end
 
-	local comdID
-	for i, combatant in pairs(self:GetLastFightPeriod().CombatantsList) do
-		comdID = TCombatant.GetID(combatant)
-		if comdID and cachedIsExist(comdID) and TCombatant.IsClose(combatant) and (object.IsInCombat(comdID) or PlayerPetInCombat(comdID)) then			
+	local combID
+	for _, combatant in ipairs(self:GetLastFightPeriod().CombatantsList) do
+		combID = TCombatant.GetID(combatant)
+		if combID and cachedIsExist(combID) and TCombatant.IsClose(combatant) and (cachedIsInCombat(combID) or PlayerPetInCombat(combID)) then			
 			return true
 		end
 	end

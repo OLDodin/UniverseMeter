@@ -72,7 +72,7 @@ function TFightPeriod:CreateNewObject(ID)
 end
 
 function TFightPeriod:CleanCopyCombantants(aFight)
-	for _, combatant in pairs(aFight.CombatantsList) do
+	for _, combatant in ipairs(aFight.CombatantsList) do
 		table.insert(self.CombatantsList, TCombatant.MakeCleanCopy(combatant))
 	end
 end
@@ -87,7 +87,7 @@ function TFightPeriod:UpdateOrAddCombatant(anID, aName, aClassColorIndex, anIsNe
 		combatant = TCombatant:CreateNewObject(anID, aName, aClassColorIndex, anIsNear)
 		table.insert(self.CombatantsList, combatant)
 		
-		if GetTableSize(self.CombatantsList) > Settings.MaxCombatants then
+		if #self.CombatantsList > Settings.MaxCombatants then
 			local absentCombatant, index = self:GetAbsentCombatant()
 			if index then
 				table.remove(self.CombatantsList, index)
@@ -109,7 +109,7 @@ function TFightPeriod:RemoveCombatant(anID, aName)
 end
 
 function TFightPeriod:GetAbsentCombatant()
-	for i, combatant in pairs(self.CombatantsList) do
+	for i, combatant in ipairs(self.CombatantsList) do
 		if TCombatant.IsAbsent(combatant) then
 			return combatant, i 
 		end
@@ -122,7 +122,7 @@ end
 --------------------------------------------------------------------------------
 function TFightPeriod:GetCombatant(anID, aName)
 	if anID then
-		for i, combatant in pairs( self.CombatantsList ) do
+		for i, combatant in ipairs( self.CombatantsList ) do
 			if TCombatant.GetID(combatant) == anID then
 				return combatant, i 
 			end
@@ -131,7 +131,7 @@ function TFightPeriod:GetCombatant(anID, aName)
 	--если перезаходил и у него сменился id ищем по имени
 	--в UpdateCombatant обновим его ид
 	if aName then
-		for i, combatant in pairs( self.CombatantsList ) do
+		for i, combatant in ipairs( self.CombatantsList ) do
 			if TCombatant.GetName(combatant) == aName then
 				return combatant, i
 			end
@@ -163,11 +163,11 @@ end
 -- Get combatant count
 --------------------------------------------------------------------------------
 function TFightPeriod:GetCombatantCount()
-	return table.getn(self.CombatantsList) or 0
+	return #self.CombatantsList
 end
 
 function TFightPeriod:HasData()
-	for _, combatant in pairs(self.CombatantsList) do
+	for _, combatant in ipairs(self.CombatantsList) do
 		if TCombatant.HasData(combatant) then
 			return true
 		end
@@ -200,7 +200,7 @@ function TFight:UpdateCombatantByCombatant(aCombatant)
 end
 
 function TFight:UpdateCombatantFromFightPeriod(aFightPeriod)
-	for _, combatantFromPeriod in pairs(aFightPeriod.CombatantsList) do
+	for _, combatantFromPeriod in ipairs(aFightPeriod.CombatantsList) do
 		self:UpdateCombatantByCombatant(combatantFromPeriod)
 	end
 end
@@ -208,7 +208,7 @@ end
 function TFight:UpdateOnlyDisplayData(aFightPeriod)
 	local combatant
 	local combatantFromPeriodData
-	for _, combatantFromPeriod in pairs(aFightPeriod.CombatantsList) do
+	for _, combatantFromPeriod in ipairs(aFightPeriod.CombatantsList) do
 		combatant = self:UpdateCombatantByCombatant(combatantFromPeriod)
 		
 		for _, mode in pairs(enumMode) do 
@@ -229,7 +229,7 @@ function TFight:AddFightPeriodAndApply(aFightPeriod, aCalculateSpellData)
 	local periodAmount
 	local combatant
 	local combatantFromPeriodData
-	for _, combatantFromPeriod in pairs(aFightPeriod.CombatantsList) do
+	for _, combatantFromPeriod in ipairs(aFightPeriod.CombatantsList) do
 		combatant = self:UpdateCombatantByCombatant(combatantFromPeriod)
 		
 		for _, mode in pairs(enumMode) do 
@@ -316,7 +316,7 @@ function TFight:RecalculateCombatantsData(aMode)
 	-- Calculate the total amount
 	local fightData = self.CalcuatedValues
 	fightData.Amount = 0
-	for _, combatant in pairs( self.CombatantsList ) do
+	for _, combatant in ipairs( self.CombatantsList ) do
 		combatant.SortValue = TCombatant.GetAmount(combatant, aMode)
 		fightData.Amount = fightData.Amount + combatant.SortValue
 	end
@@ -330,7 +330,7 @@ function TFight:RecalculateCombatantsData(aMode)
 	if imbaCombatant then
 		local leaderAmount = TCombatant.GetAmount(imbaCombatant, aMode)
 		-- For each combatant, calculate DPS and damage amount
-		for _, combatant in pairs( self.CombatantsList ) do
+		for _, combatant in ipairs( self.CombatantsList ) do
 			TCombatant.CalculateCombatantsData(combatant, aMode, fightTime, fightData.Amount, leaderAmount)
 			combatant.SortValue = nil
 		end

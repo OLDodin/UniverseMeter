@@ -222,7 +222,7 @@ end
 onReaction["DpsTimeLapsePressed"] = function(reaction)
 	local wdgName = reaction.widget:GetName()
 	wdgName = string.gsub(wdgName, "DpsBtn", "")
-	DPSMeterGUI:SwitchToTimeLapseElement(tonumber(wdgName))
+	DPSMeterGUI:SwitchToTimeLapseElement(reaction.widget, tonumber(wdgName))
 end
 
 onReaction["historyElementClicked"] = function(reaction)
