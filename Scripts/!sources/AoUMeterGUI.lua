@@ -388,18 +388,8 @@ function TUMeterGUI:DisplayPlayer(aCurrFight, aPlayerIndex)
 	local combatant = aCurrFight:GetCombatantByIndex(aPlayerIndex)
 	local playerPanel = self.MainPanel.PlayerList[aPlayerIndex]
 	if not combatant or not playerPanel then return end
-	if Settings.ShowPositionOnBtn and TCombatant.GetID(combatant) == MyAvatarID then
-		if CurrentScoreOnMainBtn ~= aPlayerIndex then
-			if AoPanelDetected then
-				local SetVal = { val = StrMainBtn..StrSpace..cachedFormatInt(aPlayerIndex , "%d") }
-				userMods.SendEvent( "AOPANEL_UPDATE_ADDON", { sysName = "UniverseMeter", header = SetVal } )
-			else
-				self.ShowHideBtn:SetVal( 'button_label', tostring(aPlayerIndex))
-			end
-			
-			CurrentScoreOnMainBtn = aPlayerIndex
-		end
-	end
+	
+	self:UpdateScoreOnMainBtn(combatant, aPlayerIndex)
 
 	playerPanel:Show()
 	
@@ -426,7 +416,7 @@ function TUMeterGUI:UpdatePlayerList()
 	local currentFight = self:GetActiveFight()
 	if not currentFight then return end
 	if not self.MainPanel.Widget:IsVisible() then 
-		self:UpdateScoreOnMainBtn(currentFight)
+		self:UpdateOnlyScore(currentFight)
 		return 
 	end
 
@@ -447,7 +437,23 @@ function TUMeterGUI:UpdatePlayerList()
 	end
 end
 
-function TUMeterGUI:UpdateScoreOnMainBtn(aCurrentFight)
+function TUMeterGUI:UpdateScoreOnMainBtn(aCombatant, aPlayerIndex)
+	if Settings.ShowPositionOnBtn and aCombatant and TCombatant.GetID(aCombatant) == MyAvatarID then
+		if CurrentScoreOnMainBtn ~= aPlayerIndex then
+			if AoPanelDetected then
+				local SetVal = { val = StrMainBtn..StrSpace..cachedFormatInt(aPlayerIndex , "%d") }
+				userMods.SendEvent( "AOPANEL_UPDATE_ADDON", { sysName = "UniverseMeter", header = SetVal } )
+			else
+				self.ShowHideBtn:SetVal( 'button_label', tostring(aPlayerIndex))
+			end
+			
+			CurrentScoreOnMainBtn = aPlayerIndex
+		end
+		return true
+	end
+end
+
+function TUMeterGUI:UpdateOnlyScore(aCurrentFight)
 	if not Settings.ShowPositionOnBtn then return end
 	aCurrentFight:RecalculateCombatantsData(self.ActiveMode)
 
@@ -455,17 +461,8 @@ function TUMeterGUI:UpdateScoreOnMainBtn(aCurrentFight)
 	
 	for playerIndex = 1, combatantCount do
 		local combatant = aCurrentFight:GetCombatantByIndex(playerIndex)
-		if combatant and TCombatant.GetID(combatant) == MyAvatarID then
-			if CurrentScoreOnMainBtn ~= playerIndex then
-				if AoPanelDetected then
-					local SetVal = { val = StrMainBtn..StrSpace..cachedFormatInt(playerIndex , "%d") }
-					userMods.SendEvent( "AOPANEL_UPDATE_ADDON", { sysName = "UniverseMeter", header = SetVal } )
-				else
-					self.ShowHideBtn:SetVal( 'button_label', tostring(aPlayerIndex) )
-				end
-				
-				CurrentScoreOnMainBtn = playerIndex
-			end
+		if self:UpdateScoreOnMainBtn(combatant, playerIndex) then
+			break
 		end
 	end
 end

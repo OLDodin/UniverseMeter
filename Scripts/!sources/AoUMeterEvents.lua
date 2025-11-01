@@ -35,7 +35,11 @@ end
 onMyEvent["EVENT_ADDON_LOAD_STATE_CHANGED"] = function(params)
 	if params.state == ADDON_STATE_NOT_LOADED and string.find(params.name, "AOPanel") then
 		DPSMeterGUI.ShowHideBtn:Show()
+		if Settings.ShowPositionOnBtn then
+			DPSMeterGUI.ShowHideBtn:SetVal( 'button_label', tostring(CurrentScoreOnMainBtn or 1))
+		end
 		m_isBtnInAOPanelNow = false
+		AoPanelDetected = false
 	end
 end
 
@@ -683,6 +687,10 @@ function GlobalInit()
 	
 	if AoPanelDetected then 
 		DPSMeterGUI.ShowHideBtn:Hide()
+	else
+		if Settings.ShowPositionOnBtn then
+			DPSMeterGUI.ShowHideBtn:SetVal( 'button_label', tostring(CurrentScoreOnMainBtn or 1))
+		end
 	end
 
 	m_buffListener.listenerAddBuff = PlayerAddBuff
