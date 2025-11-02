@@ -22,17 +22,14 @@ end
 
 function TValueDetails:RecalcDetails(aValue)
 	local cnt = TValueDetails.GetCount(self) + 1
-	self[Amount] = TValueDetails.GetAmount(self) + aValue
 
 	if cnt > 1 then
+		self[Min] = math.min(TValueDetails.GetMin(self), aValue)	
+		self[Max] = math.max(TValueDetails.GetMax(self), aValue)
+		
 		self[Count] = cnt
-		if cnt == 2 then
-			self[Min] = math.huge
-			self[Max] = -math.huge
-		end
-		self[Min] = math.min(self[Min], aValue)	
-		self[Max] = math.max(self[Max], aValue)
 	end
+	self[Amount] = TValueDetails.GetAmount(self) + aValue
 end
 
 function TValueDetails:MergeDetails(aSpellDataDetails)
