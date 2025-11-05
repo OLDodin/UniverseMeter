@@ -708,7 +708,6 @@ function GlobalInit()
 	RegisterReactionHandlers(onReaction)
 	ReRegisterEvents()
 	
-	
 	StartTimer(FastUpdate, Settings.FastUpdateInterval)
 	
 	onMyEvent["EVENT_SECOND_TIMER"]()

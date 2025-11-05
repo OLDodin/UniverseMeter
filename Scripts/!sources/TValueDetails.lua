@@ -36,17 +36,17 @@ function TValueDetails:MergeDetails(aSpellDataDetails)
 	if TValueDetails.GetCount(aSpellDataDetails) == 0 then
 		return
 	end
+		
+	if TValueDetails.GetCount(self) == 0 then
+		self[Min] = TValueDetails.GetMin(aSpellDataDetails)
+		self[Max] = TValueDetails.GetMax(aSpellDataDetails)
+	else
+		self[Min] = math.min(TValueDetails.GetMin(self), TValueDetails.GetMin(aSpellDataDetails))
+		self[Max] = math.max(TValueDetails.GetMax(self), TValueDetails.GetMax(aSpellDataDetails))
+	end
 	
 	self[Count] = TValueDetails.GetCount(self) + TValueDetails.GetCount(aSpellDataDetails)
 	self[Amount] = TValueDetails.GetAmount(self) + TValueDetails.GetAmount(aSpellDataDetails)
-	
-	if not self[Min] then
-		self[Min] = math.huge
-		self[Max] = -math.huge
-	end
-
-	self[Min] = math.min(self[Min], TValueDetails.GetMin(aSpellDataDetails))
-	self[Max] = math.max(self[Max], TValueDetails.GetMax(aSpellDataDetails))
 end
 
 function TValueDetails:GetAvg()
