@@ -2,7 +2,7 @@
 <WidgetScrollableContainer>
  <Name>ScrollableContainerH</Name>
 	<Priority>0</Priority>
-	<BackLayer href="Textures/panel.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
+	<BackLayer href="Textures/panelTexture.xdb" />
   <Placement>
     <X>
       <Align>WIDGET_ALIGN_BOTH</Align>

@@ -564,7 +564,7 @@ function TUMeterGUI:DisplaySpell(aSpellIndex, aSelectedCombatant)
 		spellPanel.Damage:SetVal("DamageDone", cachedFormatInt(spellData[enumAmount] , "%dK5"))
 		spellPanel.Damage:SetVal("DPS", cachedFormatFloat(spellData.AmountPerSec , "%f3K5"))
 		spellPanel.CPS:SetVal("CPS", cachedFormatFloat(GetAverageCntPerSecond(spellData) , "%.1f"))
-		spellPanel.DmgBlock:SetVal("DamageBlock", cachedFormatInt(spellData.ResistPercentage , "%d"))
+		spellPanel.DmgBlock:SetVal("DamageBlock", cachedFormatInt(math.floor(spellData.ResistPercentage) , "%d"))
 		spellPanel.Percent:SetVal("Percentage", cachedFormatFloat(spellData.Percentage , "%.1f"))
 		
 		if IsSpellDataLethal(spellData) and self.ActiveDetailMode == enumMode.Dps then
@@ -908,7 +908,7 @@ function TUMeterGUI:DisplaySpellDetails(anIndex, aSpellInfoData, aSpellInfoPanel
 		aSpellInfoPanel.DamageMin:SetVal("Min", cachedFormatFloat(TValueDetails.GetMin(aSpellInfoData), "%f3K5"))
 		aSpellInfoPanel.DamageAvg:SetVal("Avg", cachedFormatFloat(TValueDetails.GetAvg(aSpellInfoData) , "%f3K5"))
 		aSpellInfoPanel.DamageMax:SetVal("Max", cachedFormatFloat(TValueDetails.GetMax(aSpellInfoData), "%f3K5"))
-		aSpellInfoPanel.Percent:SetVal("Percentage", cachedFormatInt(aPercent, "%d"))
+		aSpellInfoPanel.Percent:SetVal("Percentage", cachedFormatInt(math.floor(aPercent), "%d"))
 	else
 		if aTitle[anIndex] then
 			aSpellInfoPanel:Show()
