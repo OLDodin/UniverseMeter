@@ -330,13 +330,7 @@ function TUMeterGUI:PrepareShowDetails(aPlayerIndex)
 	self:CreateTimeLapse()
 end
 
-function TUMeterGUI:DetailsClosed()
-	if common.GetClientArch() ~= CLIENT_ARCH_WIN64 then
-		--на х32 удаляем все виджеты для экономии памяти
-		AllCacheInvalidate()
-		DestroyAllInvalidated()
-	end
-	
+function TUMeterGUI:DetailsClosed()	
 	self.DetailModeCurrentFight = nil
 	self.DetailModeTotalFight = nil
 end
