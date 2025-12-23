@@ -298,6 +298,10 @@
       <resource href="DpsHpsBuff3.txt" />
     </Item>
 	<Item>
+      <name>DpsHpsBuff4</name>
+      <resource href="DpsHpsBuff4.txt" />
+    </Item>
+	<Item>
       <name>DefBuff1</name>
       <resource href="DefBuff1.txt" />
     </Item>
