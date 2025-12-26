@@ -33,7 +33,7 @@ local function FillBuffCheckList()
 	CustomBuffIndex.Vulnerability = index - 1
 	
 	DPSHPSTYPES = 10
-	DEFTYPES = 27
+	DEFTYPES = 28
 	for i = 1, 1 do
 		table.insert(buffCheckList, {name = GetTextLocalized("IHpsBuff"..i), ind = index, forTarget = true, forHps = true})
 		index = index + 1
@@ -48,6 +48,10 @@ local function FillBuffCheckList()
 		index = index + 1
 	end
 	CustomBuffIndex.Weakness = index - 1
+	for i = 27, 27 do
+		table.insert(buffCheckList, {name = GetTextLocalized("DefBuff"..i), ind = index, forTarget = true, forDps = true})
+		index = index + 1
+	end
 	
 	for i = 1, DPSHPSTYPES do
 		TitleCustomDpsBuffType[i] = buffCheckList[i].name

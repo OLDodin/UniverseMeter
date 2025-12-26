@@ -406,6 +406,10 @@
       <resource href="DefBuff26.txt" />
     </Item>
 	<Item>
+      <name>DefBuff27</name>
+      <resource href="DefBuff27.txt" />
+    </Item>
+	<Item>
       <name>ShowScoreCheckBoxText</name>
       <resource href="ShowScoreCheckBoxText.txt" />
     </Item>
