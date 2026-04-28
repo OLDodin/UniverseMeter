@@ -372,15 +372,20 @@ function TUMeter:GetSpellInfoFromParamsHPS(aParams, anIsPet)
 	local spellInfo = {}
 	
 	spellInfo.infoID = aParams.buffId or aParams.spellId or aParams.abilityId
-
-	local someInfo = self:GetInfoFromParams(aParams)
-	if someInfo and someInfo.name and not someInfo.name:IsEmpty() then
-		spellInfo.name = someInfo.name
-	else
-		spellInfo.name =
-		aParams.isFall and StrFall
-		or BuildHealBySourceName(aParams.healerId, aParams.unitId)
-		or StrUnknown
+	
+	if aParams.isLifeSteal then
+		spellInfo.infoID = nil
+		spellInfo.name = StrBloodlust
+	else	
+		local someInfo = self:GetInfoFromParams(aParams)
+		if someInfo and someInfo.name and not someInfo.name:IsEmpty() then
+			spellInfo.name = someInfo.name
+		else
+			spellInfo.name =
+			aParams.isFall and StrFall
+			or BuildHealBySourceName(aParams.healerId, aParams.unitId)
+			or StrUnknown
+		end
 	end
 
 	spellInfo.isPet = anIsPet

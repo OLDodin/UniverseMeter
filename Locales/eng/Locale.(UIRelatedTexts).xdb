@@ -497,6 +497,10 @@
       <name>Natural</name>
       <resource href="Natural.txt" />
     </Item>
+	<Item>
+      <name>Bloodlust</name>
+      <resource href="Bloodlust.txt" />
+    </Item>
   </items>
 </UIRelatedTexts>
 

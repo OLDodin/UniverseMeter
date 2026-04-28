@@ -77,6 +77,7 @@ local function Init()
 
 	StrDamagePool = GetTextLocalized("DamagePool")
 	StrFromBarrier = GetTextLocalized("FromBarrier")
+	StrBloodlust = GetTextLocalized("Bloodlust")
 
 	StrNone = common.GetEmptyWString()
 	StrWeakness = GetTextLocalized("Weakness")
