@@ -277,21 +277,23 @@ function TUMeterGUI:CreateNewObject(dpsMeter)
 end
 --------------------------------------------------------------------------------
 function TUMeterGUI:GetActiveFight()
-	local rotateFight = {
-		[enumFight.Current] = self.DPSMeter.Fight.Current,
-		[enumFight.Total] = self.DPSMeter.Fight.Total,
-		[enumFight.History] = self.ActiveHistoryFight
-	}
-	return rotateFight[self.ActiveFightMode]
+	if self.ActiveFightMode == enumFight.Current then
+		return self.DPSMeter.Fight.Current
+	elseif self.ActiveFightMode == enumFight.Total then
+		return self.DPSMeter.Fight.Total
+	else
+		return self.ActiveHistoryFight
+	end
 end
 
 function TUMeterGUI:GetActiveDetailFight()
-	local rotateFight = {
-		[enumFight.Current] = self.DetailModeCurrentFight,
-		[enumFight.Total] = self.DetailModeTotalFight,
-		[enumFight.History] = self.ActiveHistoryFight
-	}
-	return rotateFight[self.ActiveFightDetailMode]
+	if self.ActiveFightDetailMode == enumFight.Current then
+		return self.DetailModeCurrentFight
+	elseif self.ActiveFightDetailMode == enumFight.Total then
+		return self.DetailModeTotalFight
+	else
+		return self.ActiveHistoryFight
+	end
 end
 --------------------------------------------------------------------------------
 function TUMeterGUI:GetActiveFightData()

@@ -180,26 +180,24 @@ function TUMeter:GetFightCombatant(anID)
 	end
 end
 
-
 local function GetInfoFromCache(anID, aCache, aGetInfoFunc)
 	if anID == nil then
 		return nil
 	end
-	for _, info in ipairs(aCache) do
-		if info.meterInfoID:IsEqual(anID) then
-			return info
-		end
+	local info = aCache[anID]
+	if info then
+		return info
 	end
-
-	local info = aGetInfoFunc(anID)
+	
+	info = aGetInfoFunc(anID)
 	local storeInfo = {}
 	if info then
 		storeInfo.meterInfoID = anID
 		storeInfo.name = info.name
 		storeInfo.description = info.description
 		storeInfo.texture = info.texture or info.image
-		
-		table.insert(aCache, storeInfo)
+
+		aCache[anID] = storeInfo
 	end
 	return storeInfo
 end

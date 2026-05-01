@@ -14,6 +14,8 @@ Global( "enumInfo", { Amount = 0, Count = 1, Min = 2, Max = 3 } )
 Global( "enumSpellInfo", { Count = 0, Amount = 1, InfoID = 2, Name = 3, PackedValue = 4, Hits = 5, PetName = 6 } )
 Global( "enumCombatantInfo", { ID = 0, Name = 1, BitPackedValue = 2, Data = 3 } )
 Global( "enumTimelapseScale", { [1] = 1, [2] = 1.16, [3] = 1.3, [4] = 1.6 } )
+Global( "enumUsedMode", { } )
+
 
 --------------------------------------------------------------------------------
 -- Init in FillBuffCheckList

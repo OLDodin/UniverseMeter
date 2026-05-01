@@ -19,6 +19,11 @@ local m_enumHitBlockMult = m_enumMissMult + MISSTYPES
 local m_enumHealResist = m_enumHitBlockMult
 local m_customBuffMult = m_enumHitBlockMult + BLOCKDMGTYPES
 
+local m_enumMissSize = table.nkeys(enumMiss)
+local m_enumHitSize = table.nkeys(enumHit)
+local m_enumHitBlockSize = table.nkeys(enumHitBlock)
+local m_enumHealResistSize = table.nkeys(enumHealResist)
+
 
 local function CreateAndRecalcDetails(aList, anIndex, anAmount)
 	if not aList[anIndex] then
@@ -149,8 +154,8 @@ function GetResistDetailPercentage(aSpellData, aSpellDetails)
 	return GetFunctionOwnerForSpellData(aSpellData).GetResistDetailPercentage(aSpellData, aSpellDetails)
 end
 
-local function MakeList(aList, anEnum, aMult)
-	return table.move(aList, aMult+1, aMult+table.nkeys(anEnum), 1, {})
+local function MakeList(aList, aSize, aMult)
+	return table.move(aList, aMult+1, aMult+aSize, 1, {})
 end
 
 function CustomBuffList(aSpellData)
@@ -162,18 +167,18 @@ function CustomBuffList(aSpellData)
 end
 
 function MissList(aSpellData)
-	return MakeList(aSpellData, enumMiss, m_enumMissMult)
+	return MakeList(aSpellData, m_enumMissSize, m_enumMissMult)
 end
 
 function DetailsList(aSpellData)
-	return MakeList(aSpellData, enumHit, m_enumHitMult)
+	return MakeList(aSpellData, m_enumHitSize, m_enumHitMult)
 end
 
 function ResistDetailsList(aSpellData)
 	if aSpellData[enumHits] ~= nil then
-		return MakeList(aSpellData, enumHitBlock, m_enumHitBlockMult)
+		return MakeList(aSpellData, m_enumHitBlockSize, m_enumHitBlockMult)
 	else
-		return MakeList(aSpellData, enumHealResist, m_enumHealResist)
+		return MakeList(aSpellData, m_enumHealResistSize, m_enumHealResist)
 	end
 end
 

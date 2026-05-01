@@ -166,6 +166,19 @@ local function Init()
 		end
 	end
 	
+	if Settings.ModeDPS then 
+		table.insert(enumUsedMode, enumMode.Dps)
+	end
+	if Settings.ModeHPS then 
+		table.insert(enumUsedMode, enumMode.Hps)
+	end
+	if Settings.ModeDEF then 
+		table.insert(enumUsedMode, enumMode.Def)
+	end
+	if Settings.ModeIHPS then 
+		table.insert(enumUsedMode, enumMode.IHps)
+	end
+	
 	InitBuffConditionMgr(FillBuffCheckList())
 	
 	-- Create the DPSMeter here

@@ -211,7 +211,7 @@ function TFight:UpdateOnlyDisplayData(aFightPeriod)
 	for _, combatantFromPeriod in ipairs(aFightPeriod.CombatantsList) do
 		combatant = self:UpdateCombatantByCombatant(combatantFromPeriod)
 		
-		for _, mode in pairs(enumMode) do 
+		for _, mode in ipairs(enumUsedMode) do 
 			combatantFromPeriodData = TCombatant.GetCombatantData(combatantFromPeriod, mode)
 			if combatantFromPeriodData then
 				TCombatant.RecalculateAmount(combatant, TCombatant.GetAmount(combatantFromPeriod, mode), mode, false)
@@ -232,7 +232,7 @@ function TFight:AddFightPeriodAndApply(aFightPeriod, aCalculateSpellData)
 	for _, combatantFromPeriod in ipairs(aFightPeriod.CombatantsList) do
 		combatant = self:UpdateCombatantByCombatant(combatantFromPeriod)
 		
-		for _, mode in pairs(enumMode) do 
+		for _, mode in ipairs(enumUsedMode) do 
 			combatantFromPeriodData = TCombatant.GetCombatantData(combatantFromPeriod, mode)
 			if combatantFromPeriodData then
 				periodAmount = TCombatant.GetAmount(combatantFromPeriod, mode)
@@ -253,7 +253,7 @@ end
 function TFight:CalculateSpellData(aCombatant, aCombatantFromPeriod, aFightPeriodID)
 	if aCombatantFromPeriod then
 		local spellData
-		for _, mode in pairs(enumMode) do 					
+		for _, mode in ipairs(enumUsedMode) do 					
 			TCombatant.MergeGlobalInfo(aCombatant, mode, aCombatantFromPeriod)
 			for _, spellDataFromPeriod in ipairs(TCombatant.GetCombatantData(aCombatantFromPeriod, mode) or {}) do
 				spellData = TCombatant.GetSpellByIdentifier(aCombatant, mode, IsPetData(spellDataFromPeriod), GetSpellDataElement(spellDataFromPeriod), spellDataFromPeriod[enumSpellInfo.Name])
