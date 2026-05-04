@@ -60,8 +60,25 @@ local function FillBuffCheckList()
 		TitleCustomDefBuffType[i] = buffCheckList[DPSHPSTYPES + i].name
 	end
 	
-	for i = 1, index-1 do
+	for i = 1, DPSHPSTYPES + DEFTYPES do
 		CurrentBuffsState[i] = {}
+	end
+
+	--для оптимизации в ReceiveValuesFromParams - уменьшаем число итераций и проверок
+	--храним ссылки на объекты из CurrentBuffsState
+	for i, value in ipairs(buffCheckList) do
+		if value.forDps and value.forSrc then
+			table.insert(BuffsRefForDpsSrc, { ind = i, buffsState = CurrentBuffsState[i]})
+		end
+		if value.forDps and value.forTarget then
+			table.insert(BuffsRefForDpsTarget, { ind = i, buffsState = CurrentBuffsState[i]})
+		end
+		if value.forHps and value.forSrc then
+			table.insert(BuffsRefForHpsSrc, { ind = i, buffsState = CurrentBuffsState[i]})
+		end
+		if value.forHps and value.forTarget then
+			table.insert(BuffsRefForHpsTarget, { ind = i, buffsState = CurrentBuffsState[i]})
+		end
 	end
 	
 	return buffCheckList

@@ -207,5 +207,10 @@ Global("DPSMeterGUI", {})
 
 Global( "CurrentBuffsState", {})
 
+Global( "BuffsRefForDpsSrc", {})
+Global( "BuffsRefForDpsTarget", {})
+Global( "BuffsRefForHpsSrc", {})
+Global( "BuffsRefForHpsTarget", {})
+
 Global( "CurrentScoreOnMainBtn", false)
 Global("MyAvatarID", false)

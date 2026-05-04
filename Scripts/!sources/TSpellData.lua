@@ -160,7 +160,7 @@ end
 
 function CustomBuffList(aSpellData)
 	local res = {}
-	for i, _ in ipairs(CurrentBuffsState) do
+	for i = 1, DPSHPSTYPES + DEFTYPES do
 		res[i] = aSpellData[i+m_customBuffMult]
 	end
 	return res
@@ -247,33 +247,40 @@ function TDamageSpellData:ReceiveValuesFromParams(aParams)
 	local currTime = cachedGetLocalDateTimeMs()
 	local srcBuff
 	local targetBuff
-	for i, value in ipairs(CurrentBuffsState) do
+	
+	for _, value in ipairs(BuffsRefForDpsSrc) do
 		--для баффов, указываемых в событии об уроне, это серверное указание в приоритете
-		if i == CustomBuffIndex.Valor then
-			if aParams.valor or AdditionalBuffCheckLethal(aParams, aParams.sourceID, value, currTime) then
+		if value.ind == CustomBuffIndex.Valor then
+			if aParams.valor or AdditionalBuffCheckLethal(aParams, aParams.sourceID, value.buffsState, currTime) then
 				CreateAndRecalcDetails(self, CustomBuffIndex.Valor+m_customBuffMult, aParams.amount)
 			end
-		elseif i == CustomBuffIndex.Vulnerability then
-			if aParams.vulnerability or AdditionalBuffCheckLethal(aParams, aParams.targetID, value, currTime) then
-				CreateAndRecalcDetails(self, CustomBuffIndex.Vulnerability+m_customBuffMult, aParams.amount)
-			end
-		elseif i == CustomBuffIndex.Defense then
-			if aParams.defense or AdditionalBuffCheckLethal(aParams, aParams.targetID, value, currTime) then
-				CreateAndRecalcDetails(self, CustomBuffIndex.Defense+m_customBuffMult, aParams.amount)
-			end
-		elseif i == CustomBuffIndex.Weakness then
-			if aParams.weakness or AdditionalBuffCheckLethal(aParams, aParams.sourceID, value, currTime) then
+		elseif value.ind == CustomBuffIndex.Weakness then
+			if aParams.weakness or AdditionalBuffCheckLethal(aParams, aParams.sourceID, value.buffsState, currTime) then
 				CreateAndRecalcDetails(self, CustomBuffIndex.Weakness+m_customBuffMult, aParams.amount)
 			end
 		else
-			srcBuff = AdditionalBuffCheckLethal(aParams, aParams.sourceID, value, currTime)
-			targetBuff = AdditionalBuffCheckLethal(aParams, aParams.targetID, value, currTime)
-			
-			if srcBuff and srcBuff.forDps and srcBuff.forSrc then
+			srcBuff = AdditionalBuffCheckLethal(aParams, aParams.sourceID, value.buffsState, currTime)
+
+			if srcBuff then
 				CreateAndRecalcDetails(self, srcBuff.ind+m_customBuffMult, aParams.amount)
 			end
+		end
+	end
+	
+	for _, value in ipairs(BuffsRefForDpsTarget) do
+		--для баффов, указываемых в событии об уроне, это серверное указание в приоритете
+		if value.ind == CustomBuffIndex.Vulnerability then
+			if aParams.vulnerability or AdditionalBuffCheckLethal(aParams, aParams.targetID, value.buffsState, currTime) then
+				CreateAndRecalcDetails(self, CustomBuffIndex.Vulnerability+m_customBuffMult, aParams.amount)
+			end
+		elseif value.ind == CustomBuffIndex.Defense then
+			if aParams.defense or AdditionalBuffCheckLethal(aParams, aParams.targetID, value.buffsState, currTime) then
+				CreateAndRecalcDetails(self, CustomBuffIndex.Defense+m_customBuffMult, aParams.amount)
+			end
+		else
+			targetBuff = AdditionalBuffCheckLethal(aParams, aParams.targetID, value.buffsState, currTime)
 			
-			if targetBuff and targetBuff.forDps and targetBuff.forTarget then
+			if targetBuff then
 				CreateAndRecalcDetails(self, targetBuff.ind+m_customBuffMult, aParams.amount)
 			end
 		end
@@ -308,7 +315,7 @@ function TDamageSpellData:AddValuesFromSpellData(aSpellData, aLastHitTime)
 	CreateAndMergeDetails(self, aSpellData, enumHitBlock.Mount+m_enumHitBlockMult)
 	CreateAndMergeDetails(self, aSpellData, enumHitBlock.MultAbsorb+m_enumHitBlockMult)
 	
-	for i, _ in ipairs(CurrentBuffsState) do
+	for i = 1, DPSHPSTYPES + DEFTYPES do
 		CreateAndMergeDetails(self, aSpellData, i+m_customBuffMult)
 	end
 
@@ -371,13 +378,18 @@ function THealSpellData:ReceiveValuesFromParams(aParams)
 	local currTime = cachedGetLocalDateTimeMs()
 	local srcBuff
 	local targetBuff
-	for i, value in ipairs(CurrentBuffsState) do
-		srcBuff = AdditionalBuffCheckLethal(aParams, aParams.sourceID, value, currTime)
-		targetBuff = AdditionalBuffCheckLethal(aParams, aParams.targetID, value, currTime)
-		if srcBuff and srcBuff.forHps and srcBuff.forSrc then
+	
+	for _, value in ipairs(BuffsRefForHpsSrc) do
+		srcBuff = AdditionalBuffCheckLethal(aParams, aParams.sourceID, value.buffsState, currTime)
+
+		if srcBuff then
 			CreateAndRecalcDetails(self, srcBuff.ind+m_customBuffMult, aParams.amount)
 		end
-		if targetBuff and targetBuff.forHps and targetBuff.forTarget then
+	end
+	for _, value in ipairs(BuffsRefForHpsTarget) do
+		targetBuff = AdditionalBuffCheckLethal(aParams, aParams.targetID, value.buffsState, currTime)
+
+		if targetBuff then
 			CreateAndRecalcDetails(self, targetBuff.ind+m_customBuffMult, aParams.amount)
 		end
 	end
@@ -396,7 +408,7 @@ function THealSpellData:AddValuesFromSpellData(aSpellData, aLastHitTime)
 	CreateAndMergeDetails(self, aSpellData, enumHealResist.Absorbed+m_enumHealResist)
 	CreateAndMergeDetails(self, aSpellData, enumHealResist.Overload+m_enumHealResist)
 	
-	for i, _ in ipairs(CurrentBuffsState) do
+	for i = 1, DPSHPSTYPES + DEFTYPES do
 		CreateAndMergeDetails(self, aSpellData, i+m_customBuffMult)
 	end
 
