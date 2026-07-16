@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <WidgetButton>
 	<Header>
-		<Prototype href="../CheckBoxTemp/CheckBoxStone.Prototype.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Prototype href="../../../../Resources/meter/CheckBoxTemp/CheckBoxStone.Prototype.(WidgetButton).xdb#xpointer(/WidgetButton)" />
 	</Header>
   <Name>DpsCheckBox</Name>
   <Priority>1</Priority>

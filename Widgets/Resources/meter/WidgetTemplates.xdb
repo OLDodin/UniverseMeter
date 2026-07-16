@@ -45,6 +45,10 @@
 			<name>BuffLine</name>
 			<widget href="BuffLine/Line.xdb" />
 		</Item>
+		<Item>
+			<name>BuffSettings</name>
+			<widget href="BuffSettings/Panel.xdb" />
+		</Item>
 	</items>
 </UIRelatedWidgets>
 

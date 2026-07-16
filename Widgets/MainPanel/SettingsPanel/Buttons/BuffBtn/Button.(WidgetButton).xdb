@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetButton>
+<Name>BuffBtn</Name>
+	<Header>
+		<Prototype href="/Mods/SampleCommon/Button/ButtonRegular.Prototype.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+	</Header>
+  <Placement>
+    <X>
+      <Align>WIDGET_ALIGN_BOTH</Align>
+      <Pos>15</Pos>
+	  <HighPos>5</HighPos>
+      <Size>310</Size>
+    </X>
+    <Y>
+      <Align>WIDGET_ALIGN_LOW</Align>
+      <Pos>4</Pos>
+      <Size>25</Size>
+    </Y>
+  </Placement>
+	<Variants>
+		<Item>
+			<TextFileRef href="ButtonText.txt" />
+			<Reaction>BuffBtnPressed</Reaction>
+		</Item>
+	</Variants>
+	<Enabled>false</Enabled>
+</WidgetButton>

@@ -14,7 +14,7 @@
       <Size>25</Size>
     </Y>
   </Placement>
-  <BackLayer href="textures\TextBox.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
+  <BackLayer href="..\..\..\Resources\meter\EditTextures\TextBox.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
   <Visible>true</Visible>
   <Enabled>true</Enabled>
   <TabOrder>0</TabOrder>
@@ -23,8 +23,8 @@
   <PickChildrenOnly>false</PickChildrenOnly>
   <IgnoreDblClick>false</IgnoreDblClick>
   <fade>1</fade>
-  <Cursor1Layer href="textures\Cursor.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)"/>
-  <Cursor2Layer href="TransparentLayer.(WidgetLayerSimpleTexture).xdb#xpointer(/WidgetLayerSimpleTexture)" />
+  <Cursor1Layer href="..\..\..\Resources\meter\EditTextures\Cursor.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)"/>
+  <Cursor2Layer href="..\..\..\Resources\meter\EditTextures\TransparentLayer.(WidgetLayerSimpleTexture).xdb#xpointer(/WidgetLayerSimpleTexture)" />
   <CursorWidth>2</CursorWidth>
   <CursorChangeTimeMs>500</CursorChangeTimeMs>
   <TextStyle>
@@ -40,5 +40,5 @@
   <maxSymbolsCount>-1</maxSymbolsCount>
   <globalClassName />
   <selectionClassName />
-  <selectionLayer href="textures\TextBoxSel.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
+  <selectionLayer href="..\..\..\Resources\meter\EditTextures\TextBoxSel.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />
 </WidgetEditLine>

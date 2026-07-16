@@ -19,7 +19,7 @@
 	<IgnoreDblClick>true</IgnoreDblClick>	
 	<Variants>
 		<Item>			
-			<LayerHighlight href="../ButtonDown/ScrollButtonHighlight.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />			
+			<LayerHighlight href="../ButtonDown/ScrollButtonHighlight.(UITexture).(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />			
 			<StateNormal>
 				<LayerMain href="ScrollUp.(UITexture).(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />				
 			</StateNormal>

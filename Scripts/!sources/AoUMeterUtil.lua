@@ -265,7 +265,7 @@ function GetPartyMembers(aNeedCorrectNames)
 end
 
 function PlayerPetInCombat(anPlayerID)
-	for _, followerID in pairs(unit.GetFollowers(anPlayerID) or {}) do
+	for _, followerID in ipairs(unit.GetFollowers(anPlayerID) or {}) do
 		if object.IsInCombat(followerID) then
 			return true
 		end

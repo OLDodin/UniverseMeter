@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetPanel>
+	<Priority>10</Priority>
+	<Name>BuffSettings</Name>
+	
+	<Children>
+		<Item href="NameEditTxt.xdb" />
+		<Item href="ForSrcCheckBox.xdb" />
+		<Item href="ForTargetCheckBox.xdb" />
+		<Item href="ForDpsCheckBox.xdb" />
+		<Item href="ForHpsCheckBox.xdb" />
+	</Children>
+	
+	
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_BOTH</Align>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Size>25</Size>
+		</Y>
+	</Placement>
+	<TransparentInput>false</TransparentInput>
+</WidgetPanel>

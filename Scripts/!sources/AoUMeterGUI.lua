@@ -17,6 +17,7 @@ local m_timeLapseScaleStep = 1
 local m_wdgCacheByTypeName = {}
 local m_wdgCreatedByTypeName = {}
 
+
 local function AllCacheInvalidate()
 	m_wdgCacheByTypeName = m_wdgCreatedByTypeName
 	m_wdgCreatedByTypeName = {}
@@ -69,7 +70,7 @@ function TMainPanelGUI:CreateNewObject(name)
 			TotalPanel = nil, -- Panel to display the total
 			PlayerList = {}, -- Panel player list
 			HistoryPanelHeight = 250,
-			SettingsPanelHeight = 350
+			SettingsPanelHeight = 370
 		}, { __index = widget })
 end
 
@@ -153,32 +154,44 @@ end
 Global("TSettingsPanelGUI", {})
 --------------------------------------------------------------------------------
 function TSettingsPanelGUI:Init(aPanel)
-	aPanel.CloseButton = aPanel:GetChildByName("CloseBtn")
-	aPanel.DefCheckBoxText = aPanel:GetChildByName("DefCheckBoxText").Widget
-	aPanel.DpsCheckBoxText = aPanel:GetChildByName("DpsCheckBoxText").Widget
-	aPanel.HpsCheckBoxText = aPanel:GetChildByName("HpsCheckBoxText").Widget
-	aPanel.IhpsCheckBoxText = aPanel:GetChildByName("IhpsCheckBoxText").Widget
-	aPanel.SkipPetCheckBoxText = aPanel:GetChildByName("SkipPetCheckBoxText").Widget
-	aPanel.StartHidedCheckBoxText = aPanel:GetChildByName("StartHidedCheckBoxText").Widget
-	aPanel.SkipYourselfCheckBoxText = aPanel:GetChildByName("SkipYourselfCheckBoxText").Widget
-	aPanel.CombatantCntText = aPanel:GetChildByName("CombatantCntText").Widget
-	aPanel.ShowScoreCheckBoxText = aPanel:GetChildByName("ShowScoreCheckBoxText").Widget
-	aPanel.ScaleFontsCheckBoxText = aPanel:GetChildByName("ScaleFontsCheckBoxText").Widget
+	local panelContent = aPanel:GetChildByName("PanelContent"):GetChildByName("PanelContent1")
+	aPanel.CloseButton = panelContent:GetChildByName("CloseBtn")
+	aPanel.DefCheckBoxText = panelContent:GetChildByName("DefCheckBoxText").Widget
+	aPanel.DpsCheckBoxText = panelContent:GetChildByName("DpsCheckBoxText").Widget
+	aPanel.HpsCheckBoxText = panelContent:GetChildByName("HpsCheckBoxText").Widget
+	aPanel.IhpsCheckBoxText = panelContent:GetChildByName("IhpsCheckBoxText").Widget
+	aPanel.SkipPetCheckBoxText = panelContent:GetChildByName("SkipPetCheckBoxText").Widget
+	aPanel.StartHidedCheckBoxText = panelContent:GetChildByName("StartHidedCheckBoxText").Widget
+	aPanel.SkipYourselfCheckBoxText = panelContent:GetChildByName("SkipYourselfCheckBoxText").Widget
+	aPanel.CombatantCntText = panelContent:GetChildByName("CombatantCntText").Widget
+	aPanel.ShowScoreCheckBoxText = panelContent:GetChildByName("ShowScoreCheckBoxText").Widget
+	aPanel.ScaleFontsCheckBoxText = panelContent:GetChildByName("ScaleFontsCheckBoxText").Widget
 	
-	aPanel.DefCheckBox = aPanel:GetChildByName("DefCheckBox").Widget
-	aPanel.DpsCheckBox = aPanel:GetChildByName("DpsCheckBox").Widget
-	aPanel.HpsCheckBox = aPanel:GetChildByName("HpsCheckBox").Widget
-	aPanel.IhpsCheckBox = aPanel:GetChildByName("IhpsCheckBox").Widget
-	aPanel.SkipPetCheckBox = aPanel:GetChildByName("SkipPetCheckBox").Widget
-	aPanel.StartHidedCheckBox = aPanel:GetChildByName("StartHidedCheckBox").Widget
-	aPanel.SkipYourselfCheckBox = aPanel:GetChildByName("SkipYourselfCheckBox").Widget
-	aPanel.MaxCombatantTextEdit = aPanel:GetChildByName("SettingsMaxCombatant").Widget
-	aPanel.ShowScoreCheckBox = aPanel:GetChildByName("ShowScoreCheckBox").Widget
-	aPanel.ScaleFontsCheckBox = aPanel:GetChildByName("ScaleFontsCheckBox").Widget
+	aPanel.PanelContent = aPanel:GetChildByName("PanelContent").Widget
+
+	aPanel.DefCheckBox = panelContent:GetChildByName("DefCheckBox").Widget
+	aPanel.DpsCheckBox = panelContent:GetChildByName("DpsCheckBox").Widget
+	aPanel.HpsCheckBox = panelContent:GetChildByName("HpsCheckBox").Widget
+	aPanel.IhpsCheckBox = panelContent:GetChildByName("IhpsCheckBox").Widget
+	aPanel.SkipPetCheckBox = panelContent:GetChildByName("SkipPetCheckBox").Widget
+	aPanel.StartHidedCheckBox = panelContent:GetChildByName("StartHidedCheckBox").Widget
+	aPanel.SkipYourselfCheckBox = panelContent:GetChildByName("SkipYourselfCheckBox").Widget
+	aPanel.MaxCombatantTextEdit = panelContent:GetChildByName("SettingsMaxCombatant").Widget
+	aPanel.ShowScoreCheckBox = panelContent:GetChildByName("ShowScoreCheckBox").Widget
+	aPanel.ScaleFontsCheckBox = panelContent:GetChildByName("ScaleFontsCheckBox").Widget
 	
 	aPanel.HeaderText = aPanel:GetChildByName("HeaderText").Widget
 	
 	aPanel.SaveBtn = aPanel:GetChildByName("SaveBtn").Widget
+	aPanel.BuffBtn = panelContent:GetChildByName("BuffBtn").Widget
+	
+	panelContent = aPanel:GetChildByName("PanelContent"):GetChildByName("PanelContent2")
+	aPanel.BackBtn = panelContent:GetChildByName("BackBtn").Widget
+	aPanel.BuffScrollPanel = panelContent:GetChildByName("ScrollBuffPanel"):GetChildByName("ScrollableContainerV").Widget
+	aPanel.ForDpsText = panelContent:GetChildByName("ForDpsText").Widget
+	aPanel.ForHpsText = panelContent:GetChildByName("ForHpsText").Widget
+	aPanel.ForSrcText = panelContent:GetChildByName("ForSrcText").Widget
+	aPanel.ForTargetText = panelContent:GetChildByName("ForTargetText").Widget
 end
 --------------------------------------------------------------------------------
 -- Type TTotalPanelGUI
@@ -190,6 +203,20 @@ function TTotalPanelGUI:CreateNewObjectByDesc(name, desc, owner)
 			Bar = widget:GetChildByName("PlayerInfoBar"),
 			Name = widget:GetChildByName("TotalInfoTextViewName"),
 			Value = widget:GetChildByName("PlayerInfoTextViewStats")
+		}, { __index = widget })
+end
+--------------------------------------------------------------------------------
+-- Type TBuffSettings
+Global("TBuffSettings", {})
+--------------------------------------------------------------------------------
+function TBuffSettings:CreateNewObjectByDesc(name, desc, owner)
+	local widget = TWidget:CreateNewObjectByDesc(name, desc, owner)
+	return setmetatable({
+			NameEdit = widget:GetChildByName("BuffName").Widget,
+			ForSrc = widget:GetChildByName("ForSrcCheckBox").Widget,
+			ForTarget = widget:GetChildByName("ForTargetCheckBox").Widget,
+			ForDps = widget:GetChildByName("ForDpsCheckBox").Widget,
+			ForHps = widget:GetChildByName("ForHpsCheckBox").Widget,
 		}, { __index = widget })
 end
 --------------------------------------------------------------------------------
@@ -1246,7 +1273,23 @@ function TUMeterGUI:CreateNewSpellPanel()
 	self.DetailsPanel.SpellList[spellIndex] = newSpellPanel
 end
 
-function TUMeterGUI:Init()
+function TUMeterGUI:CreateBuffScrollPanel(aBuffSettings)
+--{name = GetTextLocalized("HpsBuff"..i), ind = index, forSrc = true, forHps = true} forDps  forTarget
+	for i, element in pairs(aBuffSettings) do
+		local buffSettingsPanel = TBuffSettings:CreateNewObjectByDesc("Buff"..tostring(i), GetDescFromResource("BuffSettings"), self.SettingsPanel)
+		buffSettingsPanel.NameEdit:SetText(element.name)
+		SetCheckedForCheckBox(buffSettingsPanel.ForSrc, element.forSrc)
+		SetCheckedForCheckBox(buffSettingsPanel.ForTarget, element.forTarget)
+		SetCheckedForCheckBox(buffSettingsPanel.ForDps, element.forDps)
+		SetCheckedForCheckBox(buffSettingsPanel.ForHps, element.forHps)
+		
+		buffSettingsPanel.NameEdit:SetCursorPos(0)
+		
+		self.SettingsPanel.BuffScrollPanel:PushBack(buffSettingsPanel.Widget)
+	end
+end
+
+function TUMeterGUI:Init(aBuffSettings)
 	-- Default mode
 	self.ActiveMode = Settings.DefaultMode
 	self.ActiveFightMode = enumFight.Current
@@ -1274,6 +1317,13 @@ function TUMeterGUI:Init()
 	self.SettingsPanel.SkipYourselfCheckBoxText:SetVal("Name", GetTextLocalized("StrSettingsIgnoreYourself"))
 	self.SettingsPanel.CombatantCntText:SetVal("Name", GetTextLocalized("StrCombatantCntText"))
 	self.SettingsPanel.SaveBtn:SetVal("button_label", GetTextLocalized("SettingsSave"))
+	self.SettingsPanel.BuffBtn:SetVal("button_label", GetTextLocalized("SettingsBuff"))
+	self.SettingsPanel.BackBtn:SetVal("button_label", GetTextLocalized("SettingsBack"))
+	self.SettingsPanel.ForSrcText:SetVal("Name", GetTextLocalized("SettingsForSrc"))
+	self.SettingsPanel.ForTargetText:SetVal("Name", GetTextLocalized("SettingsForTarget"))
+	self.SettingsPanel.ForDpsText:SetVal("Name", GetTextLocalized("SettingsForDps"))
+	self.SettingsPanel.ForHpsText:SetVal("Name", GetTextLocalized("SettingsForHps"))
+	
 	self.SettingsPanel.HeaderText:SetVal("Name", GetTextLocalized("StrSettings"))
 	self.SettingsPanel.MaxCombatantTextEdit:SetText(cachedFormatInt(Settings.MaxCombatants, "%d"))
 	
@@ -1501,7 +1551,7 @@ function TUMeterGUI:Init()
 	self.DetailsPanel.FightBtn:SetPosition(550, 28)
 	
 	
-	
+	self:CreateBuffScrollPanel(aBuffSettings)
 	
 
 	self.DetailsPanel.GlobalInfoHeaderNameText:SetVal("Name", GetTextLocalized("GlobalInfo"))

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetPanel>
+	<Name>PanelContent2</Name>
+	<Priority>3</Priority>
+	<Children>
+		<Item href="Buttons/BackBtn/Button.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/ForSrcText/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="Buttons/ForTargetText/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="Buttons/ForDpsText/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="Buttons/ForHpsText/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="ScrollPanel.(WidgetPanel).xdb"/>
+	</Children>
+	<BackLayer href="backTexture.xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Size>320</Size>
+			<Pos>360</Pos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Size>306</Size>
+			<Pos>0</Pos>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+</WidgetPanel>

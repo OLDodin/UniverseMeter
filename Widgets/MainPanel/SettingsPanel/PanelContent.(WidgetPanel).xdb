@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetPanel>
+	<Name>PanelContent</Name>
+	<Priority>3</Priority>
+	<Children>
+		<Item href="PanelContent1.(WidgetPanel).xdb" />
+		<Item href="PanelContent2.(WidgetPanel).xdb" />
+	</Children>
+
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Size>680</Size>
+			<Pos>0</Pos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Size>306</Size>
+			<Pos>25</Pos>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+</WidgetPanel>

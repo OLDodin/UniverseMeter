@@ -197,6 +197,14 @@ onReaction["SavePressed"] = function(reaction)
 	DPSMeterGUI.SettingsPanel:Hide()
 end
 
+onReaction["BuffBtnPressed"] = function(reaction)
+	DPSMeterGUI.SettingsPanel.PanelContent:PlayMoveEffect( nil, { posX = -350 }, 100, EA_MONOTONOUS_INCREASE )
+end
+
+onReaction["BackBtnPressed"] = function(reaction)
+	DPSMeterGUI.SettingsPanel.PanelContent:PlayMoveEffect( nil, { posX = 0 }, 100, EA_MONOTONOUS_INCREASE )
+end
+
 --------------------------------------------------------------------------------
 -- occurred when the player press the close button in the main panel
 --------------------------------------------------------------------------------
@@ -619,11 +627,9 @@ function GetListWithPets(anUnitList)
 	for _, member in ipairs(anUnitList) do
 		if member.id then
 			unitListWithPets[member.id] = true
-			local followers = unit.GetFollowers(member.id)
-			if followers then
-				for _, followerID in ipairs(followers) do
-					unitListWithPets[followerID] = true
-				end
+			local followers = object.IsExist(member.id) and unit.GetFollowers(member.id)
+			for _, followerID in ipairs(followers or {}) do
+				unitListWithPets[followerID] = true
 			end
 		end
 	end

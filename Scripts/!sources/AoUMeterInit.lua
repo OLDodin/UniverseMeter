@@ -196,11 +196,12 @@ local function Init()
 		table.insert(enumUsedMode, enumMode.IHps)
 	end
 	
-	InitBuffConditionMgr(FillBuffCheckList())
+	local buffCheckList = FillBuffCheckList()
+	InitBuffConditionMgr(buffCheckList)
 	
 	-- Create the DPSMeter here
 	DPSMeterGUI = TUMeterGUI:CreateNewObject(TUMeter:CreateNewObject())
-	DPSMeterGUI:Init()
+	DPSMeterGUI:Init(buffCheckList)
 	
 	if Settings.StartHided then
 		DPSMeterGUI.MainPanel:Hide()

@@ -158,6 +158,30 @@
       <resource href="SettingsSave.txt" />
     </Item>
 	<Item>
+      <name>SettingsBuff</name>
+      <resource href="SettingsBuff.txt" />
+    </Item>
+	<Item>
+      <name>SettingsBack</name>
+      <resource href="SettingsBack.txt" />
+    </Item>
+	<Item>
+      <name>SettingsForSrc</name>
+      <resource href="SettingsForSrc.txt" />
+    </Item>
+	<Item>
+      <name>SettingsForDps</name>
+      <resource href="SettingsForDps.txt" />
+    </Item>
+	<Item>
+      <name>SettingsForTarget</name>
+      <resource href="SettingsForTarget.txt" />
+    </Item>
+	<Item>
+      <name>SettingsForHps</name>
+      <resource href="SettingsForHps.txt" />
+    </Item>
+	<Item>
       <name>StrSettings</name>
       <resource href="StrSettings.txt" />
     </Item>
