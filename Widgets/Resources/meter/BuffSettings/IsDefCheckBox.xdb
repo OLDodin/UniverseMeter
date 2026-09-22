@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetButton>
+	<Header>
+		<Prototype href="../CheckBoxTemp/CheckBoxStone.Prototype.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+	</Header>
+
+  <Name>IsDefCheckBox</Name>
+  <Priority>1</Priority>
+  <Placement>
+    <X>
+      <Align>WIDGET_ALIGN_HIGH</Align>
+      <HighPos>20</HighPos>
+      <Size>15</Size>
+    </X>
+    <Y>
+      <Align>WIDGET_ALIGN_CENTER</Align>
+      <Pos>0</Pos>
+      <Size>15</Size>
+    </Y>
+  </Placement>
+</WidgetButton>

@@ -3,8 +3,8 @@
 	<Name>SettingsPanel</Name>
 	<Priority>3</Priority>
 	<Children>
-		<Item href="Buttons/HeaderText/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
-		<Item href="Buttons/SaveBtn/Button.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+		<Item href="Buttons/HeaderText.xdb" />
+		<Item href="Buttons/SaveBtn.xdb" />
 		<Item href="PanelContent.(WidgetPanel).xdb" />
 	</Children>
 	<BackLayer href="SettingsPanel.(WidgetLayerTiledTexture).xdb#xpointer(/WidgetLayerTiledTexture)" />

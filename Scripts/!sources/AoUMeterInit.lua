@@ -4,60 +4,109 @@
 --------------------------------------------------------------------------------
 
 onMyEvent [ "EVENT_UNKNOWN_SLASH_COMMAND" ] = function( params )
-	if userMods.FromWString(params.text) == "/umreset" then
-		DPSMeterGUI.ShowHideBtn:SetPosition(100, 10)
+	local commandStr = userMods.FromWString(params.text)
+	if commandStr == "/um_reset" or commandStr == "\\um_reset" then
+		DPSMeterGUI.ShowHideBtn:ResetDNDPos(350, 10, true)
+	elseif commandStr == "/um_buff_reset" or commandStr == "\\um_buff_reset" then
+		local savedData = userMods.GetGlobalConfigSection("UniverseMeterSettings")
+		savedData.buffCheckList = nil
+		userMods.SetGlobalConfigSection( "UniverseMeterSettings", savedData )
+		common.StateReloadManagedAddon(common.GetAddonSysName())
 	end
 end
 
-local function FillBuffCheckList()
+local function GenerateDefaultBuffCheckList()
+	DPSHPSTYPES = 10
+	DEFTYPES = 28
+	
 	local buffCheckList = {}
 	local index = 1
 	for i = 1, 3 do
-		table.insert(buffCheckList, {name = GetTextLocalized("HpsBuff"..i), ind = index, forSrc = true, forHps = true})
+		table.insert(buffCheckList, {name = GetTextLocalized("HpsBuff"..i), ind = index, forSrc = true, forHps = true, isDef = false})
 		index = index + 1
 	end
 	CustomBuffIndex.Might = 2
 	for i = 1, 4 do
-		table.insert(buffCheckList, {name = GetTextLocalized("DpsHpsBuff"..i), ind = index, forSrc = true, forHps = true, forDps = true})
+		table.insert(buffCheckList, {name = GetTextLocalized("DpsHpsBuff"..i), ind = index, forSrc = true, forHps = true, forDps = true, isDef = false})
 		index = index + 1
 	end
 	for i = 1, 2 do
-		table.insert(buffCheckList, {name = GetTextLocalized("DpsBuff"..i), ind = index, forSrc = true, forDps = true})
+		table.insert(buffCheckList, {name = GetTextLocalized("DpsBuff"..i), ind = index, forSrc = true, forDps = true, isDef = false})
 		index = index + 1
 	end
 	CustomBuffIndex.Valor = index - 1
 	for i = 3, 3 do
-		table.insert(buffCheckList, {name = GetTextLocalized("DpsBuff"..i), ind = index, forTarget = true, forDps = true})
+		table.insert(buffCheckList, {name = GetTextLocalized("DpsBuff"..i), ind = index, forTarget = true, forDps = true, isDef = false})
 		index = index + 1
 	end
 	CustomBuffIndex.Vulnerability = index - 1
 	
-	DPSHPSTYPES = 10
-	DEFTYPES = 28
 	for i = 1, 1 do
-		table.insert(buffCheckList, {name = GetTextLocalized("IHpsBuff"..i), ind = index, forTarget = true, forHps = true})
+		table.insert(buffCheckList, {name = GetTextLocalized("IHpsBuff"..i), ind = index, forTarget = true, forHps = true, isDef = true})
 		index = index + 1
 	end
 	for i = 1, 25 do
-		table.insert(buffCheckList, {name = GetTextLocalized("DefBuff"..i), ind = index, forTarget = true, forDps = true})
+		table.insert(buffCheckList, {name = GetTextLocalized("DefBuff"..i), ind = index, forTarget = true, forDps = true, isDef = true})
 		index = index + 1
 	end
 	CustomBuffIndex.Defense = index - 1
 	for i = 26, 26 do
-		table.insert(buffCheckList, {name = GetTextLocalized("DefBuff"..i), ind = index, forSrc = true, forDps = true})
+		table.insert(buffCheckList, {name = GetTextLocalized("DefBuff"..i), ind = index, forSrc = true, forDps = true, isDef = true})
 		index = index + 1
 	end
 	CustomBuffIndex.Weakness = index - 1
 	for i = 27, 27 do
-		table.insert(buffCheckList, {name = GetTextLocalized("DefBuff"..i), ind = index, forTarget = true, forDps = true})
+		table.insert(buffCheckList, {name = GetTextLocalized("DefBuff"..i), ind = index, forTarget = true, forDps = true, isDef = true})
 		index = index + 1
 	end
 	
+	return buffCheckList
+end
+
+local function GetDpsHpsCnt(aBuffCheckList)
+	local cnt = 0
+	for _, value in ipairs(aBuffCheckList) do
+		if not value.isDef then
+			cnt = cnt + 1
+		end
+	end
+	return cnt
+end
+
+local function GetDefCnt(aBuffCheckList)
+	local cnt = 0
+	for _, value in ipairs(aBuffCheckList) do
+		if value.isDef then
+			cnt = cnt + 1
+		end
+	end
+	return cnt
+end
+
+local function FindBuffIndex(aBuffCheckList, aBuffName)
+	for i, value in ipairs(aBuffCheckList) do
+		if value.name == aBuffName then
+			return i
+		end
+	end
+	return -1
+end
+
+local function FillBuffCheckList(aBuffCheckList)
+	CustomBuffIndex.Might = FindBuffIndex(aBuffCheckList, StrMight)
+	CustomBuffIndex.Valor = FindBuffIndex(aBuffCheckList, StrValor)
+	CustomBuffIndex.Vulnerability = FindBuffIndex(aBuffCheckList, StrVulnerability)
+	CustomBuffIndex.Defense = FindBuffIndex(aBuffCheckList, StrDefense)
+	CustomBuffIndex.Weakness = FindBuffIndex(aBuffCheckList, StrWeakness)
+
+	DPSHPSTYPES = GetDpsHpsCnt(aBuffCheckList)
+	DEFTYPES = GetDefCnt(aBuffCheckList)
+
 	for i = 1, DPSHPSTYPES do
-		TitleCustomDpsBuffType[i] = buffCheckList[i].name
+		TitleCustomDpsBuffType[i] = aBuffCheckList[i].name
 	end
 	for i = 1, DEFTYPES do
-		TitleCustomDefBuffType[i] = buffCheckList[DPSHPSTYPES + i].name
+		TitleCustomDefBuffType[i] = aBuffCheckList[DPSHPSTYPES + i].name
 	end
 	
 	for i = 1, DPSHPSTYPES + DEFTYPES do
@@ -66,7 +115,7 @@ local function FillBuffCheckList()
 
 	--для оптимизации в ReceiveValuesFromParams - уменьшаем число итераций и проверок
 	--храним ссылки на объекты из CurrentBuffsState
-	for i, value in ipairs(buffCheckList) do
+	for i, value in ipairs(aBuffCheckList) do
 		if value.forDps and value.forSrc then
 			table.insert(BuffsRefForDpsSrc, { ind = i, buffsState = CurrentBuffsState[i]})
 		end
@@ -81,7 +130,7 @@ local function FillBuffCheckList()
 		end
 	end
 	
-	return buffCheckList
+	return aBuffCheckList
 end
 
 local function Init()
@@ -95,6 +144,8 @@ local function Init()
 	StrDamagePool = GetTextLocalized("DamagePool")
 	StrFromBarrier = GetTextLocalized("FromBarrier")
 	StrBloodlust = GetTextLocalized("Bloodlust")
+	
+	StrDefaultBuff = GetTextLocalized("EnterName")
 
 	StrNone = common.GetEmptyWString()
 	StrWeakness = GetTextLocalized("Weakness")
@@ -102,6 +153,7 @@ local function Init()
 	StrVulnerability = GetTextLocalized("Vulnerability")
 	StrInsidiousness = GetTextLocalized("Insidiousness")
 	StrValor = GetTextLocalized("Valor")
+	StrMight = GetTextLocalized("Might")
 	StrMapModifier = GetTextLocalized("MapModifier")
 	StrExploit = GetTextLocalized("Exploit")
 	StrFall = GetTextLocalized("Fall")
@@ -181,6 +233,13 @@ local function Init()
 		if savedData.maxCombatants then
 			Settings.MaxCombatants = savedData.maxCombatants
 		end
+		if savedData.buffCheckList then
+			Settings.BuffCheckList = savedData.buffCheckList
+		end
+	end
+	
+	if not Settings.BuffCheckList then
+		Settings.BuffCheckList = GenerateDefaultBuffCheckList()
 	end
 	
 	if Settings.ModeDPS then 
@@ -196,7 +255,7 @@ local function Init()
 		table.insert(enumUsedMode, enumMode.IHps)
 	end
 	
-	local buffCheckList = FillBuffCheckList()
+	local buffCheckList = FillBuffCheckList(Settings.BuffCheckList)
 	InitBuffConditionMgr(buffCheckList)
 	
 	-- Create the DPSMeter here

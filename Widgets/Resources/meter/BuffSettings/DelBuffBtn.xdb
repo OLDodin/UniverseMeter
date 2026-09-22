@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetButton>
+<Name>DelBuffBtn</Name>
+	<Header>
+		<Prototype href="/Mods/SampleCommon/Button/ButtonRegular.Prototype.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+	</Header>
+  <Placement>
+    <X>
+      <Align>WIDGET_ALIGN_HIGH</Align>
+	  <HighPos>0</HighPos>
+      <Size>15</Size>
+    </X>
+    <Y>
+      <Align>WIDGET_ALIGN_LOW</Align>
+      <Pos>3</Pos>
+      <Size>15</Size>
+    </Y>
+  </Placement>
+	<Variants>
+		<Item>
+			<TextFileRef href="ButtonText.txt" />
+			<StateNormal>
+				<FormatFileRef href="DelBuffText.txt" />
+			</StateNormal>
+			<Reaction>DelBuffBtnPressed</Reaction>
+		</Item>
+	</Variants>
+	<Visible>false</Visible>
+</WidgetButton>

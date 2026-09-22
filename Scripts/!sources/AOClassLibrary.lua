@@ -106,6 +106,13 @@ end
 function TWidget:DragNDrop( bUseCfg, bLockedToScreenArea, Padding )
 	DnD.Init( self.Widget, self.Widget, bUseCfg, bLockedToScreenArea, Padding  )
 end
+
+function TWidget:ResetDNDPos( aPosX, aPosY, bUseCfg, bLockedToScreenArea, Padding )
+	DnD.Remove(self.Widget)
+	SetConfig("DnD:"..DnD.GetWidgetTreePath(self.Widget), {posX = aPosX, posY = aPosY, highPosX = aPosX, highPosY = 0})
+	DnD.Init( self.Widget, self.Widget, bUseCfg, bLockedToScreenArea, Padding  )
+end
+
 --------------------------------------------------------------------------------
 function TWidget:SetVariant( newVariant )
 	if self.LastValues.variant == newVariant then

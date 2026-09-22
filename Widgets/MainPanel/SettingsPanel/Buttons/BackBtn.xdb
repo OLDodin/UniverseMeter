@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetButton>
+<Name>BackBtn</Name>
+	<Header>
+		<Prototype href="/Mods/SampleCommon/Button/ButtonRegular.Prototype.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+	</Header>
+  <Placement>
+    <X>
+      <Align>WIDGET_ALIGN_LOW</Align>
+      <Pos>5</Pos>
+      <Size>75</Size>
+    </X>
+    <Y>
+      <Align>WIDGET_ALIGN_LOW</Align>
+      <Pos>4</Pos>
+      <Size>25</Size>
+    </Y>
+  </Placement>
+	<Variants>
+		<Item>
+			<Reaction>BackBtnPressed</Reaction>
+		</Item>
+	</Variants>
+</WidgetButton>

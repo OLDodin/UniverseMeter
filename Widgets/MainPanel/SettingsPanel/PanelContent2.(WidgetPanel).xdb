@@ -3,11 +3,14 @@
 	<Name>PanelContent2</Name>
 	<Priority>3</Priority>
 	<Children>
-		<Item href="Buttons/BackBtn/Button.(WidgetButton).xdb#xpointer(/WidgetButton)" />
-		<Item href="Buttons/ForSrcText/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
-		<Item href="Buttons/ForTargetText/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
-		<Item href="Buttons/ForDpsText/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
-		<Item href="Buttons/ForHpsText/TextView.(WidgetTextView).xdb#xpointer(/WidgetTextView)" />
+		<Item href="Buttons/BackBtn.xdb" />
+		<Item href="Buttons/AddBuffBtn.xdb" />
+		<Item href="Buttons/DelModeBtn.xdb" />
+		<Item href="Buttons/ForSrcText.xdb" />
+		<Item href="Buttons/ForTargetText.xdb" />
+		<Item href="Buttons/ForDpsText.xdb" />
+		<Item href="Buttons/ForHpsText.xdb" />
+		<Item href="Buttons/DefImg/DefImg.xdb" />
 		<Item href="ScrollPanel.(WidgetPanel).xdb"/>
 	</Children>
 	<BackLayer href="backTexture.xdb" />

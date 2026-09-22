@@ -9,6 +9,8 @@
 		<Item href="ForTargetCheckBox.xdb" />
 		<Item href="ForDpsCheckBox.xdb" />
 		<Item href="ForHpsCheckBox.xdb" />
+		<Item href="IsDefCheckBox.xdb" />
+		<Item href="DelBuffBtn.xdb" />
 	</Children>
 	
 	

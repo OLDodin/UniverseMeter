@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetPanel>
+	<Name>DefImg</Name>
+	<Priority>3</Priority>
+	<Children>
+	</Children>
+	<BackLayer href="def.(WidgetLayerSimpleTexture).xdb" />
+	<Placement>
+		<X>
+			<Align>WIDGET_ALIGN_HIGH</Align>
+			<Size>30</Size>
+			<HighPos>47</HighPos>
+		</X>
+		<Y>
+			<Align>WIDGET_ALIGN_LOW</Align>
+			<Size>30</Size>
+			<Pos>30</Pos>
+		</Y>
+	</Placement>
+	<Visible>true</Visible>
+</WidgetPanel>

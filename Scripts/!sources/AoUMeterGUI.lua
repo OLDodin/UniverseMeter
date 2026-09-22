@@ -187,6 +187,8 @@ function TSettingsPanelGUI:Init(aPanel)
 	
 	panelContent = aPanel:GetChildByName("PanelContent"):GetChildByName("PanelContent2")
 	aPanel.BackBtn = panelContent:GetChildByName("BackBtn").Widget
+	aPanel.AddBuffBtn = panelContent:GetChildByName("AddBuffBtn").Widget
+	aPanel.DelModeBtn = panelContent:GetChildByName("DelModeBtn").Widget
 	aPanel.BuffScrollPanel = panelContent:GetChildByName("ScrollBuffPanel"):GetChildByName("ScrollableContainerV").Widget
 	aPanel.ForDpsText = panelContent:GetChildByName("ForDpsText").Widget
 	aPanel.ForHpsText = panelContent:GetChildByName("ForHpsText").Widget
@@ -217,6 +219,8 @@ function TBuffSettings:CreateNewObjectByDesc(name, desc, owner)
 			ForTarget = widget:GetChildByName("ForTargetCheckBox").Widget,
 			ForDps = widget:GetChildByName("ForDpsCheckBox").Widget,
 			ForHps = widget:GetChildByName("ForHpsCheckBox").Widget,
+			IsDef = widget:GetChildByName("IsDefCheckBox").Widget,
+			DelBuff = widget:GetChildByName("DelBuffBtn").Widget
 		}, { __index = widget })
 end
 --------------------------------------------------------------------------------
@@ -1274,7 +1278,6 @@ function TUMeterGUI:CreateNewSpellPanel()
 end
 
 function TUMeterGUI:CreateBuffScrollPanel(aBuffSettings)
---{name = GetTextLocalized("HpsBuff"..i), ind = index, forSrc = true, forHps = true} forDps  forTarget
 	for i, element in pairs(aBuffSettings) do
 		local buffSettingsPanel = TBuffSettings:CreateNewObjectByDesc("Buff"..tostring(i), GetDescFromResource("BuffSettings"), self.SettingsPanel)
 		buffSettingsPanel.NameEdit:SetText(element.name)
@@ -1282,11 +1285,58 @@ function TUMeterGUI:CreateBuffScrollPanel(aBuffSettings)
 		SetCheckedForCheckBox(buffSettingsPanel.ForTarget, element.forTarget)
 		SetCheckedForCheckBox(buffSettingsPanel.ForDps, element.forDps)
 		SetCheckedForCheckBox(buffSettingsPanel.ForHps, element.forHps)
+		SetCheckedForCheckBox(buffSettingsPanel.IsDef, element.isDef)
 		
 		buffSettingsPanel.NameEdit:SetCursorPos(0)
 		
 		self.SettingsPanel.BuffScrollPanel:PushBack(buffSettingsPanel.Widget)
 	end
+end
+
+function TUMeterGUI:SwitchDelBuffScrollPanel(aMode)
+	for i = 0, self.SettingsPanel.BuffScrollPanel:GetElementCount() - 1 do
+		self.SettingsPanel.BuffScrollPanel:At(i):GetChildUnchecked("DelBuffBtn"):Show(aMode)
+		if aMode then
+			self.SettingsPanel.BuffScrollPanel:At(i):GetChildUnchecked("DelBuffBtn"):PlayFadeEffect( 0, 1, 100, EA_MONOTONOUS_INCREASE )
+		end
+	end
+end
+
+function TUMeterGUI:AddToBuffScrollPanel()
+	local buffSettingsPanel = TBuffSettings:CreateNewObjectByDesc("Buff"..tostring(self.SettingsPanel.BuffScrollPanel:GetElementCount()), GetDescFromResource("BuffSettings"), self.SettingsPanel)
+	buffSettingsPanel.NameEdit:SetText(StrDefaultBuff)
+	SetCheckedForCheckBox(buffSettingsPanel.ForSrc, true)
+	SetCheckedForCheckBox(buffSettingsPanel.ForTarget, false)
+	SetCheckedForCheckBox(buffSettingsPanel.ForDps, true)
+	SetCheckedForCheckBox(buffSettingsPanel.ForHps, false)
+	SetCheckedForCheckBox(buffSettingsPanel.IsDef, false)
+	
+	self.SettingsPanel.BuffScrollPanel:PushBack(buffSettingsPanel.Widget)
+	self.SettingsPanel.BuffScrollPanel:EnsureVisible(buffSettingsPanel.Widget)
+	buffSettingsPanel.NameEdit:SetFocus(true)
+
+end
+
+function TUMeterGUI:RemoveFromBuffScrollPanel(aWdg)
+	self.SettingsPanel.BuffScrollPanel:Remove(aWdg)
+	aWdg:DestroyWidget()
+end
+
+function TUMeterGUI:ExportBuffScrollPanel()
+	local buffSettingsList = {}
+	for i = 0, self.SettingsPanel.BuffScrollPanel:GetElementCount() - 1 do
+		local element = self.SettingsPanel.BuffScrollPanel:At(i)
+		local obj = {}
+		obj.name = element:GetChildUnchecked("BuffName"):GetText()
+		obj.ind = i + 1
+		obj.forTarget = element:GetChildUnchecked("ForTargetCheckBox"):GetVariant() == 1
+		obj.forSrc = element:GetChildUnchecked("ForSrcCheckBox"):GetVariant() == 1
+		obj.forHps = element:GetChildUnchecked("ForHpsCheckBox"):GetVariant() == 1
+		obj.forDps = element:GetChildUnchecked("ForDpsCheckBox"):GetVariant() == 1
+		obj.isDef = element:GetChildUnchecked("IsDefCheckBox"):GetVariant() == 1
+		table.insert(buffSettingsList, obj)
+	end
+	return buffSettingsList
 end
 
 function TUMeterGUI:Init(aBuffSettings)
@@ -1319,6 +1369,8 @@ function TUMeterGUI:Init(aBuffSettings)
 	self.SettingsPanel.SaveBtn:SetVal("button_label", GetTextLocalized("SettingsSave"))
 	self.SettingsPanel.BuffBtn:SetVal("button_label", GetTextLocalized("SettingsBuff"))
 	self.SettingsPanel.BackBtn:SetVal("button_label", GetTextLocalized("SettingsBack"))
+	self.SettingsPanel.AddBuffBtn:SetVal("button_label", GetTextLocalized("SettingsAdd"))
+	self.SettingsPanel.DelModeBtn:SetVal("button_label", GetTextLocalized("SettingsDelMode"))
 	self.SettingsPanel.ForSrcText:SetVal("Name", GetTextLocalized("SettingsForSrc"))
 	self.SettingsPanel.ForTargetText:SetVal("Name", GetTextLocalized("SettingsForTarget"))
 	self.SettingsPanel.ForDpsText:SetVal("Name", GetTextLocalized("SettingsForDps"))

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<WidgetButton>
+<Name>DelModeBtn</Name>
+	<Header>
+		<Prototype href="/Mods/SampleCommon/Button/ButtonRegular.Prototype.(WidgetButton).xdb#xpointer(/WidgetButton)" />
+	</Header>
+  <Placement>
+    <X>
+      <Align>WIDGET_ALIGN_CENTER</Align>
+      <Size>80</Size>
+    </X>
+    <Y>
+      <Align>WIDGET_ALIGN_LOW</Align>
+      <Pos>4</Pos>
+      <Size>25</Size>
+    </Y>
+  </Placement>
+	<Variants>
+		<Item>
+			<Reaction>DelModeBtnPressed</Reaction>
+		</Item>
+		<Item>
+			<LayerHighlight href="/Mods/SampleCommon/Button/ButtonRegularHighlighted.(WidgetLayerTiledTexture).xdb" />
+			<PushedOffset x="-2" y="2" />
+			<StateNormal>
+				<LayerMain href="/Mods/SampleCommon/Button/ButtonRegularPressed.(WidgetLayerTiledTexture).xdb" />
+				<FormatFileRef href="/Mods/SampleCommon/Button/ButtonFormatNormal.txt" />
+			</StateNormal>
+			<StatePushed>
+				<LayerMain href="/Mods/SampleCommon/Button/ButtonRegularPressed.(WidgetLayerTiledTexture).xdb" />
+			</StatePushed>
+			<ReactionOnUp>true</ReactionOnUp>
+			<Reaction>DelModeBtnPressed</Reaction>
+		</Item>
+	</Variants>
+</WidgetButton>

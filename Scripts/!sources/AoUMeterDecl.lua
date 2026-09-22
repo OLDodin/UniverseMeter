@@ -20,7 +20,7 @@ Global( "enumUsedMode", { } )
 --------------------------------------------------------------------------------
 -- Init in FillBuffCheckList
 --------------------------------------------------------------------------------
-Global( "CustomBuffIndex", { Valor = 0, Vulnerability = 0, Weakness = 0, Defense = 0, Might = 0 } )
+Global( "CustomBuffIndex", { Valor = -1, Vulnerability = -1, Weakness = -1, Defense = -1, Might = -1 } )
 Global( "DPSHPSTYPES", 0)
 Global( "DEFTYPES", 0)
 --------------------------------------------------------------------------------
@@ -73,6 +73,7 @@ Global( "StrDefense", "" )
 Global( "StrVulnerability", "" )
 Global( "StrInsidiousness", "" )
 Global( "StrValor", "" )
+Global( "StrMight", "" )
 Global( "StrUnknown", userMods.ToWString("?") )
 Global( "StrArrow", userMods.ToWString(" -> ") )
 Global( "StrMapModifier", "" )
@@ -82,7 +83,7 @@ Global ( "StrMainBtn", userMods.ToWString("D") )
 Global ( "StrSpace", userMods.ToWString(" ") )
 Global ( "StrShardBegin", userMods.ToWString("[") )
 Global ( "StrShardEnd", userMods.ToWString("]") )
-
+Global( "StrDefaultBuff", "" )
 
 Global( "StrHpsBuffHeader", "" )
 Global( "StrAntiHpsBuffHeader", "" )

@@ -6,6 +6,7 @@ local m_paramsListForHps = {}
 local m_paramsListForIHps = {}
 local m_paramsListForPets = {}
 
+local m_delModeSwitch = false
 local m_redrawCnt = 0
 local m_mustUpdateGUI = true
 local m_mustRedrawGUI = true
@@ -191,6 +192,8 @@ onReaction["SavePressed"] = function(reaction)
 	
 	savedData.maxCombatants = parsedCombantants
 	
+	savedData.buffCheckList = DPSMeterGUI:ExportBuffScrollPanel()
+	
 	userMods.SetGlobalConfigSection( "UniverseMeterSettings", savedData )
 	common.StateReloadManagedAddon(common.GetAddonSysName())
 	
@@ -203,6 +206,25 @@ end
 
 onReaction["BackBtnPressed"] = function(reaction)
 	DPSMeterGUI.SettingsPanel.PanelContent:PlayMoveEffect( nil, { posX = 0 }, 100, EA_MONOTONOUS_INCREASE )
+end
+
+onReaction["AddBuffBtnPressed"] = function(reaction)
+	DPSMeterGUI:AddToBuffScrollPanel()
+end
+
+onReaction["DelModeBtnPressed"] = function(reaction)
+	m_delModeSwitch = not m_delModeSwitch
+	if m_delModeSwitch then
+		reaction.widget:SetVariant(1)
+	else
+		reaction.widget:SetVariant(0)
+	end
+
+	DPSMeterGUI:SwitchDelBuffScrollPanel(m_delModeSwitch)
+end
+
+onReaction["DelBuffBtnPressed"] = function(reaction)
+	DPSMeterGUI:RemoveFromBuffScrollPanel(reaction.widget:GetParent())
 end
 
 --------------------------------------------------------------------------------

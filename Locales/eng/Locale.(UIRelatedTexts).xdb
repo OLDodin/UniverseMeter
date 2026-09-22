@@ -525,6 +525,22 @@
       <name>Bloodlust</name>
       <resource href="Bloodlust.txt" />
     </Item>
+	<Item>
+      <name>SettingsAdd</name>
+      <resource href="SettingsAdd.txt" />
+    </Item>
+	<Item>
+      <name>SettingsDelMode</name>
+      <resource href="SettingsDelMode.txt" />
+    </Item>
+	<Item>
+      <name>EnterName</name>
+      <resource href="EnterName.txt" />
+    </Item>
+	<Item>
+      <name>Might</name>
+      <resource href="Might.txt" />
+    </Item>
   </items>
 </UIRelatedTexts>
 
