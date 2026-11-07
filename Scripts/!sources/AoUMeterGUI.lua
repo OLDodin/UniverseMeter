@@ -1294,7 +1294,7 @@ function TUMeterGUI:CreateBuffScrollPanel(aBuffSettings)
 end
 
 function TUMeterGUI:SwitchDelBuffScrollPanel(aMode)
-	for i = 0, self.SettingsPanel.BuffScrollPanel:GetElementCount() - 1 do
+	for i = 1, self.SettingsPanel.BuffScrollPanel:GetElementCount() do
 		self.SettingsPanel.BuffScrollPanel:At(i):GetChildUnchecked("DelBuffBtn"):Show(aMode)
 		if aMode then
 			self.SettingsPanel.BuffScrollPanel:At(i):GetChildUnchecked("DelBuffBtn"):PlayFadeEffect( 0, 1, 100, EA_MONOTONOUS_INCREASE )
@@ -1324,7 +1324,7 @@ end
 
 function TUMeterGUI:ExportBuffScrollPanel()
 	local buffSettingsList = {}
-	for i = 0, self.SettingsPanel.BuffScrollPanel:GetElementCount() - 1 do
+	for i = 1, self.SettingsPanel.BuffScrollPanel:GetElementCount() do
 		local element = self.SettingsPanel.BuffScrollPanel:At(i)
 		local obj = {}
 		obj.name = element:GetChildUnchecked("BuffName"):GetText()

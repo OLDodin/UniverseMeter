@@ -315,7 +315,7 @@ function TUMeter:GetSpellInfoFromParamsDD(aParams, anIsPet, aMode)
 	spellInfo.isPet = anIsPet
 	spellInfo.petName = anIsPet and aParams.sourceName or nil
 	
-	spellInfo.determination = self:GetUnitRage(aParams.source)
+	spellInfo.determination = self:GetUnitRage(aParams.sourceId)
 	spellInfo.sysSubElement = enumSubElementIndex[aParams.sysSubElement]
 
 
@@ -334,8 +334,8 @@ function TUMeter:GetSpellInfoFromParamsDD(aParams, anIsPet, aMode)
 	spellInfo.multipliersAbsorb = aParams.multipliersAbsorb
 	spellInfo.lethal = aParams.lethal
 	
-	spellInfo.sourceID = aParams.source
-	spellInfo.targetID = aParams.target
+	spellInfo.sourceID = aParams.sourceId
+	spellInfo.targetID = aParams.targetId
    
 	for _, combatTag in pairs( aParams.targetTags or {} ) do
 		local info = combatTag:GetInfo()
@@ -381,17 +381,17 @@ function TUMeter:GetSpellInfoFromParamsHPS(aParams, anIsPet)
 		else
 			spellInfo.name =
 			aParams.isFall and StrFall
-			or BuildHealBySourceName(aParams.healerId, aParams.unitId)
+			or BuildHealBySourceName(aParams.sourceId, aParams.targetId)
 			or StrUnknown
 		end
 	end
 
 	spellInfo.isPet = anIsPet
-	if anIsPet and IsExistUnit(aParams.healerId) then
-		spellInfo.petName = cachedGetName(aParams.healerId) or nil
+	if anIsPet and IsExistUnit(aParams.sourceId) then
+		spellInfo.petName = cachedGetName(aParams.sourceId) or nil
 	end
 	
-	spellInfo.determination = self:GetUnitRage(aParams.healerId)
+	spellInfo.determination = self:GetUnitRage(aParams.sourceId)
 
 	spellInfo.sysSubElement = enumSubElementIndex["ENUM_SubElement_HOLY"]
 
@@ -403,8 +403,8 @@ function TUMeter:GetSpellInfoFromParamsHPS(aParams, anIsPet)
 	spellInfo.absorbed = aParams.absorbed
 	spellInfo.overload = aParams.overload
 	
-	spellInfo.sourceID = aParams.healerId
-	spellInfo.targetID = aParams.unitId
+	spellInfo.sourceID = aParams.sourceId
+	spellInfo.targetID = aParams.targetId
 
 	return spellInfo
 end
@@ -443,14 +443,14 @@ end
 -- Collect damage dealed data by someone in the party
 --------------------------------------------------------------------------------
 function TUMeter:CollectDamageDealedData(aParams)
-	if aParams.source == aParams.target then return end
+	if aParams.sourceId == aParams.targetId then return end
 	
 	-- look for the type of the source
-	local currFightCombatant, isPet = self:GetFightCombatant(aParams.source)
+	local currFightCombatant, isPet = self:GetFightCombatant(aParams.sourceId)
 	-- If the source is not part of the group or the target is an ally
 	if not currFightCombatant then return end
 
-	if Settings.SkipDmgAndHpsOnPet and IsExistPet(aParams.target) then return end
+	if Settings.SkipDmgAndHpsOnPet and IsExistPet(aParams.targetId) then return end
 
 	-- If we're not collecting data, means we are not currently in fight, then start a new one
 	if not self.bCollectData and TCombatant.IsClose(currFightCombatant) and (self:ShouldCollectData() or aParams.lethal) then
@@ -464,10 +464,10 @@ end
 -- Collect damage received data by someone in the party
 --------------------------------------------------------------------------------
 function TUMeter:CollectDamageReceivedData(aParams)
-	if Settings.SkipDmgYourselfIn and aParams.source == aParams.target then return end
+	if Settings.SkipDmgYourselfIn and aParams.sourceId == aParams.targetId then return end
 
 	-- look for the type of the target
-	local currFightCombatant = self:GetFightCombatant(aParams.target)
+	local currFightCombatant = self:GetFightCombatant(aParams.targetId)
 
 	if not currFightCombatant then return end
 
@@ -475,7 +475,7 @@ function TUMeter:CollectDamageReceivedData(aParams)
 		self:Start()
 	end
 
-	return self:CollectData(enumMode.Def, currFightCombatant, aParams.source and cachedGetFollowerMaster(aParams.source) ~= nil or false, aParams)
+	return self:CollectData(enumMode.Def, currFightCombatant, aParams.sourceId and cachedGetFollowerMaster(aParams.sourceId) ~= nil or false, aParams)
 end
 
 --------------------------------------------------------------------------------
@@ -483,16 +483,16 @@ end
 --------------------------------------------------------------------------------
 function TUMeter:CollectHealData(aParams)
 	-- Check that the healer is part of the group
-	local currFightCombatant, isPet = self:GetFightCombatant(aParams.healerId)
+	local currFightCombatant, isPet = self:GetFightCombatant(aParams.sourceId)
 
 	-- if this happen, most probably it's a bloodlust but the heal is coming from the target...
 	if not currFightCombatant then
-		currFightCombatant, isPet = self:GetFightCombatant(aParams.unitId)
+		currFightCombatant, isPet = self:GetFightCombatant(aParams.targetId)
 	end
 
 	if not currFightCombatant then return end
 	
-	if Settings.SkipDmgAndHpsOnPet and IsExistPet(aParams.unitId) then return end
+	if Settings.SkipDmgAndHpsOnPet and IsExistPet(aParams.targetId) then return end
 
 	if not self.bCollectData and TCombatant.IsClose(currFightCombatant) and self:ShouldCollectData() then
 		self:Start()
@@ -503,7 +503,7 @@ end
 
 function TUMeter:CollectHealDataIN(aParams)
 	-- Check that the healer is part of the group
-	local currFightCombatant = self:GetFightCombatant(aParams.unitId)
+	local currFightCombatant = self:GetFightCombatant(aParams.targetId)
 
 	if not currFightCombatant then return end
 
@@ -511,7 +511,7 @@ function TUMeter:CollectHealDataIN(aParams)
 		self:Start()
 	end
 
-	return self:CollectData(enumMode.IHps, currFightCombatant, aParams.healerId and cachedGetFollowerMaster(aParams.healerId) ~= nil or false, aParams)
+	return self:CollectData(enumMode.IHps, currFightCombatant, aParams.sourceId and cachedGetFollowerMaster(aParams.sourceId) ~= nil or false, aParams)
 end
 --------------------------------------------------------------------------------
 -- Update the data in the given mode

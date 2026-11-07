@@ -479,7 +479,7 @@ function DefEventReceived(aParams)
 	DPSMeterGUI.DPSMeter:CollectDamageReceivedData(aParams)
 end
 --------------------------------------------------------------------------------
--- Event: EVENT_HEALING_RECEIVED
+-- Event: EVENT_UNIT_HEAL_RECEIVED
 --------------------------------------------------------------------------------
 function HpsEventReceived(aParams)
 	DPSMeterGUI.DPSMeter:CollectHealData(aParams)
@@ -563,8 +563,8 @@ function ReloadPet(aParams)
 	if Settings.ModeHPS then
 		local paramsListForHps = BuildEventParamsForHps(unitListWithPets)
 		deleteParams, newParams = CompareArrays(m_paramsListForHps, paramsListForHps)
-		UnRegisterEventHandlerWithParams("EVENT_HEALING_RECEIVED", HpsEventReceived, deleteParams)
-		RegisterEventHandlerWithParams("EVENT_HEALING_RECEIVED", HpsEventReceived, newParams)
+		UnRegisterEventHandlerWithParams("EVENT_UNIT_HEAL_RECEIVED", HpsEventReceived, deleteParams)
+		RegisterEventHandlerWithParams("EVENT_UNIT_HEAL_RECEIVED", HpsEventReceived, newParams)
 
 		m_paramsListForHps = paramsListForHps
 	end
@@ -589,8 +589,8 @@ function ReRegisterEvents()
 	if Settings.ModeIHPS then 
 		local paramsListForIHps = BuildEventParamsForIHps(unitList)
 		deleteParams, newParams = CompareArrays(m_paramsListForIHps, paramsListForIHps)
-		UnRegisterEventHandlerWithParams("EVENT_HEALING_RECEIVED", IHpsEventReceived, deleteParams)
-		RegisterEventHandlerWithParams("EVENT_HEALING_RECEIVED", IHpsEventReceived, newParams)
+		UnRegisterEventHandlerWithParams("EVENT_UNIT_HEAL_RECEIVED", IHpsEventReceived, deleteParams)
+		RegisterEventHandlerWithParams("EVENT_UNIT_HEAL_RECEIVED", IHpsEventReceived, newParams)
 		m_paramsListForIHps = paramsListForIHps
 	end
 	if Settings.ModeDPS then 
@@ -603,8 +603,8 @@ function ReRegisterEvents()
 	if Settings.ModeHPS then 
 		local paramsListForHps = BuildEventParamsForHps(unitListWithPets)
 		deleteParams, newParams = CompareArrays(m_paramsListForHps, paramsListForHps)
-		UnRegisterEventHandlerWithParams("EVENT_HEALING_RECEIVED", HpsEventReceived, deleteParams)
-		RegisterEventHandlerWithParams("EVENT_HEALING_RECEIVED", HpsEventReceived, newParams)
+		UnRegisterEventHandlerWithParams("EVENT_UNIT_HEAL_RECEIVED", HpsEventReceived, deleteParams)
+		RegisterEventHandlerWithParams("EVENT_UNIT_HEAL_RECEIVED", HpsEventReceived, newParams)
 		m_paramsListForHps = paramsListForHps
 	end
 end
@@ -661,7 +661,7 @@ end
 function BuildEventParamsForDps(anUnitList)
 	local paramsListForDps = {}
 	for unitID, _ in pairs(anUnitList) do	
-		table.insert(paramsListForDps, {source = unitID})
+		table.insert(paramsListForDps, {sourceId = unitID})
 	end
 	return paramsListForDps
 end
@@ -669,7 +669,7 @@ end
 function BuildEventParamsForHps(anUnitList)
 	local paramsListForHps = {}
 	for unitID, _ in pairs(anUnitList) do	
-		table.insert(paramsListForHps, {healerId = unitID})
+		table.insert(paramsListForHps, {sourceId = unitID})
 	end
 	return paramsListForHps
 end
@@ -678,7 +678,7 @@ function BuildEventParamsForDef(anUnitList)
 	local paramsListForDef = {}
 	for _, member in ipairs(anUnitList) do
 		if member.id then
-			table.insert(paramsListForDef, {target = member.id})
+			table.insert(paramsListForDef, {targetId = member.id})
 		end
 	end
 	return paramsListForDef
@@ -688,7 +688,7 @@ function BuildEventParamsForIHps(anUnitList)
 	local paramsListForIHps = {}
 	for _, member in ipairs(anUnitList) do
 		if member.id then
-			table.insert(paramsListForIHps, {unitId = member.id})
+			table.insert(paramsListForIHps, {targetId = member.id})
 		end
 	end
 	return paramsListForIHps

@@ -257,7 +257,7 @@ end
 
 function TWidget:ClearScrollList()
 	local containerArr = {}
-	for i = 0, self.Widget:GetElementCount() - 1 do
+	for i = 1, self.Widget:GetElementCount() do
 		table.insert(containerArr, self.Widget:At(i))
 	end
 	self.Widget:RemoveItems()
