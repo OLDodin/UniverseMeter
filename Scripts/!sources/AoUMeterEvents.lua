@@ -27,7 +27,7 @@ onMyEvent["AOPANEL_START"] = function(params)
 		SetVal = { val = StrMainBtn..StrSpace..tostring(CurrentScoreOnMainBtn or 1) }
 	end
 	local params = { header =  SetVal , ptype =  "button" , size =  Settings.ShowPositionOnBtn and 50 or 30 } 
-	userMods.SendEvent("AOPANEL_SEND_ADDON", { name = "UniverseMeter" , sysName = "UniverseMeter" , param = params } )
+	common.SendEvent("AOPANEL_SEND_ADDON", { name = "UniverseMeter" , sysName = "UniverseMeter" , param = params } )
 	AoPanelDetected = true
 	m_isBtnInAOPanelNow = true
 	DPSMeterGUI.ShowHideBtn:Hide()
@@ -552,7 +552,7 @@ function ReloadPet(aParams)
 	local newParams = nil
 	
 	if Settings.ModeDPS then 
-		local paramsListForDps = BuildEventParamsForDps(unitListWithPets)
+		local paramsListForDps = BuildEventParamsOut(unitListWithPets)
 		deleteParams, newParams = CompareArrays(m_paramsListForDps, paramsListForDps)
 		UnRegisterEventHandlerWithParams("EVENT_UNIT_DAMAGE_RECEIVED", DpsEventReceived, deleteParams)
 		RegisterEventHandlerWithParams("EVENT_UNIT_DAMAGE_RECEIVED", DpsEventReceived, newParams)
@@ -561,7 +561,7 @@ function ReloadPet(aParams)
 	end
 	
 	if Settings.ModeHPS then
-		local paramsListForHps = BuildEventParamsForHps(unitListWithPets)
+		local paramsListForHps = BuildEventParamsOut(unitListWithPets)
 		deleteParams, newParams = CompareArrays(m_paramsListForHps, paramsListForHps)
 		UnRegisterEventHandlerWithParams("EVENT_UNIT_HEAL_RECEIVED", HpsEventReceived, deleteParams)
 		RegisterEventHandlerWithParams("EVENT_UNIT_HEAL_RECEIVED", HpsEventReceived, newParams)
@@ -580,28 +580,28 @@ function ReRegisterEvents()
 	local unitListWithPets = GetListWithPets(unitList)
 		
 	if Settings.ModeDEF then 
-		local paramsListForDef = BuildEventParamsForDef(unitList)
+		local paramsListForDef = BuildEventParamsForIn(unitList)
 		deleteParams, newParams = CompareArrays(m_paramsListForDef, paramsListForDef)
 		UnRegisterEventHandlerWithParams("EVENT_UNIT_DAMAGE_RECEIVED", DefEventReceived, deleteParams)
 		RegisterEventHandlerWithParams("EVENT_UNIT_DAMAGE_RECEIVED", DefEventReceived, newParams)
 		m_paramsListForDef = paramsListForDef
 	end
 	if Settings.ModeIHPS then 
-		local paramsListForIHps = BuildEventParamsForIHps(unitList)
+		local paramsListForIHps = BuildEventParamsForIn(unitList)
 		deleteParams, newParams = CompareArrays(m_paramsListForIHps, paramsListForIHps)
 		UnRegisterEventHandlerWithParams("EVENT_UNIT_HEAL_RECEIVED", IHpsEventReceived, deleteParams)
 		RegisterEventHandlerWithParams("EVENT_UNIT_HEAL_RECEIVED", IHpsEventReceived, newParams)
 		m_paramsListForIHps = paramsListForIHps
 	end
 	if Settings.ModeDPS then 
-		local paramsListForDps = BuildEventParamsForDps(unitListWithPets)
+		local paramsListForDps = BuildEventParamsOut(unitListWithPets)
 		deleteParams, newParams = CompareArrays(m_paramsListForDps, paramsListForDps)
 		UnRegisterEventHandlerWithParams("EVENT_UNIT_DAMAGE_RECEIVED", DpsEventReceived, deleteParams)
 		RegisterEventHandlerWithParams("EVENT_UNIT_DAMAGE_RECEIVED", DpsEventReceived, newParams)
 		m_paramsListForDps = paramsListForDps
 	end
 	if Settings.ModeHPS then 
-		local paramsListForHps = BuildEventParamsForHps(unitListWithPets)
+		local paramsListForHps = BuildEventParamsOut(unitListWithPets)
 		deleteParams, newParams = CompareArrays(m_paramsListForHps, paramsListForHps)
 		UnRegisterEventHandlerWithParams("EVENT_UNIT_HEAL_RECEIVED", HpsEventReceived, deleteParams)
 		RegisterEventHandlerWithParams("EVENT_UNIT_HEAL_RECEIVED", HpsEventReceived, newParams)
@@ -658,40 +658,23 @@ function GetListWithPets(anUnitList)
 	return unitListWithPets
 end
 
-function BuildEventParamsForDps(anUnitList)
-	local paramsListForDps = {}
+function BuildEventParamsOut(anUnitList)
+	local paramsList = {}
 	for unitID, _ in pairs(anUnitList) do	
-		table.insert(paramsListForDps, {sourceId = unitID})
+		table.insert(paramsList, {sourceId = unitID})
 	end
-	return paramsListForDps
+	return paramsList
 end
 
-function BuildEventParamsForHps(anUnitList)
-	local paramsListForHps = {}
-	for unitID, _ in pairs(anUnitList) do	
-		table.insert(paramsListForHps, {sourceId = unitID})
-	end
-	return paramsListForHps
-end
 
-function BuildEventParamsForDef(anUnitList)
-	local paramsListForDef = {}
+function BuildEventParamsForIn(anUnitList)
+	local paramsList = {}
 	for _, member in ipairs(anUnitList) do
 		if member.id then
-			table.insert(paramsListForDef, {targetId = member.id})
+			table.insert(paramsList, {targetId = member.id})
 		end
 	end
-	return paramsListForDef
-end
-
-function BuildEventParamsForIHps(anUnitList)
-	local paramsListForIHps = {}
-	for _, member in ipairs(anUnitList) do
-		if member.id then
-			table.insert(paramsListForIHps, {targetId = member.id})
-		end
-	end
-	return paramsListForIHps
+	return paramsList
 end
 
 function BuildEventParamsForPetChanged(anUnitList)

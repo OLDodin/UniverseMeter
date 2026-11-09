@@ -469,7 +469,7 @@ function TUMeterGUI:UpdateScoreOnMainBtn(aCombatant, aPlayerIndex)
 		if CurrentScoreOnMainBtn ~= aPlayerIndex then
 			if AoPanelDetected then
 				local SetVal = { val = StrMainBtn..StrSpace..cachedFormatInt(aPlayerIndex , "%d") }
-				userMods.SendEvent( "AOPANEL_UPDATE_ADDON", { sysName = "UniverseMeter", header = SetVal } )
+				common.SendEvent( "AOPANEL_UPDATE_ADDON", { sysName = "UniverseMeter", header = SetVal } )
 			else
 				self.ShowHideBtn:SetVal( 'button_label', tostring(aPlayerIndex))
 			end
@@ -1328,7 +1328,7 @@ function TUMeterGUI:ExportBuffScrollPanel()
 		local element = self.SettingsPanel.BuffScrollPanel:At(i)
 		local obj = {}
 		obj.name = element:GetChildUnchecked("BuffName"):GetText()
-		obj.ind = i + 1
+		obj.ind = i
 		obj.forTarget = element:GetChildUnchecked("ForTargetCheckBox"):GetVariant() == 1
 		obj.forSrc = element:GetChildUnchecked("ForSrcCheckBox"):GetVariant() == 1
 		obj.forHps = element:GetChildUnchecked("ForHpsCheckBox"):GetVariant() == 1
