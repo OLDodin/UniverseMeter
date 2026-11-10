@@ -185,7 +185,7 @@ end
 -- при смерти игрока событие об уроне получим уже после спадания баффов из-за смерти
 -- то при летальном уроне учитываем баффы, спавшие после смерти плюс WaitBuffAfterDeathTime на запаздывания событий об уроне
 local function AdditionalBuffCheckLethal(aParams, anObjID, aStatesArr, aCurrTime)
-	local buffState = aStatesArr[anObjID]
+	local buffState = anObjID and aStatesArr[anObjID] or nil
 	if buffState then
 		if buffState.removeAfterDeath then
 			if aCurrTime - buffState.removeTime <= Settings.WaitBuffAfterDeathTime  then
